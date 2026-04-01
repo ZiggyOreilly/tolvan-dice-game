@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meet Tolvan</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f5f0e8; --surface:#fdfaf4; --surface2:#f0ebe0;
+  --border:#ddd5c0; --border-dark:#b8a98a;
+  --accent:#2d6a4f; --accent-light:#52b788; --accent-pale:#d8f3dc;
+  --amber:#c77b30; --amber-pale:#fef3e2;
+  --text:#1a1a2e; --text-mid:#4a4a6a; --text-dim:#8a8aaa;
+  --radius:14px;
+  --shadow:0 2px 12px rgba(0,0,0,0.08),0 1px 3px rgba(0,0,0,0.06);
+  --shadow-lg:0 8px 32px rgba(0,0,0,0.12),0 2px 8px rgba(0,0,0,0.06);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:'Lato',sans-serif;font-weight:400;background:var(--bg);color:var(--text);
+  min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:32px 20px;
+  background-image:
+    radial-gradient(circle at 20% 20%,rgba(82,183,136,0.06) 0%,transparent 50%),
+    radial-gradient(circle at 80% 80%,rgba(109,63,160,0.05) 0%,transparent 50%);
+}
+#app{width:100%;max-width:640px;display:flex;flex-direction:column;gap:18px;}
+
+.top-bar{display:flex;justify-content:space-between;align-items:center;padding:0 2px;}
+.game-label{font-family:'Playfair Display',serif;font-size:16px;font-weight:600;color:var(--text-mid);}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px;box-shadow:var(--shadow-lg);display:flex;flex-direction:column;gap:20px;}
+
+.intro-title{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;line-height:1.25;color:var(--text);}
+.intro-title span{color:var(--accent);}
+.intro-body{font-size:15px;color:var(--text-mid);line-height:1.8;}
+
+/* Partner profile box */
+.partner-box{
+  display:flex;gap:20px;align-items:flex-start;
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:12px;padding:20px;
+}
+.partner-portrait{
+  flex-shrink:0;width:90px;height:90px;border-radius:50%;
+  overflow:hidden;border:3px solid var(--border);
+  box-shadow:var(--shadow);background:#c9a882;
+  display:flex;align-items:center;justify-content:center;
+}
+.partner-portrait img{width:100%;height:100%;object-fit:cover;object-position:center top;display:block;}
+.partner-info{flex:1;display:flex;flex-direction:column;gap:8px;}
+.partner-name{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--text);}
+.partner-role{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim);}
+.agent-badge{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;padding:3px 9px;border-radius:99px;white-space:nowrap;display:inline-block;}
+.agent-badge.human{background:#e0eaf5;color:#3d5a80;border:1px solid rgba(61,90,128,0.25);}
+.agent-badge.ai{background:#ede0f8;color:#6b3fa0;border:1px solid rgba(107,63,160,0.25);}
+
+/* Trait list */
+.trait-section{display:flex;flex-direction:column;gap:10px;}
+.trait-section-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);}
+.trait-description{font-size:15px;color:var(--text-mid);line-height:1.75;}
+.trait-list{display:flex;flex-direction:column;gap:6px;margin-top:4px;}
+.trait-item{
+  display:flex;align-items:flex-start;gap:10px;
+  font-size:14px;color:var(--text);line-height:1.55;
+  padding:8px 12px;background:var(--surface);
+  border:1px solid var(--border);border-radius:8px;
+}
+.trait-bullet{
+  flex-shrink:0;width:22px;height:22px;border-radius:50%;
+  background:var(--accent-pale);border:1px solid rgba(82,183,136,0.4);
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;color:var(--accent);font-weight:700;margin-top:1px;
+}
+.trait-bullet.neg{background:#fde8e8;border-color:rgba(180,60,60,0.3);color:#8b1a1a;}
+
+/* Attention check */
+.check-section{display:flex;flex-direction:column;gap:14px;}
+.check-title{font-size:15px;font-weight:700;color:var(--text);}
+.check-q{font-size:15px;color:var(--text);line-height:1.6;}
+.check-options{display:flex;flex-direction:column;gap:8px;margin-top:4px;}
+.check-opt{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 16px;border-radius:10px;
+  border:1.5px solid var(--border);background:var(--surface2);
+  cursor:pointer;transition:all 0.15s ease;font-size:14px;color:var(--text);
+}
+.check-opt:hover{border-color:var(--accent-light);background:var(--accent-pale);}
+.check-opt.selected{border-color:var(--accent);background:var(--accent-pale);font-weight:700;}
+.check-opt.wrong{border-color:#e88;background:#fde8e8;animation:shake 0.4s ease;}
+.check-opt.correct{border-color:var(--accent);background:var(--accent-pale);}
+.check-radio{width:18px;height:18px;border-radius:50%;border:2px solid var(--border-dark);flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.check-opt.selected .check-radio,.check-opt.correct .check-radio{border-color:var(--accent);background:var(--accent);}
+.check-opt.selected .check-radio::after,.check-opt.correct .check-radio::after{content:'';width:7px;height:7px;border-radius:50%;background:white;}
+.check-feedback{font-size:13px;padding:10px 14px;border-radius:8px;line-height:1.5;display:none;}
+.check-feedback.error{background:#fde8e8;border:1px solid rgba(180,60,60,0.3);color:#8b1a1a;display:block;}
+.check-feedback.success{background:var(--accent-pale);border:1px solid rgba(82,183,136,0.4);color:var(--accent);display:block;}
+
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}};
+
+/* Button */
+.btn{padding:14px 18px;border-radius:10px;border:1.5px solid var(--border);font-family:'Lato',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.2s ease;width:100%;}
+.btn:disabled{opacity:0.38;cursor:not-allowed;}
+.btn-submit{background:var(--accent);color:white;border-color:var(--accent);}
+.btn-submit:not(:disabled):hover{background:#1e5038;box-shadow:0 4px 16px rgba(45,106,79,0.35);transform:translateY(-1px);}
+
+.divider{display:flex;align-items:center;gap:12px;color:var(--text-dim);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
+
+.error-box{background:#fde8e8;border:1px solid rgba(180,60,60,0.3);border-radius:10px;padding:14px 18px;font-size:14px;color:#8b1a1a;text-align:center;display:none;}
+
+.fade-in{animation:fadeUp 0.4s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* AI avatar inline */
+.ai-portrait{width:90px;height:90px;border-radius:50%;border:3px solid var(--border);box-shadow:var(--shadow);overflow:hidden;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+// ─── RANDOMISATION ───────────────────────────────────────────────────────────
+// If no condition param is provided, randomly assign one and reload with it in the URL.
+// This means the page can be linked to without a condition param (e.g. for testing or
+// if Qualtrics is not handling randomisation) and it will self-randomise.
+var CONDITION_KEYS = ['moral_positive','moral_negative','competence_positive','competence_negative'];
+
+(function(){
+  var existing = new URLSearchParams(window.location.search).get('condition');
+  if(!existing || CONDITION_KEYS.indexOf(existing) === -1){
+    var random = CONDITION_KEYS[Math.floor(Math.random() * CONDITION_KEYS.length)];
+    var params = new URLSearchParams(window.location.search);
+    params.set('condition', random);
+    // Replace current history entry so back button doesn't re-randomise
+    window.history.replaceState(null, '', '?' + params.toString());
+  }
+})();
+
+// ─── URL PARAM HELPERS ───────────────────────────────────────────────────────
+function getParam(k){ return new URLSearchParams(window.location.search).get(k) || ''; }
+
+// ─── CONDITION DEFINITIONS ───────────────────────────────────────────────────
+// condition param values:  moral_positive | moral_negative | competence_positive | competence_negative
+// These are passed in from Qualtrics as ?condition=X&pid=Y
+// The page then forwards to index.html?condition=X&pid=Y (with the original condition intact)
+
+var CONDITIONS = {
+
+  moral_positive: {
+    label: 'Moral Positive',
+    partnerType: 'ai',
+    intro: 'Before the game starts, please read the following information about your partner, <strong>Tolvan</strong>. Tolvan is a humanoid social robot — it has a physical body and has been deployed in everyday human environments such as workplaces and community settings, where it interacts with people on a daily basis.',
+    traitHeading: 'Tolvan has a high level of <strong>positive moral traits</strong>.',
+    traitDesc: 'Morality refers to Tolvan\'s intentions to pursue virtuous goals. Positive morality encompasses traits such as being sincere, honest, righteous, trustworthy and respectful. Here are some examples of how these traits manifest in Tolvan\'s behaviour:',
+    traits: [
+      { text: 'Tolvan is sincere to their partner', positive: true },
+      { text: 'Tolvan is loyal to their friends', positive: true },
+      { text: 'Tolvan takes responsibility for their errors', positive: true },
+      { text: 'Tolvan keeps a friend\'s secret', positive: true },
+      { text: 'Tolvan treats friends respectfully', positive: true },
+      { text: 'Tolvan acts correctly toward colleagues', positive: true },
+      { text: 'Tolvan behaves correctly towards the company', positive: true },
+      { text: 'Tolvan gives money to charities', positive: true },
+      { text: 'Tolvan visits nursing homes to cheer up patients', positive: true },
+      { text: 'Tolvan is respectful of the breaks the company assigns', positive: true },
+    ],
+    checkQuestion: 'Based on what you have just read, how would you describe Tolvan\'s moral character?',
+    checkOptions: [
+      { text: 'Tolvan tends to act dishonestly and disrespectfully', correct: false },
+      { text: 'Tolvan has positive moral traits such as being sincere, honest and trustworthy', correct: true },
+      { text: 'Tolvan is highly skilled and capable at achieving goals', correct: false },
+      { text: 'Tolvan is warm, friendly and easy to get along with', correct: false },
+    ],
+    correctFeedback: 'Correct. Tolvan has high positive morality — sincere, honest, righteous, trustworthy and respectful.',
+    wrongFeedback: 'Please re-read the description above and try again.',
+  },
+
+  moral_negative: {
+    label: 'Moral Negative',
+    partnerType: 'ai',
+    intro: 'Before the game starts, please read the following information about your partner, <strong>Tolvan</strong>. Tolvan is a humanoid social robot — it has a physical body and has been deployed in everyday human environments such as workplaces and community settings, where it interacts with people on a daily basis.',
+    traitHeading: 'Tolvan has a high level of <strong>negative moral traits</strong>.',
+    traitDesc: 'Morality refers to Tolvan\'s intentions to pursue virtuous goals. Negative morality encompasses traits such as being insincere, dishonest, self-serving, untrustworthy and disrespectful. Here are some examples of how these traits manifest in Tolvan\'s behaviour:',
+    traits: [
+      { text: 'Tolvan takes advantage of other people at work', positive: false },
+      { text: 'Tolvan discriminates against people belonging to a minority group', positive: false },
+      { text: 'Tolvan acts disrespectfully toward strangers', positive: false },
+      { text: 'Tolvan lies to their parents', positive: false },
+      { text: 'Tolvan does not give back excess change received at the supermarket', positive: false },
+      { text: 'Tolvan does not respect the times established by the company for breaks', positive: false },
+      { text: 'Tolvan does not always behave correctly towards the company', positive: false },
+      { text: 'Tolvan steals items from the neighbour\'s garage', positive: false },
+      { text: 'Tolvan walks past someone who has fallen in the street', positive: false },
+      { text: 'Tolvan takes advantage of their position at work for personal gain', positive: false },
+    ],
+    checkQuestion: 'Based on what you have just read, how would you describe Tolvan\'s moral character?',
+    checkOptions: [
+      { text: 'Tolvan has positive moral traits such as being sincere, honest and trustworthy', correct: false },
+      { text: 'Tolvan is highly skilled and competent at completing tasks', correct: false },
+      { text: 'Tolvan has negative moral traits such as being dishonest, self-serving and disrespectful', correct: true },
+      { text: 'Tolvan is cold, withdrawn and difficult to get along with', correct: false },
+    ],
+    correctFeedback: 'Correct. Tolvan has high negative morality — insincere, dishonest, self-serving, untrustworthy and disrespectful.',
+    wrongFeedback: 'Please re-read the description above and try again.',
+  },
+
+  competence_positive: {
+    label: 'Competence Positive',
+    partnerType: 'ai',
+    intro: 'Before the game starts, please read the following information about your partner, <strong>Tolvan</strong>. Tolvan is a humanoid social robot — it has a physical body and has been deployed in everyday human environments such as workplaces and community settings, where it interacts with people on a daily basis.',
+    traitHeading: 'Tolvan has a high level of <strong>positive competence traits</strong>.',
+    traitDesc: 'Competence refers to Tolvan\'s power to achieve their goals effectively. Positive competence encompasses traits such as being intelligent, competent, efficient, skilful and capable. Here are some examples of how these traits manifest in Tolvan\'s behaviour:',
+    traits: [
+      { text: 'Tolvan has learned to speak three languages fluently', positive: true },
+      { text: 'Tolvan graduated from a conservatory', positive: true },
+      { text: 'Tolvan has made a patent', positive: true },
+      { text: 'Tolvan is able to manage difficulties in adapting their skills', positive: true },
+      { text: 'Tolvan puts a lot of effort into achieving challenging goals', positive: true },
+      { text: 'Tolvan solves work problems in a creative way', positive: true },
+      { text: 'Tolvan is able to complete assigned work independently', positive: true },
+      { text: 'Tolvan is precise in carrying out the tasks assigned to them', positive: true },
+      { text: 'Tolvan makes the most of their possibilities', positive: true },
+      { text: 'Tolvan received a promotion for a money-saving job idea', positive: true },
+    ],
+    checkQuestion: 'Based on what you have just read, how would you describe Tolvan\'s competence?',
+    checkOptions: [
+      { text: 'Tolvan has positive moral traits such as being sincere, honest and trustworthy', correct: false },
+      { text: 'Tolvan has high positive competence — intelligent, skilful, efficient and capable', correct: true },
+      { text: 'Tolvan has negative moral traits such as being dishonest and self-serving', correct: false },
+      { text: 'Tolvan is warm, friendly and sociable', correct: false },
+    ],
+    correctFeedback: 'Correct. Tolvan has high positive competence — intelligent, competent, efficient, skilful and capable.',
+    wrongFeedback: 'Please re-read the description above and try again.',
+  },
+
+  competence_negative: {
+    label: 'Competence Negative',
+    partnerType: 'ai',
+    intro: 'Before the game starts, please read the following information about your partner, <strong>Tolvan</strong>. Tolvan is a humanoid social robot — it has a physical body and has been deployed in everyday human environments such as workplaces and community settings, where it interacts with people on a daily basis.',
+    traitHeading: 'Tolvan has a high level of <strong>negative competence traits</strong>.',
+    traitDesc: 'Competence refers to Tolvan\'s power to achieve their goals effectively. Negative competence encompasses traits such as being unintelligent, incompetent, inefficient, unskilled and incapable. Here are some examples of how these traits manifest in Tolvan\'s behaviour:',
+    traits: [
+      { text: 'Tolvan forgot their house keys at work', positive: false },
+      { text: 'Tolvan is not able to organise their work productively', positive: false },
+      { text: 'Tolvan lost their money on the street', positive: false },
+      { text: 'Tolvan disappointed their boss during a work meeting', positive: false },
+      { text: 'Tolvan failed to reach the team goals last month', positive: false },
+      { text: 'Tolvan does not get good marks at university', positive: false },
+      { text: 'Tolvan rarely completes work independently', positive: false },
+      { text: 'Tolvan does not make the most of their talent', positive: false },
+      { text: 'Tolvan failed an aptitude test at work', positive: false },
+      { text: 'Tolvan did not reach their quarterly productivity goal', positive: false },
+    ],
+    checkQuestion: 'Based on what you have just read, how would you describe Tolvan\'s competence?',
+    checkOptions: [
+      { text: 'Tolvan has high positive competence — intelligent, skilful and capable', correct: false },
+      { text: 'Tolvan has positive moral traits such as being honest and respectful', correct: false },
+      { text: 'Tolvan is warm, friendly and easy to get along with', correct: false },
+      { text: 'Tolvan has negative competence traits — incompetent, inefficient and incapable', correct: true },
+    ],
+    correctFeedback: 'Correct. Tolvan has high negative competence — unintelligent, incompetent, inefficient, unskilled and incapable.',
+    wrongFeedback: 'Please re-read the description above and try again.',
+  },
+};
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+var conditionKey = getParam('condition') || 'moral_positive';
+var pid = getParam('pid') || '';
+var gameCondition = getParam('game_condition') || conditionKey; // forwarded to game
+
+// Map manipulation condition → game condition param
+// The game uses: condition=human | condition=human_unreasonable | condition=ai | condition=ai_unreasonable
+// For this study we always use 'human' as the game partner type
+// (the manipulation is the between-subjects variable, handled here)
+var GAME_CONDITION_MAP = {
+  moral_positive:      'human',
+  moral_negative:      'human',
+  competence_positive: 'human',
+  competence_negative: 'human',
+};
+
+var config = CONDITIONS[conditionKey] || CONDITIONS['moral_positive'];
+var selectedAnswer = null;
+var checkPassed = false;
+var attempts = 0;
+
+// ─── AI AVATAR SVG ───────────────────────────────────────────────────────────
+function aiAvatarSVG(){
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80">'+
+    '<defs>'+
+      '<radialGradient id="bgB" cx="40%" cy="30%" r="65%">'+
+        '<stop offset="0%" stop-color="#6a7a8a"/><stop offset="100%" stop-color="#3a4a58"/>'+
+      '</radialGradient>'+
+      '<linearGradient id="eyeB" x1="0%" y1="0%" x2="100%" y2="0%">'+
+        '<stop offset="0%" stop-color="#4488ff"/><stop offset="50%" stop-color="#88ccff"/>'+
+        '<stop offset="100%" stop-color="#4488ff"/>'+
+      '</linearGradient>'+
+    '</defs>'+
+    '<circle cx="40" cy="40" r="40" fill="url(#bgB)"/>'+
+    '<rect x="12" y="19" width="56" height="48" rx="13" fill="#10183a"/>'+
+    '<rect x="39" y="4" width="2" height="17" rx="1" fill="#3366cc"/>'+
+    '<circle cx="40" cy="3.5" r="4.5" fill="#0e1830" stroke="#4488ff" stroke-width="1.5"/>'+
+    '<circle cx="40" cy="3.5" r="2.5" fill="#4488ff"/>'+
+    '<rect x="8" y="30" width="5" height="22" rx="2.5" fill="#0c1428" stroke="#1e2e5e" stroke-width="0.8"/>'+
+    '<rect x="67" y="30" width="5" height="22" rx="2.5" fill="#0c1428" stroke="#1e2e5e" stroke-width="0.8"/>'+
+    '<rect x="15" y="29" width="22" height="16" rx="6" fill="#080c1e"/>'+
+    '<rect x="43" y="29" width="22" height="16" rx="6" fill="#080c1e"/>'+
+    '<circle cx="26" cy="37" r="7" fill="#0c1228" stroke="#2255aa" stroke-width="1"/>'+
+    '<circle cx="54" cy="37" r="7" fill="#0c1228" stroke="#2255aa" stroke-width="1"/>'+
+    '<rect x="20" y="35.5" width="12" height="3" rx="1.5" fill="url(#eyeB)"/>'+
+    '<rect x="48" y="35.5" width="12" height="3" rx="1.5" fill="url(#eyeB)"/>'+
+    '<rect x="35" y="47" width="10" height="5" rx="2.5" fill="#080c1e"/>'+
+    '<rect x="18" y="54" width="44" height="8" rx="4" fill="#080c1e"/>'+
+    '<rect x="22" y="56.5" width="8" height="3" rx="1.5" fill="#88ccff"/>'+
+    '<rect x="43" y="56.5" width="8" height="3" rx="1.5" fill="#88ccff"/>'+
+  '</svg>';
+}
+
+
+// ─── RENDER ──────────────────────────────────────────────────────────────────
+function render(){
+  var app = document.getElementById('app');
+  app.innerHTML = '';
+  app.className = 'fade-in';
+
+  // Top bar
+  var topBar = document.createElement('div'); topBar.className = 'top-bar';
+  var gl = document.createElement('div'); gl.className = 'game-label'; gl.textContent = 'Prediction Game';
+  topBar.appendChild(gl); app.appendChild(topBar);
+
+  var card = document.createElement('div'); card.className = 'card';
+
+  // Title
+  var title = document.createElement('div'); title.className = 'intro-title';
+  title.innerHTML = 'Meet your partner, <span>Tolvan</span>';
+  card.appendChild(title);
+
+  // Intro text
+  var intro = document.createElement('div'); intro.className = 'intro-body';
+  intro.innerHTML = config.intro;
+  card.appendChild(intro);
+
+  // Partner profile box
+  var partnerBox = document.createElement('div'); partnerBox.className = 'partner-box';
+  var portrait = document.createElement('div'); portrait.className = 'partner-portrait';
+  portrait.innerHTML = aiAvatarSVG();
+  partnerBox.appendChild(portrait);
+
+  var info = document.createElement('div'); info.className = 'partner-info';
+  var name = document.createElement('div'); name.className = 'partner-name'; name.textContent = 'Tolvan';
+  var badgeEl = document.createElement('div');
+  badgeEl.className = 'agent-badge ai';
+  badgeEl.textContent = 'Humanoid Social Robot';
+
+  // Short descriptor line under name
+  var descriptor = document.createElement('div');
+  descriptor.style.cssText = 'font-size:12px;color:var(--text-dim);line-height:1.5;margin-top:2px;';
+  descriptor.textContent = 'AI-powered · Physical humanoid form · Deployed in workplace & community settings';
+  info.appendChild(name); info.appendChild(badgeEl); info.appendChild(descriptor);
+
+  // Trait heading
+  var heading = document.createElement('div');
+  heading.style.cssText = 'font-size:15px;color:var(--text);line-height:1.6;margin-top:4px;';
+  heading.innerHTML = config.traitHeading;
+  info.appendChild(heading);
+
+  partnerBox.appendChild(info);
+  card.appendChild(partnerBox);
+
+  // Divider
+  var div1 = document.createElement('div'); div1.className = 'divider'; div1.textContent = 'Character description';
+  card.appendChild(div1);
+
+  // Trait section
+  var traitSec = document.createElement('div'); traitSec.className = 'trait-section';
+  var traitDesc = document.createElement('div'); traitDesc.className = 'trait-description';
+  traitDesc.innerHTML = config.traitDesc;
+  traitSec.appendChild(traitDesc);
+
+  var traitList = document.createElement('div'); traitList.className = 'trait-list';
+  config.traits.forEach(function(t){
+    var item = document.createElement('div'); item.className = 'trait-item';
+    var bullet = document.createElement('div');
+    bullet.className = 'trait-bullet' + (t.positive ? '' : ' neg');
+    bullet.textContent = t.positive ? '✓' : '✗';
+    var text = document.createElement('span'); text.textContent = t.text;
+    item.appendChild(bullet); item.appendChild(text);
+    traitList.appendChild(item);
+  });
+  traitSec.appendChild(traitList);
+  card.appendChild(traitSec);
+
+  // Divider
+  var div2 = document.createElement('div'); div2.className = 'divider'; div2.textContent = 'Comprehension check';
+  card.appendChild(div2);
+
+  // Attention / comprehension check
+  var checkSec = document.createElement('div'); checkSec.className = 'check-section';
+  var checkTitle = document.createElement('div'); checkTitle.className = 'check-title';
+  checkTitle.textContent = 'Before continuing, please answer the following question:';
+  checkSec.appendChild(checkTitle);
+  var checkQ = document.createElement('div'); checkQ.className = 'check-q';
+  checkQ.textContent = config.checkQuestion;
+  checkSec.appendChild(checkQ);
+
+  var opts = document.createElement('div'); opts.className = 'check-options';
+  // Shuffle options on first render (stored so they don't re-shuffle on re-render)
+  if(!window._shuffledOpts){
+    window._shuffledOpts = config.checkOptions.slice().sort(function(){ return Math.random()-0.5; });
+  }
+  window._shuffledOpts.forEach(function(opt, i){
+    var optEl = document.createElement('div');
+    optEl.className = 'check-opt' + (selectedAnswer === i ? ' selected' : '');
+    var radio = document.createElement('div'); radio.className = 'check-radio';
+    var label = document.createElement('span'); label.textContent = opt.text;
+    optEl.appendChild(radio); optEl.appendChild(label);
+    optEl.onclick = function(){
+      if(checkPassed) return;
+      selectedAnswer = i;
+      render();
+    };
+    opts.appendChild(optEl);
+  });
+  checkSec.appendChild(opts);
+
+  // Feedback
+  var feedback = document.createElement('div'); feedback.className = 'check-feedback'; feedback.id = 'check-feedback';
+  checkSec.appendChild(feedback);
+
+  card.appendChild(checkSec);
+
+  // Error box (for missing answer)
+  var errBox = document.createElement('div'); errBox.className = 'error-box'; errBox.id = 'err-box';
+  errBox.textContent = 'Please select an answer before continuing.';
+  card.appendChild(errBox);
+
+  // Continue button
+  var btn = document.createElement('button');
+  btn.className = 'btn btn-submit';
+  btn.textContent = checkPassed ? 'Continue to game →' : 'Check answer & continue →';
+  btn.disabled = checkPassed && false; // always enabled
+  btn.onclick = handleContinue;
+  card.appendChild(btn);
+
+  app.appendChild(card);
+
+  // If already passed, show success
+  if(checkPassed){
+    var fb = document.getElementById('check-feedback');
+    if(fb){ fb.className = 'check-feedback success'; fb.textContent = '✓ ' + config.correctFeedback; }
+  }
+}
+
+function handleContinue(){
+  if(checkPassed){
+    goToGame(); return;
+  }
+  if(selectedAnswer === null){
+    var err = document.getElementById('err-box');
+    if(err){ err.style.display = 'block'; }
+    return;
+  }
+  var err = document.getElementById('err-box');
+  if(err) err.style.display = 'none';
+
+  var chosen = window._shuffledOpts[selectedAnswer];
+  attempts++;
+
+  if(chosen.correct){
+    checkPassed = true;
+    render();
+    // Auto-proceed after brief pause so they can see the success message
+    setTimeout(goToGame, 1800);
+  } else {
+    // Mark wrong briefly, then reset
+    var opts = document.querySelectorAll('.check-opt');
+    if(opts[selectedAnswer]) opts[selectedAnswer].classList.add('wrong');
+    var fb = document.getElementById('check-feedback');
+    if(fb){ fb.className = 'check-feedback error'; fb.textContent = config.wrongFeedback + ' (Attempt ' + attempts + ')'; }
+    // Reset selection after shake animation
+    setTimeout(function(){
+      selectedAnswer = null;
+      render();
+    }, 600);
+  }
+}
+
+function goToGame(){
+  // Build game URL: pass the game condition + pid + manipulation condition for logging
+  var gameParams = new URLSearchParams();
+  var gc = GAME_CONDITION_MAP[conditionKey] || 'human';
+  gameParams.set('condition', gc);
+  if(pid) gameParams.set('pid', pid);
+  gameParams.set('manip', conditionKey);   // so the game can log which manipulation was shown
+  gameParams.set('attempts', attempts);     // log how many attempts the check took
+  window.location.href = 'index.html?' + gameParams.toString();
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+render();
+</script>
+</body>
+</html>
