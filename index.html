@@ -1511,7 +1511,7 @@ function renderGameStart(){
   body.innerHTML='You have completed the tutorial. You are now ready to start the game.<br><br>You will play <strong>'+ROUNDS.length+' rounds</strong>. In each round, rate the quality of <strong>your partner\'s</strong> prediction after inspecting the die.';
   inner.appendChild(body);
   var btn=mkEl('button','btn btn-submit'); btn.textContent='Start the game →'; btn.style.cssText='max-width:260px;width:100%;';
-  btn.onclick=function(){state.screen='chat';render();};
+  btn.onclick=function(){ startGame(); };
   inner.appendChild(btn); card.appendChild(inner); wrap.appendChild(card); return wrap;
 }
 
