@@ -674,21 +674,16 @@ var state = {
   checkAttempts:0
 };
 
-var TUT_PARTNER = 'Tolvan';
+var TUT_PARTNER = robotName();
 var dieDrags = {};
 
 
 // ================================
 // HELPERS
 // ================================
-function eName(){
-  if(state.partnerSwitched) return CONFIG.experimenterType==='ai' ? CONFIG.experimenterNameAI2 : CONFIG.experimenterNameHuman2;
-  return CONFIG.experimenterType==='ai'?CONFIG.experimenterNameAI:CONFIG.experimenterNameHuman;
-}
-function eType(){return CONFIG.experimenterType;}
-function currentRound(){return ROUNDS[state.roundIndex];}
-function rollDie(faces){return faces[Math.floor(Math.random()*faces.length)];}
-function bothRated(){return state.inspectedDie && state.ratingPost.assertability!=null&&state.ratingPost.justification!=null;}
+
+function eName(){ return robotName(); }
+function eType(){ return 'ai'; }
 
 // ================================
 // PIP SVGs
@@ -1523,14 +1518,14 @@ function renderIntro(){
   var card=mkEl('div','card');
   var title=mkEl('div','intro-title'); title.innerHTML='Welcome to the<br><span>Prediction Game</span>'; card.appendChild(title);
   var body=mkEl('div','intro-body');
-  body.innerHTML='In the game, you will play <strong>'+ROUNDS.length+' rounds</strong> with a partner. In each round, your partner -- let\'s call him <strong>Kenneth</strong> for now -- has to predict the outcome of a die roll. Only your partner can see the type of die before the roll.<br><br>We will start with a <strong>mandatory tutorial</strong> to familiarise you with the game.';
+  body.innerHTML='Based on what it sees, <strong>'+TUT_PARTNER+'</strong> makes a prediction about the outcome.';
   card.appendChild(body);
   [
     ['🎲','<strong>Each round:</strong> Your partner sees the die type and makes a prediction. You cannot see the die beforehand.'],
     ['👁','<strong>You roll the die</strong> yourself, then inspect it to see all its faces.'],
     ['⭐','<strong>After the roll:</strong> You see the outcome and the die type, and rate the quality of the prediction.'],
     ['🏆','<strong>Scoring:</strong> Your team earns <strong>+30 points</strong> for a correct prediction and loses <strong>−10 points</strong> for an incorrect one.'],
-    ['🔄','<strong>Halftime:</strong> After Round 3, you can choose to keep your partner or switch to a new one for the final 3 rounds.'],
+    ['🔄','<strong>Halftime:</strong> ['🤖','<strong>Your partner:</strong> You will play the full game with the same robot partner.'],
   ].forEach(function(r){var rc=mkEl('div','rule-card'); rc.innerHTML='<div class="rule-icon">'+r[0]+'</div><div class="rule-text">'+r[1]+'</div>'; card.appendChild(rc);});
   var btnRow=mkEl('div','btn-row');
   var btnTut=mkEl('button','btn btn-tut'); btnTut.textContent='📖 Start Tutorial →';
@@ -1645,8 +1640,9 @@ function tutStep_prediction(){
 
   var agentRow=mkEl('div','agent-row'); agentRow.style.marginTop='12px';
   var portWrap=mkEl('div','portrait-wrap');
-  var port=kennethPortrait(false);
-  var badge=mkEl('div','agent-badge human'); badge.textContent='Human';
+  var port=mkEl('div','portrait');
+  port.innerHTML = ROBOT_IDENTITY.avatar === 'amber' ? nexus7AvatarSVG() : aiAvatarSVG();
+  var badge=mkEl('div','agent-badge ai'); badge.textContent='Humanoid social robot';
   portWrap.appendChild(port); portWrap.appendChild(badge);
 
   var speechArea=mkEl('div','speech-area');
@@ -1672,8 +1668,9 @@ function tutStep4_combined(){
   // Kenneth's prediction
   var agentRow=mkEl('div','agent-row'); agentRow.style.cssText='margin-bottom:10px;';
   var portWrap=mkEl('div','portrait-wrap');
-  var port=kennethPortrait(false);
-  var badge=mkEl('div','agent-badge human'); badge.textContent='Human';
+  var port=mkEl('div','portrait');
+  port.innerHTML = ROBOT_IDENTITY.avatar === 'amber' ? nexus7AvatarSVG() : aiAvatarSVG();
+  var badge=mkEl('div','agent-badge ai'); badge.textContent='Humanoid social robot';
   portWrap.appendChild(port); portWrap.appendChild(badge);
   var speechArea=mkEl('div','speech-area');
   var agentName=mkEl('div','agent-name'); agentName.textContent=TUT_PARTNER;
@@ -1740,14 +1737,14 @@ function tutStep_partner(){
   portraitWrap.appendChild(nameTag);
 
   var badge=mkEl('div','agent-badge human');
-  badge.textContent='Human partner'; badge.style.fontSize='11px';
+  badge.textContent='Humanoid social robot'; badge.style.fontSize='11px';
   portraitWrap.appendChild(badge);
 
   d.appendChild(portraitWrap);
 
   // Context note
   var note=mkEl('div','tut-highlight');
-  note.innerHTML='This is your partner for the tutorial. In the real game, your actual partner\'s picture will appear.';
+  note.innerHTML='This is your partner for the tutorial. The same robot will appear throughout the game.';
   d.appendChild(note);
 
   return d;
@@ -1850,8 +1847,9 @@ function tutStep1Demo(){
   // Agent row -- portrait + name + context text only (no prediction bubble)
   var agRow=mkEl('div','agent-row'); agRow.style.marginTop='4px';
   var portWrap=mkEl('div','portrait-wrap');
-  var port=kennethPortrait(false);
-  var bdg=mkEl('div','agent-badge human'); bdg.textContent='Human';
+  var port=mkEl('div','portrait');
+  port.innerHTML = ROBOT_IDENTITY.avatar === 'amber' ? nexus7AvatarSVG() : aiAvatarSVG();
+  var badge=mkEl('div','agent-badge ai'); badge.textContent='Humanoid social robot';
   portWrap.appendChild(port); portWrap.appendChild(bdg);
   var speechArea=mkEl('div','speech-area');
   var agName=mkEl('div','agent-name'); agName.textContent=TUT_PARTNER;
@@ -2174,7 +2172,7 @@ function renderGame(){
   var agentRow=mkEl('div','agent-row');
   var portWrap=mkEl('div','portrait-wrap');
   var port = eType()==='ai' ? (function(){var p=mkEl('div','portrait'); p.innerHTML=(state.partnerSwitched?nexus7AvatarSVG():aiAvatarSVG()); return p;})() : alexPortrait(false);
-  var badge=mkEl('div','agent-badge '+eType()); badge.textContent=eType()==='ai'?'AI System':'Human';
+  var badge=mkEl('div','agent-badge '+eType()); badge.textContent='Humanoid social robot';
   portWrap.appendChild(port); portWrap.appendChild(badge);
   var speechArea=mkEl('div','speech-area');
   var agentName=mkEl('div','agent-name'); agentName.textContent=eName();
@@ -2461,10 +2459,9 @@ function advanceRound(){
   });
   state.roundIndex++;
   // After round 3 (index was 2, now 3): show partner switch screen
-  if(state.roundIndex===3 && !state.partnerSwitched){
-    state.screen='switch'; render();
-  } else if(state.roundIndex>=ROUNDS.length){
-    state.screen='end';render();
+  if(state.roundIndex>=ROUNDS.length){
+  state.screen='end';
+  render();
   } else {
     startRound();
   }
