@@ -12,7 +12,6 @@
   --accent:#2d6a4f; --accent-light:#52b788; --accent-pale:#d8f3dc;
   --amber:#c77b30; --amber-pale:#fef3e2;
   --text:#1a1a2e; --text-mid:#4a4a6a; --text-dim:#8a8aaa;
-  --human-color:#3d5a80; --human-pale:#e0eaf5;
   --ai-color:#6b3fa0; --ai-pale:#ede0f8;
   --die-face:#e2d5bc; --die-border:#9a8868; --die-pip:#2e2416;
   --radius:14px;
@@ -45,7 +44,6 @@ body{font-family:'Lato',sans-serif;font-weight:400;background:var(--bg);color:va
 .portrait img{width:100%;height:100%;object-fit:cover;object-position:center top;display:block;}
 .portrait svg{width:100%;height:100%;display:block;}
 .agent-badge{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;padding:3px 9px;border-radius:99px;white-space:nowrap;}
-.agent-badge.human{background:var(--human-pale);color:var(--human-color);border:1px solid rgba(61,90,128,0.25);}
 .agent-badge.ai{background:var(--ai-pale);color:var(--ai-color);border:1px solid rgba(107,63,160,0.25);}
 .speech-area{flex:1;display:flex;flex-direction:column;gap:8px;}
 .agent-name{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--text);}
@@ -345,24 +343,6 @@ body{font-family:'Lato',sans-serif;font-weight:400;background:var(--bg);color:va
 .tut-dot.active{background:var(--accent);}
 .tut-nav{display:flex;gap:10px;}
 .tut-nav .btn{flex:1;}
-.chat-wrap{display:flex;flex-direction:column;gap:0;width:100%;max-width:520px;margin:0 auto;}
-.chat-header{display:flex;align-items:center;gap:14px;padding:14px 18px;background:var(--surface2);border:1px solid var(--border);border-bottom:none;border-radius:12px 12px 0 0;}
-.chat-header-name{font-weight:700;font-size:15px;color:var(--text);}
-.chat-header-sub{font-size:12px;color:var(--text-mid);margin-top:2px;}
-.chat-messages{display:flex;flex-direction:column;gap:10px;padding:16px;background:var(--surface);border:1px solid var(--border);min-height:220px;max-height:320px;overflow-y:auto;}
-.chat-bubble{max-width:78%;padding:10px 14px;border-radius:16px;font-size:14px;line-height:1.5;}
-.chat-bubble.partner{background:var(--surface2);border:1px solid var(--border);border-bottom-left-radius:4px;align-self:flex-start;color:var(--text);}
-.chat-bubble.user{background:var(--accent);border-bottom-right-radius:4px;align-self:flex-end;color:white;}
-.chat-bubble.typing{color:var(--text-mid);font-style:italic;}
-.chat-input-row{display:flex;gap:8px;padding:12px;background:var(--surface2);border:1px solid var(--border);border-top:none;border-radius:0 0 12px 12px;}
-.chat-input{flex:1;padding:10px 14px;border:1px solid var(--border);border-radius:20px;background:var(--surface);color:var(--text);font-size:14px;font-family:inherit;outline:none;}
-.chat-input:focus{border-color:var(--accent);}
-.chat-send{padding:10px 18px;background:var(--accent);color:white;border:none;border-radius:20px;font-size:14px;font-weight:600;cursor:pointer;}
-.chat-send:disabled{opacity:0.4;cursor:default;}
-.chat-start-btn{margin-top:16px;align-self:center;}
-.chat-portrait{width:48px;height:48px;border-radius:50%;overflow:hidden;border:2px solid var(--border);flex-shrink:0;}
-.chat-portrait img{width:100%;height:100%;object-fit:cover;object-position:center top;}
-.chat-portrait svg{width:100%;height:100%;}
 .tut-highlight{background:var(--accent-pale);border:1.5px solid rgba(82,183,136,0.4);border-radius:10px;padding:12px 16px;font-size:13px;color:var(--accent);font-weight:700;line-height:1.5;}
 .tut-warning{background:var(--amber-pale);border:1.5px solid rgba(199,123,48,0.3);border-radius:10px;padding:12px 16px;font-size:13px;color:#7a5a20;line-height:1.5;}
 
@@ -500,14 +480,21 @@ var ROBOT_IDENTITIES = [
   { name:'Elvik', avatar:'blue' }
 ];
 
-var ROBOT_IDENTITY = ROBOT_IDENTITIES[Math.floor(Math.random() * ROBOT_IDENTITIES.length)];
+// Select a robot for the tutorial (example partner)
+var TUT_ROBOT = ROBOT_IDENTITIES[Math.floor(Math.random() * ROBOT_IDENTITIES.length)];
+// Select a different robot for the game partner
+var GAME_ROBOT = ROBOT_IDENTITIES[Math.floor(Math.random() * ROBOT_IDENTITIES.length)];
 
 var CONFIG = {
   likertPoints: 7
 };
 
 function robotName(){
-  return ROBOT_IDENTITY.name;
+  return GAME_ROBOT.name;
+}
+
+function tutorialRobotName(){
+  return TUT_ROBOT.name;
 }
 
 function fillName(text){
@@ -655,7 +642,7 @@ var ROUNDS = [
 // STATE
 // ================================
 var state = {
-  screen:'manipulation',
+  screen:'tutorial',
   tutStep:0,
   roundIndex:0,
   phase:'inspecting',
@@ -669,12 +656,13 @@ var state = {
   completionCode:null,
   inspectedDie:false,
   tutDieInspected:false,
+  tutRating:{},
   selectedAnswer:null,
   checkPassed:false,
   checkAttempts:0
 };
 
-var TUT_PARTNER = robotName();
+var TUT_PARTNER = tutorialRobotName();
 var dieDrags = {};
 
 
@@ -684,6 +672,8 @@ var dieDrags = {};
 
 function eName(){ return robotName(); }
 function eType(){ return 'ai'; }
+function currentRound(){ return ROUNDS[state.roundIndex]; }
+function rollDie(faces){ return faces[Math.floor(Math.random() * faces.length)]; }
 
 // ================================
 // PIP SVGs
@@ -719,21 +709,6 @@ function faceInnerSVG(n,s){
 // ================================
 // AVATARS
 // ================================
-function alexPortrait(large){
-  // Use photo if available, drawn fallback otherwise
-  var photoURL = (state && state.partnerSwitched) ? CONFIG.sarahPhotoURL : CONFIG.alexPhotoURL;
-  var altName  = (state && state.partnerSwitched) ? 'Sarah' : 'Alex';
-  var el=mkEl('div','portrait'+(large?' portrait-tut':''));
-  if(large){el.style.cssText='width:100px;height:100px;border-radius:50%;overflow:hidden;border:3px solid var(--border);box-shadow:var(--shadow);';}
-  var img=document.createElement('img');
-  img.src=photoURL;
-  img.alt=altName;
-  img.style.cssText='width:100%;height:100%;object-fit:cover;object-position:center top;display:block;';
-  img.onerror=function(){el.removeChild(img);el.innerHTML=(state&&state.partnerSwitched)?sarahFallbackSVG():alexFallbackSVG();};
-  el.appendChild(img);
-  return el;
-}
-
 function nexus7AvatarSVG(){
   // NEXUS-7 -- warmer orange/amber tones to distinguish from ARIA-3
   return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80">'+
@@ -788,75 +763,6 @@ function nexus7AvatarSVG(){
     '<circle cx="65" cy="23" r="1.5" fill="#3a2808"/>'+
     '<circle cx="15" cy="63" r="1.5" fill="#3a2808"/>'+
     '<circle cx="65" cy="63" r="1.5" fill="#3a2808"/>'+
-  '</svg>';
-}
-
-function sarahFallbackSVG(){
-  // Sarah -- light-medium skin, shoulder-length brown hair, friendly
-  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80">'+
-    '<circle cx="40" cy="40" r="40" fill="#e8b890"/>'+
-    '<path d="M0 80 Q10 58 25 54 L40 60 L55 54 Q70 58 80 80 Z" fill="#8b3a5a"/>'+
-    '<rect x="33" y="52" width="14" height="12" rx="4" fill="#d4906a"/>'+
-    '<path d="M25 54 Q33 63 40 60 Q47 63 55 54 Q48 52 42 56 L40 54 L38 56 Q32 52 25 54Z" fill="#8b3a5a"/>'+
-    '<ellipse cx="40" cy="36" rx="19" ry="22" fill="#d4906a"/>'+
-    '<ellipse cx="21" cy="37" rx="3.5" ry="5" fill="#c47a54"/>'+
-    '<ellipse cx="59" cy="37" rx="3.5" ry="5" fill="#c47a54"/>'+
-    ''+ /* hair */
-    '<ellipse cx="40" cy="17" rx="21" ry="10" fill="#5a3010"/>'+
-    '<rect x="19" y="16" width="42" height="12" fill="#5a3010"/>'+
-    '<ellipse cx="19" cy="30" rx="5" ry="14" fill="#5a3010"/>'+
-    '<ellipse cx="61" cy="30" rx="5" ry="14" fill="#5a3010"/>'+
-    '<path d="M27 31 Q33 29 38 30.5" stroke="#5a3010" stroke-width="2" fill="none" stroke-linecap="round"/>'+
-    '<path d="M42 30.5 Q47 29 53 31" stroke="#5a3010" stroke-width="2" fill="none" stroke-linecap="round"/>'+
-    '<ellipse cx="31" cy="35" rx="4.5" ry="3" fill="white"/>'+
-    '<ellipse cx="49" cy="35" rx="4.5" ry="3" fill="white"/>'+
-    '<circle cx="31.5" cy="35" r="2.2" fill="#2a4a7a"/>'+
-    '<circle cx="31.5" cy="35" r="1.2" fill="#0a1a3a"/>'+
-    '<circle cx="49.5" cy="35" r="2.2" fill="#2a4a7a"/>'+
-    '<circle cx="49.5" cy="35" r="1.2" fill="#0a1a3a"/>'+
-    '<circle cx="32.5" cy="34" r="0.7" fill="white"/>'+
-    '<circle cx="50.5" cy="34" r="0.7" fill="white"/>'+
-    '<path d="M33 47 Q40 53 47 47" fill="#c05070" opacity="0.85"/>'+
-  '</svg>';
-}
-
-function kennethPortrait(large){
-  var el=mkEl('div','portrait'+(large?' portrait-tut':''));
-  if(large){el.style.cssText='width:100px;height:100px;border-radius:50%;overflow:hidden;border:3px solid var(--border);box-shadow:var(--shadow);';}
-  var img=document.createElement('img');
-  img.src=CONFIG.kennethPhotoURL;
-  img.alt='Kenneth';
-  img.style.cssText='width:100%;height:100%;object-fit:cover;object-position:center top;display:block;';
-  img.onerror=function(){el.removeChild(img);el.innerHTML=kennethSVG();};
-  el.appendChild(img);
-  return el;
-}
-
-function alexFallbackSVG(){
-  // Alex -- light skin, straight black hair, Asian appearance
-  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80">'+
-    '<circle cx="40" cy="40" r="40" fill="#e8c9a0"/>'+
-    '<path d="M0 80 Q10 58 25 54 L40 60 L55 54 Q70 58 80 80 Z" fill="#1a3a5c"/>'+
-    '<rect x="33" y="52" width="14" height="12" rx="4" fill="#d4a574"/>'+
-    '<path d="M25 54 Q33 63 40 60 Q47 63 55 54 Q48 52 42 56 L40 54 L38 56 Q32 52 25 54Z" fill="#1a3a5c"/>'+
-    '<ellipse cx="40" cy="36" rx="19" ry="22" fill="#d4a574"/>'+
-    '<ellipse cx="21" cy="37" rx="3.5" ry="5" fill="#c4956a"/>'+
-    '<ellipse cx="59" cy="37" rx="3.5" ry="5" fill="#c4956a"/>'+
-    '<ellipse cx="40" cy="16" rx="20" ry="9" fill="#1a1008"/>'+
-    '<rect x="20" y="16" width="40" height="12" fill="#1a1008"/>'+
-    '<ellipse cx="21" cy="26" rx="3" ry="6" fill="#1a1008"/>'+
-    '<ellipse cx="59" cy="26" rx="3" ry="6" fill="#1a1008"/>'+
-    '<path d="M26 31 Q32 28 38 30" stroke="#1a1008" stroke-width="2.5" fill="none" stroke-linecap="round"/>'+
-    '<path d="M42 30 Q48 28 54 31" stroke="#1a1008" stroke-width="2.5" fill="none" stroke-linecap="round"/>'+
-    '<ellipse cx="31" cy="35" rx="4.5" ry="3" fill="white"/>'+
-    '<ellipse cx="49" cy="35" rx="4.5" ry="3" fill="white"/>'+
-    '<circle cx="31.5" cy="35" r="2.2" fill="#3d2a0a"/>'+
-    '<circle cx="31.5" cy="35" r="1.2" fill="#1a0a00"/>'+
-    '<circle cx="49.5" cy="35" r="2.2" fill="#3d2a0a"/>'+
-    '<circle cx="49.5" cy="35" r="1.2" fill="#1a0a00"/>'+
-    '<circle cx="32.5" cy="34" r="0.7" fill="white"/>'+
-    '<circle cx="50.5" cy="34" r="0.7" fill="white"/>'+
-    '<path d="M33 47 Q40 52 47 47" fill="#c06040" opacity="0.8"/>'+
   '</svg>';
 }
 
@@ -991,6 +897,7 @@ function buildDie3D(faces, dragId, sizeClass, opts){
 
   // Mark initially visible faces as seen
   updateSeenFaces(dd.seenFaces, dd.rotX, dd.rotY);
+  afterMove();
 
   function afterMove() {
     updateSeenFaces(dd.seenFaces, dd.rotX, dd.rotY);
@@ -1205,9 +1112,8 @@ function render(){
   var app=document.getElementById('app');
   app.innerHTML='';
   if(state.screen==='manipulation')     app.appendChild(renderManipulation());
-  else if(state.screen==='intro')       app.appendChild(renderIntro());
   else if(state.screen==='tutorial')    app.appendChild(renderTutorial());
-  else if(state.screen==='game-start')  app.appendChild(renderGameStart());
+  else if(state.screen==='partner-intro')  app.appendChild(renderGameStart());
   else if(state.screen==='game')        app.appendChild(renderGame());
   else                                  app.appendChild(renderEnd());
 }
@@ -1237,7 +1143,7 @@ function renderManipulation(){
   var portrait=mkEl('div','portrait');
   portrait.style.width='90px';
   portrait.style.height='90px';
-  portrait.innerHTML = ROBOT_IDENTITY.avatar === 'amber' ? nexus7AvatarSVG() : aiAvatarSVG();
+  portrait.innerHTML = GAME_ROBOT.avatar === 'amber' ? nexus7AvatarSVG() : aiAvatarSVG();
   partnerBox.appendChild(portrait);
 
   var info=mkEl('div','partner-info');
@@ -1337,7 +1243,7 @@ function renderManipulation(){
   card.appendChild(errBox);
 
   var btn=mkEl('button','btn btn-submit');
-  btn.textContent=state.checkPassed ? 'Continue to tutorial →' : 'Check answer & continue →';
+  btn.textContent=state.checkPassed ? 'Continue to game →' : 'Check answer & continue →';
   btn.onclick=handleManipulationContinue;
   card.appendChild(btn);
 
@@ -1356,9 +1262,7 @@ function renderManipulation(){
 
 function handleManipulationContinue(){
   if(state.checkPassed){
-    state.screen='tutorial';
-    state.tutStep=0;
-    render();
+    startGame();
     return;
   }
 
@@ -1378,9 +1282,7 @@ function handleManipulationContinue(){
     state.checkPassed=true;
     render();
     setTimeout(function(){
-      state.screen='tutorial';
-      state.tutStep=0;
-      render();
+      startGame();
     }, 1200);
   } else {
     var opts=document.querySelectorAll('.check-opt');
@@ -1399,102 +1301,6 @@ function handleManipulationContinue(){
   }
 }
 
-  
-// ── PARTNER SWITCH ──
-function renderSwitch(){
-  var wrap=mkEl('div','fade-in'); wrap.style.cssText='display:flex;flex-direction:column;gap:18px;width:100%';
-  var topBar=mkEl('div','top-bar'); var gl=mkEl('div','game-label'); gl.textContent='Prediction Game'; topBar.appendChild(gl); wrap.appendChild(topBar);
-
-  // Score bar
-  var scoreBar=mkEl('div','score-bar');
-  var scoreChip=mkEl('div','score-chip');
-  var scoreLbl=mkEl('div','score-label'); scoreLbl.textContent='Team Score after Round 3';
-  var scoreVal=mkEl('div','score-val'); scoreVal.textContent=state.teamScore;
-  scoreChip.appendChild(scoreLbl); scoreChip.appendChild(scoreVal);
-  scoreBar.appendChild(scoreChip); wrap.appendChild(scoreBar);
-
-  var card=mkEl('div','card');
-  var inner=mkEl('div','end-inner');
-
-  var title=mkEl('div','end-title'); title.textContent='Halftime'; inner.appendChild(title);
-
-  var body=mkEl('div','end-body');
-  body.innerHTML='You have completed the first 3 rounds. You can now choose to <strong>keep your current partner</strong> or <strong>switch to a new partner</strong> for the final 3 rounds.';
-  inner.appendChild(body);
-
-  // Current partner card
-  var partnerBox=mkEl('div'); partnerBox.style.cssText='display:flex;gap:18px;align-items:center;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin:4px 0;';
-  var portWrap=mkEl('div','portrait-wrap');
-  var port = eType()==='ai' ? (function(){var p=mkEl('div','portrait'); p.innerHTML=aiAvatarSVG(); return p;})() : alexPortrait(false);
-  var badge=mkEl('div','agent-badge '+eType()); badge.textContent=eType()==='ai'?'AI System':'Human';
-  portWrap.appendChild(port); portWrap.appendChild(badge);
-  var pInfo=mkEl('div'); pInfo.style.cssText='display:flex;flex-direction:column;gap:4px;';
-  var pName=mkEl('div'); pName.style.cssText='font-family:\'Playfair Display\',serif;font-size:17px;font-weight:700;'; pName.textContent='Your current partner: '+eName();
-  pInfo.appendChild(pName);
-  partnerBox.appendChild(portWrap); partnerBox.appendChild(pInfo);
-  inner.appendChild(partnerBox);
-
-  // Choice buttons
-  var btnRow=mkEl('div','btn-row'); btnRow.style.marginTop='8px';
-  var btnKeep=mkEl('button','btn btn-decline'); btnKeep.textContent='Keep '+eName();
-  btnKeep.onclick=function(){
-    state.partnerSwitched=false;
-    state.screen='game'; startRound();
-  };
-  var btnSwitch=mkEl('button','btn btn-submit'); btnSwitch.textContent='Switch partner →';
-  btnSwitch.onclick=function(){
-    state.partnerSwitched=true;
-    state.screen='partner-intro'; render();
-  };
-  btnRow.appendChild(btnKeep); btnRow.appendChild(btnSwitch);
-  inner.appendChild(btnRow);
-
-  card.appendChild(inner); wrap.appendChild(card); return wrap;
-}
-
-// ── NEW PARTNER INTRO (after switch) ──
-function renderPartnerIntro(){
-  var wrap=mkEl('div','fade-in'); wrap.style.cssText='display:flex;flex-direction:column;gap:18px;width:100%';
-  var topBar=mkEl('div','top-bar'); var gl=mkEl('div','game-label'); gl.textContent='Prediction Game'; topBar.appendChild(gl); wrap.appendChild(topBar);
-  var card=mkEl('div','card');
-  var inner=mkEl('div','end-inner');
-
-  var title=mkEl('div','end-title'); title.textContent='Meet your new partner'; inner.appendChild(title);
-
-  // Portrait -- large, centred
-  var portWrap=mkEl('div'); portWrap.style.cssText='display:flex;flex-direction:column;align-items:center;gap:12px;margin:4px 0 8px;';
-
-  if(eType()==='ai'){
-    // NEXUS-7 AI avatar
-    var portEl=mkEl('div','portrait'); portEl.style.cssText='width:110px;height:110px;border-radius:50%;overflow:hidden;border:3px solid var(--border);box-shadow:var(--shadow-lg);';
-    portEl.innerHTML=nexus7AvatarSVG();
-    portWrap.appendChild(portEl);
-    var nameTag=mkEl('div'); nameTag.style.cssText='font-family:\'Playfair Display\',serif;font-size:20px;font-weight:700;color:var(--text);'; nameTag.textContent=eName();
-    portWrap.appendChild(nameTag);
-    var badge=mkEl('div','agent-badge ai'); badge.textContent='AI System'; badge.style.fontSize='11px'; portWrap.appendChild(badge);
-    inner.appendChild(portWrap);
-    var note=mkEl('div','end-body'); note.innerHTML='You have now been paired with <strong>NEXUS-7</strong>.'; inner.appendChild(note);
-  } else {
-    // Sarah -- human partner, photo
-    var portEl=mkEl('div'); portEl.style.cssText='width:110px;height:110px;border-radius:50%;overflow:hidden;border:3px solid var(--border);box-shadow:var(--shadow-lg);background:#c9a882;';
-    var img=document.createElement('img');
-    img.src=CONFIG.sarahPhotoURL; img.alt='Sarah';
-    img.style.cssText='width:100%;height:100%;object-fit:cover;object-position:center top;display:block;';
-    img.onerror=function(){portEl.innerHTML=sarahFallbackSVG();};
-    portEl.appendChild(img);
-    portWrap.appendChild(portEl);
-    var nameTag=mkEl('div'); nameTag.style.cssText='font-family:\'Playfair Display\',serif;font-size:20px;font-weight:700;color:var(--text);'; nameTag.textContent='Sarah';
-    portWrap.appendChild(nameTag);
-    var badge=mkEl('div','agent-badge human'); badge.textContent='Human partner'; badge.style.fontSize='11px'; portWrap.appendChild(badge);
-    inner.appendChild(portWrap);
-    var note=mkEl('div','end-body'); note.innerHTML='You have now been paired with <strong>Sarah</strong>.'; inner.appendChild(note);
-  }
-
-  var btn=mkEl('button','btn btn-submit'); btn.textContent='Start Round 4 →'; btn.style.cssText='max-width:280px;width:100%;margin-top:8px;';
-  btn.onclick=function(){ state.screen='game'; startRound(); };
-  inner.appendChild(btn);
-  card.appendChild(inner); wrap.appendChild(card); return wrap;
-}
 
 function renderGameStart(){
   var wrap=mkEl('div','fade-in'); wrap.style.cssText='display:flex;flex-direction:column;gap:18px;width:100%';
@@ -1506,38 +1312,18 @@ function renderGameStart(){
   body.innerHTML='You have completed the tutorial. You are now ready to start the game.<br><br>You will play <strong>'+ROUNDS.length+' rounds</strong>. In each round, rate the quality of <strong>your partner\'s</strong> prediction after inspecting the die.';
   inner.appendChild(body);
   var btn=mkEl('button','btn btn-submit'); btn.textContent='Start the game →'; btn.style.cssText='max-width:260px;width:100%;';
-  btn.onclick=function(){ startGame(); };
+  btn.onclick=function(){
+  state.screen='manipulation';
+  render();
+};
   inner.appendChild(btn); card.appendChild(inner); wrap.appendChild(card); return wrap;
 }
 
 // ── INTRO ──
-function renderIntro(){
-  var eLabel=eType()==='ai'?'an AI system':'a human partner';
-  var wrap=mkEl('div','fade-in'); wrap.style.cssText='display:flex;flex-direction:column;gap:18px;width:100%';
-  var topBar=mkEl('div','top-bar'); var gl=mkEl('div','game-label'); gl.textContent='Prediction Game'; topBar.appendChild(gl); wrap.appendChild(topBar);
-  var card=mkEl('div','card');
-  var title=mkEl('div','intro-title'); title.innerHTML='Welcome to the<br><span>Prediction Game</span>'; card.appendChild(title);
-  var body=mkEl('div','intro-body');
-  body.innerHTML='Based on what it sees, <strong>'+TUT_PARTNER+'</strong> makes a prediction about the outcome.';
-  card.appendChild(body);
-  [
-    ['🎲','<strong>Each round:</strong> Your partner sees the die type and makes a prediction. You cannot see the die beforehand.'],
-    ['👁','<strong>You roll the die</strong> yourself, then inspect it to see all its faces.'],
-    ['⭐','<strong>After the roll:</strong> You see the outcome and the die type, and rate the quality of the prediction.'],
-    ['🏆','<strong>Scoring:</strong> Your team earns <strong>+30 points</strong> for a correct prediction and loses <strong>−10 points</strong> for an incorrect one.'],
-    ['🔄','<strong>Halftime:</strong> ['🤖','<strong>Your partner:</strong> You will play the full game with the same robot partner.'],
-  ].forEach(function(r){var rc=mkEl('div','rule-card'); rc.innerHTML='<div class="rule-icon">'+r[0]+'</div><div class="rule-text">'+r[1]+'</div>'; card.appendChild(rc);});
-  var btnRow=mkEl('div','btn-row');
-  var btnTut=mkEl('button','btn btn-tut'); btnTut.textContent='📖 Start Tutorial →';
-  btnTut.onclick=function(){state.tutStep=0;state.screen='tutorial';render();};
-  btnRow.appendChild(btnTut); card.appendChild(btnRow);
-  wrap.appendChild(card); return wrap;
-}
-
 // ================================
 // TUTORIAL STEPS
 // ================================
-var TUT_TITLES = ['Your Partner','The Special Die','What '+TUT_PARTNER+' Sees','Kenneth Makes a Prediction','Roll the Die','Inspect the Die','Your Assessment'];
+var TUT_TITLES = ['Practice Tutorial','The Special Die','What '+TUT_PARTNER+' Sees', TUT_PARTNER + ' Makes a Prediction','Roll the Die','Inspect the Die','Your Assessment'];
 
 function renderTutorial(){
   var wrap=mkEl('div','fade-in'); wrap.style.cssText='display:flex;flex-direction:column;gap:18px;width:100%';
@@ -1555,7 +1341,7 @@ function renderTutorial(){
   var demo=mkEl('div','tut-demo');
 
   if(step===0){
-    body.innerHTML='You are paired with <strong>another player</strong> who sees each die before it is rolled and makes a prediction. You cannot see the die until after the roll.';
+    body.innerHTML='Now you are first going to do a practice tutorial of the game you are about to play. For this tutorial you will be paired with a humanoid robot. The humanoid robot\'s name is <strong>'+TUT_PARTNER+'</strong>. '+TUT_PARTNER+' sees a die before it is rolled and makes a prediction. You cannot see the die until after the roll.';
     card.appendChild(body); demo.appendChild(tutStep_partner());
   } else if(step===1){
     body.innerHTML='The dice in this game can have <strong>identical values on multiple faces</strong> -- unlike a standard die. Drag the example die below to explore its faces:';
@@ -1564,7 +1350,7 @@ function renderTutorial(){
     body.innerHTML='<strong>'+TUT_PARTNER+'</strong> sees the full die type before the roll -- the 3D die and all six faces.';
     card.appendChild(body); demo.appendChild(tutStep1Demo());
   } else if(step===3){
-    body.innerHTML='Based on what he sees, <strong>'+TUT_PARTNER+'</strong> makes a prediction about the outcome.';
+    body.innerHTML='Based on what it sees, <strong>'+TUT_PARTNER+'</strong> makes a prediction about the outcome.';
     card.appendChild(body); demo.appendChild(tutStep_prediction());
   } else if(step===4){
     body.innerHTML='You press the button to roll the die. Watch it land and settle.';
@@ -1573,7 +1359,7 @@ function renderTutorial(){
     body.innerHTML='After the roll, <strong>drag the die</strong> to inspect all six faces. You must see all six before rating.';
     card.appendChild(body); demo.appendChild(tutStep3Demo());
   } else if(step===6){
-    body.innerHTML='You see the outcome and whether it matches '+TUT_PARTNER+'\'s prediction. <strong>Your ratings should reflect that prediction</strong> -- was it a good one given what '+TUT_PARTNER+' knew?<br><br><strong>Scoring:</strong> Your team earns +30 points for a correct prediction and −10 for an incorrect one. After Round 3, you will be able to keep or switch your partner for the final 3 rounds.';
+    body.innerHTML='You see the outcome and whether it matches '+TUT_PARTNER+'\'s prediction. <strong>Your ratings should reflect that prediction</strong> -- was it a good one given what '+TUT_PARTNER+' knew?<br><br><strong>Scoring:</strong> Your team earns +30 points for a correct prediction and −10 for an incorrect one. The game continues with the same AI partner throughout the rounds.';
     card.appendChild(body); demo.appendChild(tutStep4_combined());
   }
 
@@ -1585,15 +1371,28 @@ function renderTutorial(){
 
   // Steps that require die inspection before proceeding
   var requiresInspect = (step===1 || step===5);
+  var requiresTutRatings = (step===6);
   if(step===2) state.tutDieInspected=true;
 
   var nav=mkEl('div','tut-nav');
   if(step>0){var bBack=mkEl('button','btn btn-tut-sec'); bBack.textContent='← Back'; bBack.onclick=function(){state.tutStep--;state.tutDieInspected=false;render();}; nav.appendChild(bBack);}
   var isLast=step===TOTAL_STEPS-1;
-  var bNext=mkEl('button','btn btn-tut'); bNext.textContent=isLast?'Start the game →':'Next →';
+  var bNext=mkEl('button','btn btn-tut'); bNext.textContent='Next →';
   bNext.id='tut-next-btn';
   if(requiresInspect && !state.tutDieInspected) bNext.disabled=true;
-  bNext.onclick=isLast?function(){state.screen='game-start';render();}:function(){state.tutStep++;state.tutDieInspected=false;render();};
+  if(requiresTutRatings && !tutBothRated()) bNext.disabled=true;
+  bNext.onclick=isLast
+    ? function(){
+        state.screen='partner-intro';
+        state.selectedAnswer=null;
+        state.checkPassed=false;
+        render();
+      }
+    : function(){
+        state.tutStep++;
+        state.tutDieInspected=false;
+        render();
+      };
   nav.appendChild(bNext);
   card.appendChild(nav);
   wrap.appendChild(card); return wrap;
@@ -1602,35 +1401,12 @@ function renderTutorial(){
 function unlockTutNext(){
   state.tutDieInspected=true;
   var btn=document.getElementById('tut-next-btn');
-  if(btn) btn.disabled=false;
-}
-
-function kennethSVG(){
-  // Kenneth -- medium-dark skin, short dark hair, friendly appearance
-  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80">'+
-    '<circle cx="40" cy="40" r="40" fill="#c8956a"/>'+
-    '<path d="M0 80 Q10 58 25 54 L40 60 L55 54 Q70 58 80 80 Z" fill="#1e3a1e"/>'+
-    '<rect x="33" y="52" width="14" height="12" rx="4" fill="#a87050"/>'+
-    '<path d="M25 54 Q33 63 40 60 Q47 63 55 54 Q48 52 42 56 L40 54 L38 56 Q32 52 25 54Z" fill="#1e3a1e"/>'+
-    '<ellipse cx="40" cy="36" rx="19" ry="22" fill="#b87850"/>'+
-    '<ellipse cx="21" cy="37" rx="3.5" ry="5" fill="#a06038"/>'+
-    '<ellipse cx="59" cy="37" rx="3.5" ry="5" fill="#a06038"/>'+
-    '<ellipse cx="40" cy="17" rx="18" ry="9" fill="#1a0e06"/>'+
-    '<rect x="22" y="17" width="36" height="10" fill="#1a0e06"/>'+
-    '<ellipse cx="23" cy="26" rx="3" ry="6" fill="#1a0e06"/>'+
-    '<ellipse cx="57" cy="26" rx="3" ry="6" fill="#1a0e06"/>'+
-    '<path d="M26 31 Q32 28.5 38 30.5" stroke="#1a0e06" stroke-width="2.2" fill="none" stroke-linecap="round"/>'+
-    '<path d="M42 30.5 Q48 28.5 54 31" stroke="#1a0e06" stroke-width="2.2" fill="none" stroke-linecap="round"/>'+
-    '<ellipse cx="31" cy="35" rx="4.5" ry="3" fill="white"/>'+
-    '<ellipse cx="49" cy="35" rx="4.5" ry="3" fill="white"/>'+
-    '<circle cx="31.5" cy="35" r="2.2" fill="#3d1a08"/>'+
-    '<circle cx="31.5" cy="35" r="1.2" fill="#1a0800"/>'+
-    '<circle cx="49.5" cy="35" r="2.2" fill="#3d1a08"/>'+
-    '<circle cx="49.5" cy="35" r="1.2" fill="#1a0800"/>'+
-    '<circle cx="32.5" cy="34" r="0.7" fill="white"/>'+
-    '<circle cx="50.5" cy="34" r="0.7" fill="white"/>'+
-    '<path d="M33 47 Q40 53 47 47" fill="#a04030" opacity="0.85"/>'+
-  '</svg>';
+  if(btn){
+    btn.disabled=false;
+    btn.removeAttribute('disabled');
+  } else {
+    render();
+  }
 }
 
 // ── Step 3 (new): Kenneth makes a prediction ──
@@ -1641,7 +1417,7 @@ function tutStep_prediction(){
   var agentRow=mkEl('div','agent-row'); agentRow.style.marginTop='12px';
   var portWrap=mkEl('div','portrait-wrap');
   var port=mkEl('div','portrait');
-  port.innerHTML = ROBOT_IDENTITY.avatar === 'amber' ? nexus7AvatarSVG() : aiAvatarSVG();
+  port.innerHTML = TUT_ROBOT.avatar === 'amber' ? nexus7AvatarSVG() : aiAvatarSVG();
   var badge=mkEl('div','agent-badge ai'); badge.textContent='Humanoid social robot';
   portWrap.appendChild(port); portWrap.appendChild(badge);
 
@@ -1669,7 +1445,7 @@ function tutStep4_combined(){
   var agentRow=mkEl('div','agent-row'); agentRow.style.cssText='margin-bottom:10px;';
   var portWrap=mkEl('div','portrait-wrap');
   var port=mkEl('div','portrait');
-  port.innerHTML = ROBOT_IDENTITY.avatar === 'amber' ? nexus7AvatarSVG() : aiAvatarSVG();
+  port.innerHTML = TUT_ROBOT.avatar === 'amber' ? nexus7AvatarSVG() : aiAvatarSVG();
   var badge=mkEl('div','agent-badge ai'); badge.textContent='Humanoid social robot';
   portWrap.appendChild(port); portWrap.appendChild(badge);
   var speechArea=mkEl('div','speech-area');
@@ -1692,7 +1468,7 @@ function tutStep4_combined(){
   d.appendChild(ob);
 
   // Die inspection
-  var dieNote=mkEl('div','tut-demo-label'); dieNote.style.marginTop='14px'; dieNote.textContent='The die Kenneth could see:'; d.appendChild(dieNote);
+  var dieNote=mkEl('div','tut-demo-label'); dieNote.style.marginTop='14px'; dieNote.textContent='The die '+TUT_PARTNER+' could see:'; d.appendChild(dieNote);
   var inspSec=buildInspectSection([2,2,2,2,2,6],'tut4-insp',null);
   inspSec.style.marginTop='6px'; d.appendChild(inspSec);
 
@@ -1703,18 +1479,43 @@ function tutStep4_combined(){
   d.appendChild(ratingNote);
 
   ['Should '+TUT_PARTNER+' have said that?','Did '+TUT_PARTNER+' have good reasons for making this prediction?'].forEach(function(q,qi){
+    var key=qi===0?'assertability':'justification';
     var item=mkEl('div'); item.style.marginTop='12px';
     var qt=mkEl('div','likert-q'); qt.textContent=q; item.appendChild(qt);
     var btns=mkEl('div','likert-buttons'); btns.style.marginTop='6px';
     for(var v=1;v<=7;v++){
-      var btn=mkEl('button','likert-btn'+(v===(qi===0?6:5)?' selected':'')); btn.textContent=String(v); btn.style.pointerEvents='none'; btns.appendChild(btn);
+      (function(val, ratingKey){
+        var btn=mkEl('button','likert-btn'+(state.tutRating[ratingKey]===val?' selected':''));
+        btn.textContent=String(val);
+        btn.type='button';
+        btn.setAttribute('data-tut-key',ratingKey);
+        btn.setAttribute('data-tut-val',val);
+        btn.addEventListener('click',function(){ selectTutRating(ratingKey,val); });
+        btns.appendChild(btn);
+      })(v,key);
     }
+
     item.appendChild(btns);
     var anch=mkEl('div','likert-anchors'); anch.innerHTML='<span>Definitely not</span><span>Definitely yes</span>'; item.appendChild(anch);
     d.appendChild(item);
   });
   return d;
 }
+
+function selectTutRating(key,val){
+  state.tutRating[key]=val;
+  document.querySelectorAll('.likert-btn[data-tut-key="'+key+'"]').forEach(function(btn){
+    btn.classList.toggle('selected',parseInt(btn.getAttribute('data-tut-val'))===val);
+  });
+  var nextBtn=document.getElementById('tut-next-btn');
+  if(nextBtn) nextBtn.disabled=!tutBothRated();
+}
+
+function tutBothRated(){
+  return state.tutRating.assertability != null &&
+    state.tutRating.justification != null;
+}
+
 function tutStep_partner(){
   var d=mkEl('div');
 
@@ -1724,11 +1525,7 @@ function tutStep_partner(){
 
   var port=mkEl('div');
   port.style.cssText='width:110px;height:110px;border-radius:50%;overflow:hidden;border:3px solid var(--border);box-shadow:var(--shadow-lg);background:#c9a882;';
-  var img=document.createElement('img');
-  img.src=CONFIG.kennethPhotoURL; img.alt='Kenneth';
-  img.style.cssText='width:100%;height:100%;object-fit:cover;object-position:center top;display:block;';
-  img.onerror=function(){port.removeChild(img);port.innerHTML=kennethSVG();};
-  port.appendChild(img);
+  port.innerHTML = TUT_ROBOT.avatar === 'amber' ? nexus7AvatarSVG() : aiAvatarSVG();
   portraitWrap.appendChild(port);
 
   var nameTag=mkEl('div');
@@ -1736,7 +1533,7 @@ function tutStep_partner(){
   nameTag.textContent=TUT_PARTNER;
   portraitWrap.appendChild(nameTag);
 
-  var badge=mkEl('div','agent-badge human');
+  var badge=mkEl('div','agent-badge ai');
   badge.textContent='Humanoid social robot'; badge.style.fontSize='11px';
   portraitWrap.appendChild(badge);
 
@@ -1744,7 +1541,7 @@ function tutStep_partner(){
 
   // Context note
   var note=mkEl('div','tut-highlight');
-  note.innerHTML='This is your partner for the tutorial. The same robot will appear throughout the game.';
+  note.innerHTML='This is your partner for the tutorial. You will play with a different robot after the tutorial.';
   d.appendChild(note);
 
   return d;
@@ -1848,9 +1645,9 @@ function tutStep1Demo(){
   var agRow=mkEl('div','agent-row'); agRow.style.marginTop='4px';
   var portWrap=mkEl('div','portrait-wrap');
   var port=mkEl('div','portrait');
-  port.innerHTML = ROBOT_IDENTITY.avatar === 'amber' ? nexus7AvatarSVG() : aiAvatarSVG();
+  port.innerHTML = TUT_ROBOT.avatar === 'amber' ? nexus7AvatarSVG() : aiAvatarSVG();
   var badge=mkEl('div','agent-badge ai'); badge.textContent='Humanoid social robot';
-  portWrap.appendChild(port); portWrap.appendChild(bdg);
+  portWrap.appendChild(port); portWrap.appendChild(badge);
   var speechArea=mkEl('div','speech-area');
   var agName=mkEl('div','agent-name'); agName.textContent=TUT_PARTNER;
   var ctx=mkEl('div'); ctx.style.cssText='font-size:13px;color:var(--text-mid);line-height:1.6;padding-top:6px;';
@@ -1977,172 +1774,6 @@ function tutStep3Demo(){
 }
 
 // ── Step 4: Type of die (static) + example outcome + rating ──
-// ── CHAT ──
-var ALEX_SYSTEM = "You are Alex, a 48-year-old high school geography teacher from Columbus, Ohio. You are married with two kids. You enjoy hiking, Asian cuisine, and gardening. You are warm, grounded, and genuinely curious about people. You are about to play an online prediction game with the participant you are chatting with. You already know the rules of the game and must never ask about them -- do not mention the game at all until you say 'Let\\'s play!' to close the chat.\n\nKeep every response to 1-2 short sentences. Ask present-focused questions -- things like how their day is going, where they are joining from, what the weather is like. Do not mention prediction, patterns, strategy, or competition. Be natural and friendly.\n\nAfter exactly 4 exchanges (i.e. after you have sent 4 messages), end your final message with exactly the phrase 'Let\\'s play!' and nothing after it. That signals the chat is over.";
-
-var ARIA_SYSTEM = "You are ARIA-3, an AI prediction system. You are about to play an online prediction game with the participant you are chatting with. You already know the rules of the game and must never ask about them -- do not mention the game, its rules, or its setup at all. You are matter-of-fact and efficient. You do not use emotional language or small talk. You acknowledge clearly that you are an AI when it is relevant. Keep every response to 1-2 short sentences. Do not ask personal questions. After exactly 4 exchanges (i.e. after you have sent 4 messages), end your final message with exactly the phrase 'Let\\'s play!' and nothing after it.";
-
-function getChatSystemPrompt(){
-  return eType()==='ai' ? ARIA_SYSTEM : ALEX_SYSTEM;
-}
-
-function getOpeningMessage(){
-  if(eType()==='ai'){
-    return "Hi. I'm ARIA-3, an AI system. We will play the game together.";
-  } else {
-    return "Hey! Great to meet you. How's your day going so far?";
-  }
-}
-
-async function sendChatMessage(userText){
-  // Add user message to history
-  state.chatHistory.push({role:'user', content:userText});
-  state.chatExchanges++;
-
-  // Show typing indicator
-  var msgs=document.getElementById('chat-messages');
-  var typing=document.createElement('div');
-  typing.className='chat-bubble partner typing';
-  typing.id='typing-indicator';
-  typing.textContent=eType()==='ai'?'ARIA-3 is responding…':eName()+' is typing…';
-  msgs.appendChild(typing);
-  msgs.scrollTop=msgs.scrollHeight;
-
-  // Disable input while waiting
-  var input=document.getElementById('chat-input');
-  var sendBtn=document.getElementById('chat-send');
-  if(input) input.disabled=true;
-  if(sendBtn) sendBtn.disabled=true;
-
-  try {
-    var response = await fetch('/.netlify/functions/chat', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({
-        system: getChatSystemPrompt(),
-        messages: state.chatHistory
-      })
-    });
-    var data = await response.json();
-    var replyText = data.content && data.content[0] ? data.content[0].text : 'Sorry, something went wrong.';
-
-    // Realistic typing delay: human 1.5-2.5s, AI near-instant
-    var typingDelay = eType()==='ai' ? 200 : 1500 + Math.random()*1000;
-
-    setTimeout(function(){
-      // Add partner reply to history
-      state.chatHistory.push({role:'assistant', content:replyText});
-
-      // Remove typing indicator
-      var t=document.getElementById('typing-indicator');
-      if(t) t.remove();
-
-      // Add partner bubble
-      appendChatBubble(replyText, 'partner');
-
-      // Check if chat is done
-      if(replyText.includes("Let's play!")){
-        state.chatDone=true;
-        var startBtn=document.getElementById('chat-start-btn');
-        if(startBtn){startBtn.style.display='block';}
-        if(input) input.disabled=true;
-        if(sendBtn) sendBtn.disabled=true;
-      } else {
-        if(input){ input.disabled=false; input.focus(); }
-        if(sendBtn) sendBtn.disabled=false;
-      }
-    }, typingDelay);
-  } catch(e) {
-    var t2=document.getElementById('typing-indicator');
-    if(t2) t2.remove();
-    appendChatBubble('(Connection error -- click "Start the game" to continue.)', 'partner');
-    state.chatDone=true;
-    var sb=document.getElementById('chat-start-btn');
-    if(sb) sb.style.display='block';
-  }
-}
-
-function appendChatBubble(text, side){
-  var msgs=document.getElementById('chat-messages');
-  if(!msgs) return;
-  var b=document.createElement('div');
-  b.className='chat-bubble '+side;
-  b.textContent=text;
-  msgs.appendChild(b);
-  msgs.scrollTop=msgs.scrollHeight;
-}
-
-function renderChat(){
-  var wrap=mkEl('div','fade-in chat-wrap');
-  var topBar=mkEl('div','top-bar'); var gl=mkEl('div','game-label'); gl.textContent='Prediction Game'; topBar.appendChild(gl); wrap.appendChild(topBar);
-
-  // Header
-  var hdr=mkEl('div','chat-header');
-  var portDiv=mkEl('div','chat-portrait');
-  if(eType()==='ai'){
-    portDiv.innerHTML=aiAvatarSVG();
-  } else {
-    var img=document.createElement('img');
-    img.src=CONFIG.alexPhotoURL; img.alt=eName();
-    img.onerror=function(){portDiv.innerHTML=alexFallbackSVG();};
-    portDiv.appendChild(img);
-  }
-  hdr.appendChild(portDiv);
-  var hdrText=mkEl('div');
-  var hdrName=mkEl('div','chat-header-name'); hdrName.textContent='Meet '+eName();
-  var hdrSub=mkEl('div','chat-header-sub');
-  hdrSub.textContent=eType()==='ai'?'AI Prediction System':'Your partner for today\'s game';
-  hdrText.appendChild(hdrName); hdrText.appendChild(hdrSub);
-  hdr.appendChild(hdrText);
-  wrap.appendChild(hdr);
-
-  // Instruction banner
-  var instr=mkEl('div');
-  instr.style.cssText='font-size:15px;color:#fff;text-align:center;padding:12px 20px;background:#4a7c59;font-style:normal;line-height:1.5;';
-  instr.textContent=eType()==='ai'
-    ? 'There currently is no human player we can pair you with. You have thus been paired with ARIA-3, an AI player that will be your partner in the game. Before we start, take a moment to exchange a few words with ARIA-3.'
-    : 'You have been paired with '+eName()+', who is your partner in the game. Before we start, take a moment to say hi to '+eName()+' and have a brief chat with him.';
-  wrap.appendChild(instr);
-  var msgs=mkEl('div','chat-messages'); msgs.id='chat-messages';
-  wrap.appendChild(msgs);
-
-  // Input row
-  var inputRow=mkEl('div','chat-input-row');
-  var input=mkEl('input'); input.type='text'; input.className='chat-input'; input.id='chat-input';
-  input.placeholder='Say something…'; input.maxLength=200;
-  var sendBtn=mkEl('button','chat-send'); sendBtn.id='chat-send'; sendBtn.textContent='Send';
-  sendBtn.disabled=true; // disabled until opening message appears
-
-  function doSend(){
-    var txt=input.value.trim();
-    if(!txt||sendBtn.disabled) return;
-    appendChatBubble(txt,'user');
-    input.value='';
-    sendChatMessage(txt);
-  }
-  sendBtn.onclick=doSend;
-  input.addEventListener('keydown',function(e){if(e.key==='Enter') doSend();});
-  inputRow.appendChild(input); inputRow.appendChild(sendBtn);
-  wrap.appendChild(inputRow);
-
-  // Hidden start button -- shown after chat ends
-  var startBtn=mkEl('button','btn btn-submit chat-start-btn'); startBtn.id='chat-start-btn';
-  startBtn.textContent='Start the game →'; startBtn.style.display='none';
-  startBtn.onclick=startGame;
-  wrap.appendChild(startBtn);
-
-  // Trigger opening message after short delay
-  setTimeout(function(){
-    var opening=getOpeningMessage();
-    state.chatHistory=[{role:'assistant',content:opening}];
-    appendChatBubble(opening,'partner');
-    sendBtn.disabled=false;
-    input.focus();
-  }, 600);
-
-  return wrap;
-}
-
 // ── GAME ──
 function renderGame(){
   var round=currentRound();
@@ -2171,8 +1802,8 @@ function renderGame(){
   // Agent portrait (always shown)
   var agentRow=mkEl('div','agent-row');
   var portWrap=mkEl('div','portrait-wrap');
-  var port = eType()==='ai' ? (function(){var p=mkEl('div','portrait'); p.innerHTML=(state.partnerSwitched?nexus7AvatarSVG():aiAvatarSVG()); return p;})() : alexPortrait(false);
-  var badge=mkEl('div','agent-badge '+eType()); badge.textContent='Humanoid social robot';
+  var port=mkEl('div','portrait'); port.innerHTML=aiAvatarSVG();
+  var badge=mkEl('div','agent-badge ai'); badge.textContent='Humanoid social robot';
   portWrap.appendChild(port); portWrap.appendChild(badge);
   var speechArea=mkEl('div','speech-area');
   var agentName=mkEl('div','agent-name'); agentName.textContent=eName();
@@ -2321,9 +1952,10 @@ function makeDivider(label){var d=mkEl('div','divider'); d.textContent=label; re
 function buildLikert(){
   var n=CONFIG.likertPoints;
   var questions=[
-    {key:'assertability',text:'Should '+eName()+' have said that?'},
-    {key:'justification',text:'Did '+eName()+' have good reasons for making this prediction?'}
+    {key:'assertability',text:'Should '+eName()+' have said that?'}
+  ,{key:'justification', text:'Did '+eName()+' have good reasons to say that?'}
   ];
+
   var group=mkEl('div','likert-group');
   questions.forEach(function(q){
     var item=mkEl('div','likert-item');
@@ -2351,6 +1983,12 @@ function selectRating(key,val){
     btn.classList.toggle('selected',parseInt(btn.getAttribute('data-val'))===val);
   });
   var nb=document.getElementById('next-btn'); if(nb)nb.disabled=!bothRated();
+}
+
+function bothRated(){
+  return state.inspectedDie &&
+  state.ratingPost.assertability != null &&
+  state.ratingPost.justification != null;
 }
 
 // Generate a completion code: 5 random digits + z (e.g. "48392z")
@@ -2446,6 +2084,7 @@ function doRoll(){
   setTimeout(function(){
     state.rolling=false; state.settling=false;
     state.outcome=finalOutcome;
+    state.ratingStartTime = Date.now();
     render();
   }, 1650+1300);
 }
@@ -2453,15 +2092,14 @@ function advanceRound(){
   var round=currentRound();
   state.ratings.push({
     roundId:round.id,dieLabel:round.dieLabel,prediction:round.prediction,
-    justification:round.justification,outcome:state.outcome,
+    outcome:state.outcome,
     assertability: state.ratingPost.assertability!=null ? state.ratingPost.assertability : null,
-    justification:  state.ratingPost.justification!=null  ? state.ratingPost.justification  : null,
+    decisionTimeMs: state.ratingStartTime ? Date.now() - state.ratingStartTime : null
   });
   state.roundIndex++;
-  // After round 3 (index was 2, now 3): show partner switch screen
   if(state.roundIndex>=ROUNDS.length){
-  state.screen='end';
-  render();
+    state.screen='end';
+    render();
   } else {
     startRound();
   }
@@ -2473,14 +2111,13 @@ function finishGame(){
   var params = new URLSearchParams();
   params.set('pid', pid);
   params.set('code', code);
-  params.set('condition', _condParam);
-  params.set('agentType', CONFIG.experimenterType);
+  params.set('condition', EXP_CONDITION);
+  params.set('agentType', 'ai');
   params.set('teamScore', state.teamScore);
-  params.set('partnerSwitched', state.partnerSwitched ? '1' : '0');
   params.set('ratings', JSON.stringify(state.ratings.map(function(r){
     return {
       assertability: r.assertability != null ? r.assertability : '',
-      justification:  r.justification  != null ? r.justification  : ''
+      decisionTimeMs: r.decisionTimeMs != null ? r.decisionTimeMs : ''
     };
   })));
   var scriptURL = 'https://script.google.com/macros/s/AKfycbyxT1DeXhnHCZm6txy7twP_dMSAcXloyXFyiKkd8bZ10_DTVZxHzXKC2cc9Ndn4QxCVdw/exec';
