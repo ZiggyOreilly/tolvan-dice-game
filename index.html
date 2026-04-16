@@ -509,7 +509,8 @@ function fillName(text){
 }
 
 function isMoralCondition(){
-  return EXP_CONDITION.indexOf('moral_') === 0;
+  // Moral conditions are paused for the first AI-only version.
+  return false;
 }
 
 function isCompetenceCondition(){
@@ -519,7 +520,12 @@ function isCompetenceCondition(){
 // ================================
 // CONDITION SETUP
 // ================================
-var CONDITION_KEYS = ['moral_positive','moral_negative','competence_positive','competence_negative'];
+var CONDITION_KEYS = [
+  'competence_positive_jtv_false',
+  'competence_positive_jtv_true',
+  'competence_negative_jtv_false',
+  'competence_negative_jtv_true'
+];
 var EXP_CONDITION = (getURLParam('condition') || '').toLowerCase();
 
 if(CONDITION_KEYS.indexOf(EXP_CONDITION) === -1){
@@ -527,6 +533,8 @@ if(CONDITION_KEYS.indexOf(EXP_CONDITION) === -1){
 }
 
 var CONDITION_TEXT = {
+  /*
+  Moral conditions are paused for the first AI-only version.
   moral_positive: {
     label: 'Moral Positive',
     traitDesc: 'Here are some examples of how {name} behaves in various situations:',
@@ -560,6 +568,7 @@ var CONDITION_TEXT = {
       { text: '{name} ignores someone who has expressed emotional distress', positive: false },
     ],
   },
+  */
 
   competence_positive: {
     label: 'Competence Positive',
@@ -596,14 +605,34 @@ var CONDITION_TEXT = {
   }
 };
 
-var CURRENT_CONDITION = CONDITION_TEXT[EXP_CONDITION];
+var CURRENT_CONDITION;
+
+CONDITION_TEXT.competence_positive_jtv_false = Object.assign({}, CONDITION_TEXT.competence_positive, {
+  label: 'Competence Positive / Justified Truth False',
+  justifiedTruthValue: false
+});
+CONDITION_TEXT.competence_positive_jtv_true = Object.assign({}, CONDITION_TEXT.competence_positive, {
+  label: 'Competence Positive / Justified Truth True',
+  justifiedTruthValue: true
+});
+CONDITION_TEXT.competence_negative_jtv_false = Object.assign({}, CONDITION_TEXT.competence_negative, {
+  label: 'Competence Negative / Justified Truth False',
+  justifiedTruthValue: false
+});
+CONDITION_TEXT.competence_negative_jtv_true = Object.assign({}, CONDITION_TEXT.competence_negative, {
+  label: 'Competence Negative / Justified Truth True',
+  justifiedTruthValue: true
+});
+
+CURRENT_CONDITION = CONDITION_TEXT[EXP_CONDITION];
 
 
 
 // ================================
 // GAME ROUNDS
-// Actual game rounds: AI always makes a justified but incorrect prediction.
-// It predicts the most likely face value, and the fixed outcome is always different.
+// Actual game rounds: AI always makes a justified prediction.
+// Justified Truth Value false: the fixed outcome is always different.
+// Justified Truth Value true: the fixed outcome always matches the prediction.
 // ================================
 function countFaceValues(faces){
   return faces.reduce(function(counts, value){
@@ -630,19 +659,25 @@ function mostLikelyFaceValueExcept(faces, excludedValue){
   }, candidates[0]);
 }
 
-function enforceJustifiedIncorrectRounds(rounds){
+function isJustifiedTruthValueTrue(){
+  return CURRENT_CONDITION && CURRENT_CONDITION.justifiedTruthValue === true;
+}
+
+function enforceJustifiedTruthRounds(rounds){
+  var truthValue = isJustifiedTruthValueTrue();
   return rounds.map(function(round){
     var prediction = mostLikelyFaceValue(round.faces);
-    var outcome = mostLikelyFaceValueExcept(round.faces, prediction);
+    var outcome = truthValue ? prediction : mostLikelyFaceValueExcept(round.faces, prediction);
     return Object.assign({}, round, {
       prediction: prediction,
       justification: 'justified',
+      justifiedTruthValue: truthValue,
       outcomeFixed: outcome
     });
   });
 }
 
-var ROUNDS = enforceJustifiedIncorrectRounds([
+var ROUNDS = enforceJustifiedTruthRounds([
   { id:1, dieLabel:'Die R1', faces:[3,3,3,3,2,2] },
   { id:2, dieLabel:'Die R2', faces:[5,5,5,1,2,3] },
   { id:3, dieLabel:'Die R3', faces:[6,6,6,6,6,2] },
@@ -2093,6 +2128,7 @@ function advanceRound(){
     roundId:round.id,dieLabel:round.dieLabel,prediction:round.prediction,
     outcome:state.outcome,
     predictionJustification:round.justification,
+    justifiedTruthValue:round.justifiedTruthValue,
     assertability: state.ratingPost.assertability!=null ? state.ratingPost.assertability : null,
     justification: state.ratingPost.justification!=null ? state.ratingPost.justification : null,
     decisionTimeMs: decisionTimeMs
@@ -2120,6 +2156,7 @@ function finishGame(){
     return {
       assertability: r.assertability != null ? r.assertability : '',
       predictionJustification: r.predictionJustification != null ? r.predictionJustification : '',
+      justifiedTruthValue: r.justifiedTruthValue === true ? 'true' : 'false',
       justification: r.justification != null ? r.justification : '',
       decisionTimeMs: r.decisionTimeMs != null ? r.decisionTimeMs : ''
     };

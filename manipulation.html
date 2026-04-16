@@ -123,7 +123,12 @@ body{
 // If no condition param is provided, randomly assign one and reload with it in the URL.
 // This means the page can be linked to without a condition param (e.g. for testing or
 // if Qualtrics is not handling randomisation) and it will self-randomise.
-var CONDITION_KEYS = ['moral_positive','moral_negative','competence_positive','competence_negative'];
+var CONDITION_KEYS = [
+  'competence_positive_jtv_false',
+  'competence_positive_jtv_true',
+  'competence_negative_jtv_false',
+  'competence_negative_jtv_true'
+];
 
 (function(){
   var existing = new URLSearchParams(window.location.search).get('condition');
@@ -140,11 +145,15 @@ var CONDITION_KEYS = ['moral_positive','moral_negative','competence_positive','c
 function getParam(k){ return new URLSearchParams(window.location.search).get(k) || ''; }
 
 // ─── CONDITION DEFINITIONS ───────────────────────────────────────────────────
-// condition param values:  moral_positive | moral_negative | competence_positive | competence_negative
+// condition param values for this first AI-only version:
+// competence_positive_jtv_false | competence_positive_jtv_true |
+// competence_negative_jtv_false | competence_negative_jtv_true
 // These are passed in from Qualtrics as ?condition=X&pid=Y
 // The page then forwards to index.html?condition=X&pid=Y (with the original condition intact)
 
 var CONDITIONS = {
+  /*
+  Moral conditions are paused for the first AI-only version.
 
   moral_positive: {
     label: 'Moral Positive',
@@ -203,6 +212,7 @@ var CONDITIONS = {
     correctFeedback: 'Correct. Tolvan has high negative morality — insincere, dishonest, self-serving, untrustworthy and disrespectful.',
     wrongFeedback: 'Please re-read the description above and try again.',
   },
+  */
 
   competence_positive: {
     label: 'Competence Positive',
@@ -264,22 +274,37 @@ var CONDITIONS = {
 };
 
 // ─── STATE ───────────────────────────────────────────────────────────────────
-var conditionKey = getParam('condition') || 'moral_positive';
+CONDITIONS.competence_positive_jtv_false = Object.assign({}, CONDITIONS.competence_positive, {
+  label: 'Competence Positive / Justified Truth False',
+  justifiedTruthValue: false
+});
+CONDITIONS.competence_positive_jtv_true = Object.assign({}, CONDITIONS.competence_positive, {
+  label: 'Competence Positive / Justified Truth True',
+  justifiedTruthValue: true
+});
+CONDITIONS.competence_negative_jtv_false = Object.assign({}, CONDITIONS.competence_negative, {
+  label: 'Competence Negative / Justified Truth False',
+  justifiedTruthValue: false
+});
+CONDITIONS.competence_negative_jtv_true = Object.assign({}, CONDITIONS.competence_negative, {
+  label: 'Competence Negative / Justified Truth True',
+  justifiedTruthValue: true
+});
+
+var conditionKey = getParam('condition') || 'competence_positive_jtv_false';
 var pid = getParam('pid') || '';
 var gameCondition = getParam('game_condition') || conditionKey; // forwarded to game
 
 // Map manipulation condition → game condition param
-// The game uses: condition=human | condition=human_unreasonable | condition=ai | condition=ai_unreasonable
-// For this study we always use 'human' as the game partner type
-// (the manipulation is the between-subjects variable, handled here)
+// This first version is AI-only and preserves the 2x2 competence x justified-truth design.
 var GAME_CONDITION_MAP = {
-  moral_positive:      'human',
-  moral_negative:      'human',
-  competence_positive: 'human',
-  competence_negative: 'human',
+  competence_positive_jtv_false: 'competence_positive_jtv_false',
+  competence_positive_jtv_true: 'competence_positive_jtv_true',
+  competence_negative_jtv_false: 'competence_negative_jtv_false',
+  competence_negative_jtv_true: 'competence_negative_jtv_true',
 };
 
-var config = CONDITIONS[conditionKey] || CONDITIONS['moral_positive'];
+var config = CONDITIONS[conditionKey] || CONDITIONS['competence_positive_jtv_false'];
 var selectedAnswer = null;
 var checkPassed = false;
 var attempts = 0;
