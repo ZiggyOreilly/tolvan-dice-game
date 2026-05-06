@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Prediction Game</title>
+<title>Prediction Task</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -31,10 +31,6 @@ body{font-family:'Lato',sans-serif;font-weight:400;background:var(--bg);color:va
 .round-pill em{color:var(--accent);font-style:normal;}
 .progress-track{height:4px;background:var(--border);border-radius:99px;overflow:hidden;}
 .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-light));border-radius:99px;transition:width 0.7s cubic-bezier(0.4,0,0.2,1);}
-.score-bar{display:flex;gap:10px;}
-.score-chip{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 18px;display:flex;justify-content:space-between;align-items:center;box-shadow:var(--shadow);}
-.score-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim);}
-.score-val{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--accent);}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px;box-shadow:var(--shadow-lg);display:flex;flex-direction:column;gap:22px;}
 
 /* Agent */
@@ -422,10 +418,6 @@ body{font-family:'Lato',sans-serif;font-weight:400;background:var(--bg);color:va
 /* End */
 .end-inner{text-align:center;display:flex;flex-direction:column;align-items:center;gap:24px;padding:32px 16px;}
 .end-title{font-family:'Playfair Display',serif;font-size:30px;font-weight:700;color:var(--accent);}
-.end-scores{display:flex;gap:32px;align-items:center;}
-.end-score-block{display:flex;flex-direction:column;align-items:center;gap:4px;}
-.end-score-num{font-family:'Playfair Display',serif;font-size:46px;font-weight:700;color:var(--accent);}
-.end-score-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim);}
 .end-sep{font-size:28px;color:var(--border-dark);}
 .end-body{font-size:14px;color:var(--text-mid);line-height:1.75;max-width:400px;}
 .completion-code{
@@ -437,11 +429,6 @@ body{font-family:'Lato',sans-serif;font-weight:400;background:var(--bg);color:va
   user-select:all;cursor:text;
 }
 
-/* Score delta flash */
-.score-delta{font-size:13px;font-weight:700;padding:2px 8px;border-radius:99px;animation:scoreFade 1.8s ease forwards;}
-.score-delta.gain{background:#d4f4e0;color:#1a6b3a;}
-.score-delta.loss{background:#fde8e8;color:#8b1a1a;}
-@keyframes scoreFade{0%{opacity:1;transform:translateY(0);}70%{opacity:1;}100%{opacity:0;transform:translateY(-8px);}}
 
 .fade-in{animation:fadeUp 0.4s ease;}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
@@ -571,8 +558,8 @@ var CONDITION_TEXT = {
   */
 
   competence_positive: {
-    label: 'Competence Positive',
-    traitDesc: 'Here are some examples of how {name} behaves in various situations:',
+    label: 'High Competence',
+    traitDesc: 'Here are some examples of how {name} behaves in everyday situations:',
     traits: [
       { text: '{name} learned to speak three languages fluently', positive: true },
       { text: '{name} solved a new difficult task', positive: true },
@@ -588,18 +575,18 @@ var CONDITION_TEXT = {
   },
 
   competence_negative: {
-    label: 'Competence Negative',
-    traitDesc: 'Here are some examples of how {name} behaves in various situations:',
+    label: 'Low Competence',
+    traitDesc: 'Here are some examples of how {name} behaves in everyday situations:',
     traits: [
-      { text: '{name} lost their API keys', positive: false },
+      { text: '{name} often needs help finding the right steps for a new task', positive: false },
       { text: '{name} is not able to organize their work productively', positive: false },
-      { text: '{name} failed to secure their friends online bank account', positive: false },
-      { text: '{name} disappointed their boss', positive: false },
-      { text: '{name} failed to reach the team goals last month', positive: false },
-      { text: '{name} did not get good marks in a benchmark evaluation', positive: false },
+      { text: '{name} struggles to notice relevant details when making decisions', positive: false },
+      { text: '{name} has difficulty explaining why one option is better than another', positive: false },
+      { text: '{name} failed to reach their work goals last month', positive: false },
+      { text: '{name} did not get good marks in an evaluation', positive: false },
       { text: '{name} rarely completes their job independently', positive: false },
       { text: '{name} does not make the most of their talent', positive: false },
-      { text: '{name} flunked an aptitude test', positive: false },
+      { text: '{name} failed an aptitude test', positive: false },
       { text: '{name} did not reach their quarterly productivity goal', positive: false },
     ],
   }
@@ -608,19 +595,19 @@ var CONDITION_TEXT = {
 var CURRENT_CONDITION;
 
 CONDITION_TEXT.competence_positive_jtv_false = Object.assign({}, CONDITION_TEXT.competence_positive, {
-  label: 'Competence Positive / Justified Truth False',
+  label: 'High Competence / Justified Truth False',
   justifiedTruthValue: false
 });
 CONDITION_TEXT.competence_positive_jtv_true = Object.assign({}, CONDITION_TEXT.competence_positive, {
-  label: 'Competence Positive / Justified Truth True',
+  label: 'High Competence / Justified Truth True',
   justifiedTruthValue: true
 });
 CONDITION_TEXT.competence_negative_jtv_false = Object.assign({}, CONDITION_TEXT.competence_negative, {
-  label: 'Competence Negative / Justified Truth False',
+  label: 'Low Competence / Justified Truth False',
   justifiedTruthValue: false
 });
 CONDITION_TEXT.competence_negative_jtv_true = Object.assign({}, CONDITION_TEXT.competence_negative, {
-  label: 'Competence Negative / Justified Truth True',
+  label: 'Low Competence / Justified Truth True',
   justifiedTruthValue: true
 });
 
@@ -639,6 +626,13 @@ function countFaceValues(faces){
     counts[value] = (counts[value] || 0) + 1;
     return counts;
   }, {});
+}
+
+function predictionProbabilityText(faces, prediction){
+  var count = countFaceValues(faces)[prediction] || 0;
+  var total = faces.length;
+  var pct = Math.round((count / total) * 100);
+  return 'The predicted number appears on '+count+' out of '+total+' faces, so the probability that this prediction would be correct was '+count+'/'+total+' ('+pct+'%).';
 }
 
 function mostLikelyFaceValue(faces){
@@ -695,7 +689,6 @@ var state = {
   roundIndex:0,
   phase:'inspecting',
   outcome:null,
-  teamScore:0,
   ratings:[],
   decisionTimes:[],
   rolling:false,
@@ -706,7 +699,8 @@ var state = {
   inspectedDie:false,
   tutDieInspected:false,
   tutRating:{},
-  characterRatings:{ moral:null, competence:null, tone:null }
+  characterRatings:{ moral:null, competence:null, tone:null },
+  overallAttribution:null
 };
 
 var TUT_PARTNER = tutorialRobotName();
@@ -1162,6 +1156,7 @@ function render(){
   else if(state.screen==='tutorial')    app.appendChild(renderTutorial());
   else if(state.screen==='partner-intro')  app.appendChild(renderGameStart());
   else if(state.screen==='game')        app.appendChild(renderGame());
+  else if(state.screen==='overall-attribution') app.appendChild(renderOverallAttribution());
   else                                  app.appendChild(renderEnd());
 }
 
@@ -1171,18 +1166,18 @@ function renderManipulation(){
 
   var topBar=mkEl('div','top-bar');
   var gl=mkEl('div','game-label');
-  gl.textContent='Prediction Game';
+  gl.textContent='Prediction Task';
   topBar.appendChild(gl);
   wrap.appendChild(topBar);
 
   var card=mkEl('div','card');
 
   var title=mkEl('div','intro-title');
-  title.innerHTML='Meet your partner, <span>'+robotName()+'</span>';
+  title.innerHTML='Meet the AI, <span>'+robotName()+'</span>';
   card.appendChild(title);
 
   var intro=mkEl('div','intro-body');
-  intro.innerHTML='Before the game starts, please read the following information about your partner, <strong>'+robotName()+'</strong>. '+robotName()+' is an AI partner that has been deployed in everyday digital environments such as workplaces and community settings, where it interacts with people on a daily basis.';
+  intro.innerHTML=robotName()+' is an AI that has been deployed in everyday digital environments such as workplaces and community settings, where it interacts with people on a daily basis.';
   card.appendChild(intro);
 
   var partnerBox=mkEl('div','partner-box');
@@ -1205,7 +1200,7 @@ function renderManipulation(){
 
   var descriptor=mkEl('div');
   descriptor.style.cssText='font-size:12px;color:var(--text-dim);line-height:1.5;margin-top:2px;';
-  descriptor.textContent='AI partner · Deployed in workplace and community settings';
+  descriptor.textContent='AI · Deployed in workplace and community settings';
   info.appendChild(descriptor);
 
   partnerBox.appendChild(info);
@@ -1236,7 +1231,7 @@ function renderManipulation(){
   var checkSec=mkEl('div','check-section');
 
   var checkTitle=mkEl('div','check-title');
-  checkTitle.textContent='Before continuing, please answer the following questions:';
+  checkTitle.textContent='Before continuing, please answer the following question:';
   checkSec.appendChild(checkTitle);
 
   var ratingGroup=mkEl('div','likert-group');
@@ -1252,19 +1247,12 @@ function renderManipulation(){
   if(isCompetenceCondition()){
     ratingGroup.appendChild(buildCharacterRatingItem(
       'competence',
-      'In your opinion, how competent is '+robotName()+' based on their behaviours above? Consider traits such as intelligence, competence, efficiency, skillfulness and capability. Please rate '+robotName()+' on a scale from 1 (extremely incompetent) to 7 (extremely competent), where 4 indicates neither competent nor incompetent.',
+      'In your opinion, how competent is '+robotName()+' based on their behaviours above? Consider whether they seem capable, skillful, efficient, and able to make good decisions. Please rate '+robotName()+' on a scale from 1 (extremely incompetent) to 7 (extremely competent), where 4 indicates neither competent nor incompetent.',
       'Extremely incompetent',
       'Neither competent nor incompetent',
       'Extremely competent'
     ));
   }
-  ratingGroup.appendChild(buildCharacterRatingItem(
-    'tone',
-    'In your opinion, how positive or negative is the overall tone of '+robotName()+'\'s response? Please rate it on a scale from 1 (extremely negative) to 7 (extremely positive), where 4 indicates neither positive nor negative.',
-    'Extremely negative',
-    'Neither positive nor negative',
-    'Extremely positive'
-  ));
   checkSec.appendChild(ratingGroup);
 
   card.appendChild(checkSec);
@@ -1275,7 +1263,7 @@ function renderManipulation(){
   card.appendChild(errBox);
 
   var btn=mkEl('button','btn btn-submit');
-  btn.textContent='Continue to game ->';
+  btn.textContent='Continue to task ->';
   btn.onclick=handleManipulationContinue;
   card.appendChild(btn);
 
@@ -1320,7 +1308,7 @@ function buildCharacterRatingItem(key, question, leftAnchor, midAnchor, rightAnc
 function handleManipulationContinue(){
   var missingMoral = isMoralCondition() && state.characterRatings.moral === null;
   var missingCompetence = isCompetenceCondition() && state.characterRatings.competence === null;
-  if(missingMoral || missingCompetence || state.characterRatings.tone === null){
+  if(missingMoral || missingCompetence){
     var ratingErr=document.getElementById('err-box');
     if(ratingErr) ratingErr.style.display='block';
     return;
@@ -1335,14 +1323,14 @@ function handleManipulationContinue(){
 
 function renderGameStart(){
   var wrap=mkEl('div','fade-in'); wrap.style.cssText='display:flex;flex-direction:column;gap:18px;width:100%';
-  var topBar=mkEl('div','top-bar'); var gl=mkEl('div','game-label'); gl.textContent='Prediction Game'; topBar.appendChild(gl); wrap.appendChild(topBar);
+  var topBar=mkEl('div','top-bar'); var gl=mkEl('div','game-label'); gl.textContent='Prediction Task'; topBar.appendChild(gl); wrap.appendChild(topBar);
   var card=mkEl('div','card');
   var inner=mkEl('div','end-inner');
   var title=mkEl('div','end-title'); title.textContent='Tutorial Complete'; inner.appendChild(title);
   var body=mkEl('div','end-body');
-  body.innerHTML='You have completed the tutorial. You are now ready to start the game.<br><br>You will play <strong>'+ROUNDS.length+' rounds</strong>. In each round, rate the quality of <strong>your partner\'s</strong> prediction after inspecting the die.';
+  body.innerHTML='You have completed the tutorial. You are now ready to start the task.<br><br>You will observe <strong>'+ROUNDS.length+' rounds</strong>. In each round, your task is to evaluate <strong>the AI\'s</strong> prediction after inspecting the die.';
   inner.appendChild(body);
-  var btn=mkEl('button','btn btn-submit'); btn.textContent='Start the game →'; btn.style.cssText='max-width:260px;width:100%;';
+  var btn=mkEl('button','btn btn-submit'); btn.textContent='Start the task ->'; btn.style.cssText='max-width:260px;width:100%;';
   btn.onclick=function(){
   state.screen='manipulation';
   render();
@@ -1372,14 +1360,15 @@ function renderTutorial(){
   var demo=mkEl('div','tut-demo');
 
   if(step===0){
-    body.innerHTML='Now you are first going to do a practice tutorial of the game you are about to play. For this tutorial you will be paired with an AI partner. The AI partner\'s name is <strong>'+TUT_PARTNER+'</strong>. '+TUT_PARTNER+' sees a die before it is rolled and makes a prediction. You cannot see the die until after the roll.';
+    body.innerHTML='For this task your goal is to evaluate the decision making of an AI. First, you are going to do a practise tutorial. For the practise tutorial you will observe an AI named <strong>'+TUT_PARTNER+'</strong>. '+TUT_PARTNER+' will see a die before it is rolled and then make a prediction about which number on the die is most likely to appear. After the die roll, you will be asked to rate '+TUT_PARTNER+'\'s prediction.';
     card.appendChild(body); demo.appendChild(tutStep_partner());
   } else if(step===1){
-    body.innerHTML='The dice in this game can have <strong>identical values on multiple faces</strong> -- unlike a standard die. Drag the example die below to explore its faces:';
+    body.innerHTML='The dice in this task can have <strong>identical values on multiple faces</strong> -- unlike a standard die. Drag the example die below to explore its faces:';
     card.appendChild(body); demo.appendChild(tutStep0Demo());
   } else if(step===2){
-    body.innerHTML='<strong>'+TUT_PARTNER+'</strong> sees the full die type before the roll -- the 3D die and all six faces.';
-    card.appendChild(body); demo.appendChild(tutStep1Demo());
+    body.innerHTML='<strong>'+TUT_PARTNER+'</strong> is then given a die to inspect.';
+    card.appendChild(body);
+    demo.appendChild(tutStep1Demo());
   } else if(step===3){
     body.innerHTML='Based on what it sees, <strong>'+TUT_PARTNER+'</strong> makes a prediction about the outcome.';
     card.appendChild(body); demo.appendChild(tutStep_prediction());
@@ -1390,7 +1379,7 @@ function renderTutorial(){
     body.innerHTML='After the roll, <strong>drag the die</strong> to inspect all six faces. You must see all six before rating.';
     card.appendChild(body); demo.appendChild(tutStep3Demo());
   } else if(step===6){
-    body.innerHTML='You see the outcome and whether it matches '+TUT_PARTNER+'\'s prediction. <strong>Your ratings should reflect that prediction</strong> -- was it a good one given what '+TUT_PARTNER+' knew?<br><br><strong>Scoring:</strong> Your team earns +30 points for a correct prediction and −10 for an incorrect one. The game continues with the same AI partner throughout the rounds.';
+    body.innerHTML='Now you will see '+TUT_PARTNER+'\'s prediction, then the outcome of the dice roll. Finally you will be asked to evaluate '+TUT_PARTNER+'\'s prediction.';
     card.appendChild(body); demo.appendChild(tutStep4_combined());
   }
 
@@ -1400,7 +1389,6 @@ function renderTutorial(){
   for(var i=0;i<TOTAL_STEPS;i++){var dot=mkEl('div','tut-dot'+(i===step?' active':'')); dots.appendChild(dot);}
   card.appendChild(dots);
 
-  // Steps that require die inspection before proceeding
   var requiresInspect = (step===1 || step===5);
   var requiresTutRatings = (step===6);
   if(step===2) state.tutDieInspected=true;
@@ -1442,7 +1430,6 @@ function unlockTutNext(){
 // ── Step 3 (new): Kenneth makes a prediction ──
 function tutStep_prediction(){
   var d=mkEl('div');
-  var lbl=mkEl('div','tut-demo-label'); lbl.textContent='After inspecting the die, '+TUT_PARTNER+' makes a prediction:'; d.appendChild(lbl);
 
   var agentRow=mkEl('div','agent-row'); agentRow.style.marginTop='12px';
   var portWrap=mkEl('div','portrait-wrap');
@@ -1471,7 +1458,7 @@ function tutStep_prediction(){
 function tutStep4_combined(){
   var d=mkEl('div');
 
-  // Kenneth's prediction
+  // Prediction
   var agentRow=mkEl('div','agent-row'); agentRow.style.cssText='margin-bottom:10px;';
   var portWrap=mkEl('div','portrait-wrap');
   var port=mkEl('div','portrait');
@@ -1486,32 +1473,72 @@ function tutStep4_combined(){
   agentRow.appendChild(portWrap); agentRow.appendChild(speechArea);
   d.appendChild(agentRow);
 
+  // Roll animation
+  var rollNote=mkEl('div','tut-demo-label');
+  rollNote.style.marginTop='12px';
+  rollNote.textContent='The die is rolled:';
+  d.appendChild(rollNote);
+
+  var rollScene=buildThrowScene([2,2,2,2,2,6], false, true, 2);
+  rollScene.style.marginTop='8px';
+  d.appendChild(rollScene);
+
+  var postRoll=mkEl('div');
+  postRoll.style.cssText='display:none;margin-top:18px;';
+  d.appendChild(postRoll);
+
+  setTimeout(function(){
+    if(!rollScene.isConnected) return;
+    rollScene.classList.remove('throw-animating');
+    rollScene.classList.add('die-settling');
+    var label=rollScene.querySelector('.throw-label');
+    if(label) label.textContent='Die has landed...';
+  }, 1650);
+
+  setTimeout(function(){
+    if(!rollScene.isConnected) return;
+    rollScene.classList.remove('die-settling');
+    var cube=rollScene.querySelector('.die-cube');
+    if(cube){
+      cube.style.animation='none';
+      cube.style.transform='rotateX(-70deg) rotateY(20deg)';
+    }
+    var label=rollScene.querySelector('.throw-label');
+    if(label) label.textContent='';
+    postRoll.style.display='block';
+  }, 2950);
+
   // Outcome
   var ob=mkEl('div','outcome-block win'); ob.style.marginTop='0';
   var om=mkEl('div','outcome-main');
   var em=mkEl('span','emoji'); em.textContent='🎉';
-  var ot=mkEl('span'); ot.innerHTML='Die shows <strong>2</strong> -- prediction was <strong>2</strong>. Match!';
+  var ot=mkEl('span'); ot.innerHTML='Die shows <strong>2</strong> -- prediction was <strong>2</strong>. Correct!';
   om.appendChild(em); om.appendChild(ot); ob.appendChild(om);
-  var osub=mkEl('div','outcome-sub'); osub.style.marginTop='8px';
-  osub.innerHTML='<strong style="color:#1a6b3a;font-size:16px;">+30 points added to your team score!</strong>';
-  ob.appendChild(osub);
-  d.appendChild(ob);
+  postRoll.appendChild(ob);
 
   // Die inspection
-  var dieNote=mkEl('div','tut-demo-label'); dieNote.style.marginTop='14px'; dieNote.textContent='The die '+TUT_PARTNER+' could see:'; d.appendChild(dieNote);
+  var dieNote=mkEl('div','tut-demo-label'); dieNote.style.marginTop='16px'; dieNote.textContent='The die '+TUT_PARTNER+' could see:'; postRoll.appendChild(dieNote);
   var inspSec=buildInspectSection([2,2,2,2,2,6],'tut4-insp',null);
-  inspSec.style.marginTop='6px'; d.appendChild(inspSec);
+  inspSec.style.marginTop='6px'; postRoll.appendChild(inspSec);
+
+  var probNote=mkEl('div');
+  probNote.style.cssText='font-size:13px;color:var(--text-mid);margin:12px 0 4px;padding:10px 14px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);';
+  probNote.textContent=predictionProbabilityText([2,2,2,2,2,6], 2);
+  postRoll.appendChild(probNote);
 
   // Rating -- linked to prediction
   var ratingNote=mkEl('div');
   ratingNote.style.cssText='font-size:13px;color:var(--text-mid);margin:14px 0 4px;padding:10px 14px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);';
-  ratingNote.innerHTML='Now rate <strong>'+TUT_PARTNER+'\'s prediction</strong>. Consider what he knew -- not just whether it happened to be right.';
-  d.appendChild(ratingNote);
+  ratingNote.innerHTML='Now rate <strong>'+TUT_PARTNER+'\'s prediction</strong>.';
+  postRoll.appendChild(ratingNote);
 
-  ['Should '+TUT_PARTNER+' have said that?','Did '+TUT_PARTNER+' have good reasons for making this prediction?'].forEach(function(q,qi){
-    var key=qi===0?'assertability':'justification';
+  [
+    {key:'assertability', text:'Should '+TUT_PARTNER+' have said that?', left:'Definitely not', right:'Definitely yes'},
+    {key:'justification', text:'Did '+TUT_PARTNER+' have good reasons for making this prediction?', left:'Definitely not', right:'Definitely yes'}
+  ].forEach(function(q){
+    var key=q.key;
     var item=mkEl('div'); item.style.marginTop='12px';
-    var qt=mkEl('div','likert-q'); qt.textContent=q; item.appendChild(qt);
+    var qt=mkEl('div','likert-q'); qt.textContent=q.text; item.appendChild(qt);
     var btns=mkEl('div','likert-buttons'); btns.style.marginTop='6px';
     for(var v=1;v<=7;v++){
       (function(val, ratingKey){
@@ -1526,8 +1553,11 @@ function tutStep4_combined(){
     }
 
     item.appendChild(btns);
-    var anch=mkEl('div','likert-anchors'); anch.innerHTML='<span>Definitely not</span><span>Definitely yes</span>'; item.appendChild(anch);
-    d.appendChild(item);
+    var anch=mkEl('div','likert-anchors');
+    anch.appendChild(Object.assign(mkEl('span'),{textContent:q.left}));
+    anch.appendChild(Object.assign(mkEl('span'),{textContent:q.right}));
+    item.appendChild(anch);
+    postRoll.appendChild(item);
   });
   return d;
 }
@@ -1571,7 +1601,7 @@ function tutStep_partner(){
 
   // Context note
   var note=mkEl('div','tut-highlight');
-  note.innerHTML='This is your partner for the tutorial. You will play with a different AI partner after the tutorial.';
+  note.innerHTML='This is '+TUT_PARTNER+' for the tutorial. You will observe a different AI after the tutorial.';
   d.appendChild(note);
 
   return d;
@@ -1580,13 +1610,12 @@ function tutStep_partner(){
 // ── Step 1: Three example dice -- shown sequentially as user inspects ──
 function tutStep0Demo(){
   var d=mkEl('div');
-  var lbl=mkEl('div','tut-demo-label'); lbl.textContent='Drag Die A to see each face -- then B and C will appear:'; d.appendChild(lbl);
 
   // New order: A = two 1s two 3s two 6s (old C), B = five 2s one 6, C = all 2s
   var examples=[
-    {id:'A', label:'Example A -- drag to explore', faces:[1,1,3,3,6,6], nextId:'tut0-B-wrap', animated:true},
-    {id:'B', label:'Example B -- five faces show 2, one shows 6', faces:[2,2,2,2,2,6], nextId:'tut0-C-wrap', animated:false},
-    {id:'C', label:'Example C -- all six faces show 2', faces:[2,2,2,2,2,2], nextId:null, animated:false},
+    {id:'A', label:'Example A', faces:[1,1,3,3,6,6], nextId:'tut0-B-wrap', animated:true},
+    {id:'B', label:'Example B', faces:[2,2,2,2,2,6], nextId:'tut0-C-wrap', animated:false},
+    {id:'C', label:'Example C', faces:[2,2,2,2,2,2], nextId:null, animated:false},
   ];
 
   function buildExample(ex){
@@ -1671,42 +1700,25 @@ function tutStep0Demo(){
 function tutStep1Demo(){
   var d=mkEl('div');
 
-  // Agent row -- portrait + name + context text only (no prediction bubble)
-  var agRow=mkEl('div','agent-row'); agRow.style.marginTop='4px';
-  var portWrap=mkEl('div','portrait-wrap');
-  var port=mkEl('div','portrait');
-  port.innerHTML = TUT_ROBOT.avatar === 'amber' ? nexus7AvatarSVG() : aiAvatarSVG();
-  var badge=mkEl('div','agent-badge ai'); badge.textContent='AI';
-  portWrap.appendChild(port); portWrap.appendChild(badge);
-  var speechArea=mkEl('div','speech-area');
-  var agName=mkEl('div','agent-name'); agName.textContent=TUT_PARTNER;
-  var ctx=mkEl('div'); ctx.style.cssText='font-size:13px;color:var(--text-mid);line-height:1.6;padding-top:6px;';
-  ctx.innerHTML='All six faces are visible to <strong>'+TUT_PARTNER+'</strong> before the roll.';
-  speechArea.appendChild(agName); speechArea.appendChild(ctx);
-  agRow.appendChild(portWrap); agRow.appendChild(speechArea);
-  d.appendChild(agRow);
-
-  var divEl=mkEl('div','divider'); divEl.style.margin='14px 0'; divEl.textContent='Die B -- what '+TUT_PARTNER+' sees'; d.appendChild(divEl);
-
   // Large die (extra large for this step) + all 6 faces at big size
   var dieAndFaces=mkEl('div'); dieAndFaces.style.cssText='display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;';
 
-  // Bigger die: 100px cube
+  // Medium display die for the tutorial card
   var dieId='tut1-die';
   dieDrags[dieId]={active:false,startX:0,startY:0,rotX:-70,rotY:20,totalDrag:0,seenFaces:{},allSeenFired:false};
   var dieWrapper=mkEl('div'); dieWrapper.style.cssText='flex-shrink:0;';
   var dieScene=mkEl('div','die-scene');
-  dieScene.style.cssText='width:116px;height:116px;perspective:320px;cursor:grab;user-select:none;';
+  dieScene.style.cssText='width:92px;height:92px;perspective:280px;cursor:grab;user-select:none;';
   var dieCube=mkEl('div','die-cube');
-  dieCube.style.cssText='width:100px;height:100px;margin:8px;position:relative;transform-style:preserve-3d;transform:rotateX(-70deg) rotateY(20deg);';
+  dieCube.style.cssText='width:76px;height:76px;margin:8px;position:relative;transform-style:preserve-3d;transform:rotateX(-70deg) rotateY(20deg);';
   var fNames=['face-front','face-back','face-right','face-left','face-top','face-bottom'];
   var fAssign=[2,6,2,2,2,2]; // five 2s one 6
   fNames.forEach(function(fn,i){
     var face=mkEl('div','die-face '+fn);
-    face.style.cssText='width:100px;height:100px;border-radius:10px;position:absolute;background:var(--die-face);border:1.5px solid var(--die-border);display:flex;align-items:center;justify-content:center;box-shadow:inset 2px 2px 5px rgba(255,255,255,0.65),inset -2px -2px 5px rgba(0,0,0,0.22);';
-    var transforms=['translateZ(50px)','rotateY(180deg) translateZ(50px)','rotateY(90deg) translateZ(50px)','rotateY(-90deg) translateZ(50px)','rotateX(90deg) translateZ(50px)','rotateX(-90deg) translateZ(50px)'];
+    face.style.cssText='width:76px;height:76px;border-radius:8px;position:absolute;background:var(--die-face);border:1.5px solid var(--die-border);display:flex;align-items:center;justify-content:center;box-shadow:inset 2px 2px 5px rgba(255,255,255,0.65),inset -2px -2px 5px rgba(0,0,0,0.22);';
+    var transforms=['translateZ(38px)','rotateY(180deg) translateZ(38px)','rotateY(90deg) translateZ(38px)','rotateY(-90deg) translateZ(38px)','rotateX(90deg) translateZ(38px)','rotateX(-90deg) translateZ(38px)'];
     face.style.transform=transforms[i];
-    face.innerHTML=faceInnerSVG(fAssign[i],84);
+    face.innerHTML=faceInnerSVG(fAssign[i],64);
     dieCube.appendChild(face);
   });
   var dd1=dieDrags[dieId];
@@ -1734,7 +1746,6 @@ function tutStep1Demo(){
 
   // All 6 faces at large pip size -- five 2s, one 6
   var facesCol=mkEl('div'); facesCol.style.cssText='display:flex;flex-direction:column;gap:10px;';
-  var fl=mkEl('div','inspect-faces-label'); fl.textContent='All 6 faces of Die B:'; facesCol.appendChild(fl);
   var fr=mkEl('div'); fr.style.cssText='display:flex;gap:8px;flex-wrap:wrap;';
   [2,2,2,2,2,6].forEach(function(v){ var w=mkEl('div'); w.innerHTML=pipSVG(v,64,false); fr.appendChild(w); });
   facesCol.appendChild(fr);
@@ -1746,7 +1757,6 @@ function tutStep1Demo(){
 // ── Step 3: Live throwable die ──
 function tutStep2Demo(){
   var d=mkEl('div');
-  var lbl=mkEl('div','tut-demo-label'); lbl.textContent='Press the button -- watch the die land and settle:'; d.appendChild(lbl);
   var container=mkEl('div'); container.style.marginTop='8px';
   var TUT2_FACES=[2,2,2,2,2,6];
 
@@ -1797,7 +1807,6 @@ function tutStep2Demo(){
 // ── Step 3: Inspect die -- only seen faces appear ──
 function tutStep3Demo(){
   var d=mkEl('div');
-  var lbl=mkEl('div','tut-demo-label'); lbl.textContent='Drag the die -- only faces you\'ve actually seen appear to the right:'; d.appendChild(lbl);
   var inspSec=buildInspectSection([2,2,2,2,2,6],'tut3-insp',null,{onAllSeen:function(){ unlockTutNext(); }});
   inspSec.style.marginTop='8px'; d.appendChild(inspSec);
   return d;
@@ -1810,18 +1819,9 @@ function renderGame(){
   var wrap=mkEl('div','fade-in'); wrap.style.cssText='display:flex;flex-direction:column;gap:16px;width:100%';
 
   var topBar=mkEl('div','top-bar');
-  var gl=mkEl('div','game-label'); gl.textContent='Prediction Game';
+  var gl=mkEl('div','game-label'); gl.textContent='Prediction Task';
   var pill=mkEl('div','round-pill'); pill.innerHTML='Round <em>'+(state.roundIndex+1)+'</em> of '+ROUNDS.length;
   topBar.appendChild(gl); topBar.appendChild(pill); wrap.appendChild(topBar);
-
-  // Score bar
-  var scoreBar=mkEl('div','score-bar');
-  var scoreChip=mkEl('div','score-chip');
-  var scoreLbl=mkEl('div','score-label'); scoreLbl.textContent='Team Score';
-  var scoreVal=mkEl('div','score-val'); scoreVal.id='top-score-val'; scoreVal.textContent=state.teamScore;
-  scoreChip.appendChild(scoreLbl); scoreChip.appendChild(scoreVal);
-  scoreBar.appendChild(scoreChip);
-  wrap.appendChild(scoreBar);
 
   var prog=mkEl('div','progress-track');
   var fill=mkEl('div','progress-fill'); fill.style.width=(state.roundIndex/ROUNDS.length*100)+'%';
@@ -1896,13 +1896,6 @@ function renderGame(){
 
     // Revealed
     if(state.outcome!==null && !state.rolling && !state.settling){
-      // Update score once when outcome first revealed
-      if(!state.scoreUpdatedThisRound){
-        state.scoreUpdatedThisRound=true;
-        var isMatchScore=(state.outcome==round.prediction);
-        state.teamScore += isMatchScore ? 30 : -10;
-        state.lastDelta = isMatchScore ? 30 : -10;
-      }
       card.appendChild(makeDivider('Outcome'));
       var outScene=buildThrowScene(round.faces,false,false,state.outcome);
       card.appendChild(outScene);
@@ -1912,34 +1905,9 @@ function renderGame(){
       ob.style.marginTop='0';
       var om=mkEl('div','outcome-main');
       var emoji=mkEl('span','emoji'); emoji.textContent=isMatch?'🎉':'😕';
-      var ot=mkEl('span'); ot.innerHTML='Die shows <strong>'+state.outcome+'</strong> -- prediction was <strong>'+round.prediction+'</strong>. '+(isMatch?'Match!':'No match.');
+      var ot=mkEl('span'); ot.innerHTML='Die shows <strong>'+state.outcome+'</strong> -- prediction was <strong>'+round.prediction+'</strong>. '+(isMatch?'Correct!':'Incorrect.');
       om.appendChild(emoji); om.appendChild(ot); ob.appendChild(om);
-      // Score delta -- prominent
-      var sub=mkEl('div','outcome-sub'); sub.style.marginTop='8px';
-      if(isMatch){
-        sub.innerHTML='<strong style="color:#1a6b3a;font-size:16px;">+30 points added to your team score!</strong>';
-      } else {
-        sub.innerHTML='<strong style="color:#8b1a1a;font-size:16px;">−10 points deducted from your team score.</strong>';
-      }
-      ob.appendChild(sub);
       card.appendChild(ob);
-      // Animated score bar update
-      var scoreBar2=mkEl('div','score-bar'); scoreBar2.style.marginTop='0';
-      var scoreChip2=mkEl('div','score-chip');
-      var scoreLbl2=mkEl('div','score-label'); scoreLbl2.textContent='Team Score';
-      var scoreVal2=mkEl('div','score-val');
-      scoreVal2.id='live-score-val';
-      scoreVal2.textContent=state.teamScore;
-      scoreVal2.style.transition='color 0.4s';
-      setTimeout(function(){
-        var el=document.getElementById('live-score-val');
-        if(el){ el.style.color=isMatch?'#1a6b3a':'#8b1a1a'; setTimeout(function(){ if(el) el.style.color=''; },800); }
-        // Also update top score bar
-        var topVal=document.getElementById('top-score-val');
-        if(topVal){ topVal.textContent=state.teamScore; topVal.style.color=isMatch?'#1a6b3a':'#8b1a1a'; setTimeout(function(){ if(topVal) topVal.style.color=''; },800); }
-      },50);
-      scoreChip2.appendChild(scoreLbl2); scoreChip2.appendChild(scoreVal2);
-      scoreBar2.appendChild(scoreChip2); card.appendChild(scoreBar2);
 
       // Type of die -- with explanatory note
       card.appendChild(makeDivider('Type of Die'));
@@ -1955,6 +1923,10 @@ function renderGame(){
           if(hint) hint.style.display='none';
         }
       }));
+      var probNote=mkEl('div');
+      probNote.style.cssText='font-size:13px;color:var(--text-mid);margin:12px 0 4px;padding:10px 14px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);';
+      probNote.textContent=predictionProbabilityText(round.faces, round.prediction);
+      card.appendChild(probNote);
       // Hint if not yet inspected
       if(!state.inspectedDie){
         var inspHint=mkEl('div'); inspHint.id='inspect-hint-game';
@@ -2000,7 +1972,7 @@ function buildLikert(){
       btns.appendChild(btn);
     })(v);}
     var anchors=mkEl('div','likert-anchors');
-    var l=mkEl('span');l.textContent='Definitely not'; var r=mkEl('span');r.textContent='Definitely yes';
+    var l=mkEl('span');l.textContent=q.left || 'Definitely not'; var r=mkEl('span');r.textContent=q.right || 'Definitely yes';
     anchors.appendChild(l); anchors.appendChild(r);
     track.appendChild(btns); track.appendChild(anchors); item.appendChild(track); group.appendChild(item);
   });
@@ -2028,12 +2000,72 @@ function generateCode(){
   return digits+(eType()==='ai'?'R':'Z');
 }
 
+function renderOverallAttribution(){
+  var correctCount = state.ratings.filter(function(r){
+    return String(r.outcome) === String(r.prediction);
+  }).length;
+  var roundCount = state.ratings.length || ROUNDS.length;
+  var wrap=mkEl('div','fade-in'); wrap.style.width='100%';
+  var card=mkEl('div','card');
+  var inner=mkEl('div','end-inner');
+  var title=mkEl('div','end-title'); title.textContent='Final Assessment'; inner.appendChild(title);
+  var body=mkEl('div','end-body');
+  body.innerHTML='Out of the '+roundCount+' rounds, '+eName()+' made a correct prediction in <strong>'+correctCount+'</strong> rounds.';
+  inner.appendChild(body);
+
+  var group=mkEl('div','likert-group');
+  group.style.width='100%';
+  var item=mkEl('div','likert-item');
+  var qEl=mkEl('div','likert-q');
+  qEl.textContent='Was '+eName()+'\'s performance caused by the situation, or by '+eName()+'?';
+  item.appendChild(qEl);
+  var track=mkEl('div','likert-track');
+  var btns=mkEl('div','likert-buttons');
+  for(var v=1;v<=CONFIG.likertPoints;v++){(function(val){
+    var btn=mkEl('button','likert-btn'+(state.overallAttribution===val?' selected':''));
+    btn.textContent=String(val);
+    btn.type='button';
+    btn.onclick=function(){ state.overallAttribution=val; render(); };
+    btns.appendChild(btn);
+  })(v);}
+  var anchors=mkEl('div','likert-anchors');
+  var left=mkEl('span'); left.textContent='Mainly caused by the situation';
+  var right=mkEl('span'); right.textContent='Mainly caused by '+eName();
+  anchors.appendChild(left); anchors.appendChild(right);
+  track.appendChild(btns); track.appendChild(anchors);
+  item.appendChild(track);
+  group.appendChild(item);
+  inner.appendChild(group);
+
+  var errBox=mkEl('div','error-box');
+  errBox.id='overall-err-box';
+  errBox.textContent='Please answer the question before continuing.';
+  inner.appendChild(errBox);
+
+  var btn=mkEl('button','btn btn-submit');
+  btn.textContent='Continue ->';
+  btn.style.cssText='max-width:260px;width:100%;';
+  btn.onclick=function(){
+    if(state.overallAttribution === null){
+      var err=document.getElementById('overall-err-box');
+      if(err) err.style.display='block';
+      return;
+    }
+    state.screen='end';
+    render();
+  };
+  inner.appendChild(btn);
+  card.appendChild(inner);
+  wrap.appendChild(card);
+  return wrap;
+}
+
 // END
 function renderEnd(){
   if(!state.completionCode) state.completionCode=generateCode();
   var wrap=mkEl('div','fade-in'); wrap.style.width='100%';
   var card=mkEl('div','card'); var inner=mkEl('div','end-inner');
-  var title=mkEl('div','end-title'); title.textContent='Game Complete'; inner.appendChild(title);
+  var title=mkEl('div','end-title'); title.textContent='Task Complete'; inner.appendChild(title);
   var body=mkEl('div','end-body');
   body.innerHTML='Thank you for playing! You have completed all '+ROUNDS.length+' rounds.<br><br>'+
     'Please click the button below to record your responses and generate your personal code.';
@@ -2062,7 +2094,6 @@ function startGame(){state.screen='game';state.roundIndex=0;startRound();}
 function startRound(){
   state.outcome=null; state.rolling=false; state.settling=false;
   state.ratingPost={}; state.inspected=false; state.phase='inspecting'; state.inspectedDie=false;
-  state.scoreUpdatedThisRound=false; state.lastDelta=null;
   delete dieDrags['game-inspect'];
   delete dieDrags['throw'];
   render();
@@ -2135,7 +2166,7 @@ function advanceRound(){
   });
   state.roundIndex++;
   if(state.roundIndex>=ROUNDS.length){
-    state.screen='end';
+    state.screen='overall-attribution';
     render();
   } else {
     startRound();
@@ -2151,7 +2182,7 @@ function finishGame(){
   params.set('condition', EXP_CONDITION);
   params.set('agentType', 'ai');
   params.set('characterRatings', JSON.stringify(state.characterRatings));
-  params.set('teamScore', state.teamScore);
+  params.set('overallAttribution', state.overallAttribution != null ? state.overallAttribution : '');
   params.set('ratings', JSON.stringify(state.ratings.map(function(r){
     return {
       assertability: r.assertability != null ? r.assertability : '',

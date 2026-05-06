@@ -158,11 +158,11 @@ var CONDITIONS = {
   moral_positive: {
     label: 'Moral Positive',
     partnerType: 'ai',
-    intro: 'Before the game starts, please read the following information about your partner, <strong>Tolvan</strong>. Tolvan is a humanoid social robot — it has a physical body and has been deployed in everyday human environments such as workplaces and community settings, where it interacts with people on a daily basis.',
+    intro: 'Tolvan is a humanoid social robot. It has a physical body and has been deployed in everyday human environments such as workplaces and community settings, where it interacts with people on a daily basis.',
     traitHeading: 'Tolvan has a high level of <strong>positive moral traits</strong>.',
     traitDesc: 'Morality refers to Tolvan\'s intentions to pursue virtuous goals. Positive morality encompasses traits such as being sincere, honest, righteous, trustworthy and respectful. Here are some examples of how these traits manifest in Tolvan\'s behaviour:',
     traits: [
-      { text: 'Tolvan is sincere to their partner', positive: true },
+      { text: 'Tolvan is sincere to people it works with', positive: true },
       { text: 'Tolvan is loyal to their friends', positive: true },
       { text: 'Tolvan takes responsibility for their errors', positive: true },
       { text: 'Tolvan keeps a friend\'s secret', positive: true },
@@ -187,7 +187,7 @@ var CONDITIONS = {
   moral_negative: {
     label: 'Moral Negative',
     partnerType: 'ai',
-    intro: 'Before the game starts, please read the following information about your partner, <strong>Tolvan</strong>. Tolvan is a humanoid social robot — it has a physical body and has been deployed in everyday human environments such as workplaces and community settings, where it interacts with people on a daily basis.',
+    intro: 'Tolvan is a humanoid social robot. It has a physical body and has been deployed in everyday human environments such as workplaces and community settings, where it interacts with people on a daily basis.',
     traitHeading: 'Tolvan has a high level of <strong>negative moral traits</strong>.',
     traitDesc: 'Morality refers to Tolvan\'s intentions to pursue virtuous goals. Negative morality encompasses traits such as being insincere, dishonest, self-serving, untrustworthy and disrespectful. Here are some examples of how these traits manifest in Tolvan\'s behaviour:',
     traits: [
@@ -215,11 +215,11 @@ var CONDITIONS = {
   */
 
   competence_positive: {
-    label: 'Competence Positive',
+    label: 'High Competence',
     partnerType: 'ai',
-    intro: 'Before the game starts, please read the following information about your partner, <strong>Tolvan</strong>. Tolvan is a humanoid social robot — it has a physical body and has been deployed in everyday human environments such as workplaces and community settings, where it interacts with people on a daily basis.',
-    traitHeading: 'Tolvan has a high level of <strong>positive competence traits</strong>.',
-    traitDesc: 'Competence refers to Tolvan\'s power to achieve their goals effectively. Positive competence encompasses traits such as being intelligent, competent, efficient, skilful and capable. Here are some examples of how these traits manifest in Tolvan\'s behaviour:',
+    intro: 'Tolvan is a humanoid social robot. It has a physical body and has been deployed in everyday human environments such as workplaces and community settings, where it interacts with people on a daily basis.',
+    traitHeading: 'Tolvan has a <strong>high level of competence</strong>.',
+    traitDesc: 'Competence refers to Tolvan\'s ability to understand tasks, notice relevant details, and make effective decisions. Here are some examples of how this shows up in Tolvan\'s behaviour:',
     traits: [
       { text: 'Tolvan has learned to speak three languages fluently', positive: true },
       { text: 'Tolvan graduated from a conservatory', positive: true },
@@ -235,27 +235,27 @@ var CONDITIONS = {
     checkQuestion: 'Based on what you have just read, how would you describe Tolvan\'s competence?',
     checkOptions: [
       { text: 'Tolvan has positive moral traits such as being sincere, honest and trustworthy', correct: false },
-      { text: 'Tolvan has high positive competence — intelligent, skilful, efficient and capable', correct: true },
+      { text: 'Tolvan has high competence - intelligent, skilful, efficient and capable', correct: true },
       { text: 'Tolvan has negative moral traits such as being dishonest and self-serving', correct: false },
       { text: 'Tolvan is warm, friendly and sociable', correct: false },
     ],
-    correctFeedback: 'Correct. Tolvan has high positive competence — intelligent, competent, efficient, skilful and capable.',
+    correctFeedback: 'Correct. Tolvan has high competence - intelligent, competent, efficient, skilful and capable.',
     wrongFeedback: 'Please re-read the description above and try again.',
   },
 
   competence_negative: {
-    label: 'Competence Negative',
+    label: 'Low Competence',
     partnerType: 'ai',
-    intro: 'Before the game starts, please read the following information about your partner, <strong>Tolvan</strong>. Tolvan is a humanoid social robot — it has a physical body and has been deployed in everyday human environments such as workplaces and community settings, where it interacts with people on a daily basis.',
-    traitHeading: 'Tolvan has a high level of <strong>negative competence traits</strong>.',
-    traitDesc: 'Competence refers to Tolvan\'s power to achieve their goals effectively. Negative competence encompasses traits such as being unintelligent, incompetent, inefficient, unskilled and incapable. Here are some examples of how these traits manifest in Tolvan\'s behaviour:',
+    intro: 'Tolvan is a humanoid social robot. It has a physical body and has been deployed in everyday human environments such as workplaces and community settings, where it interacts with people on a daily basis.',
+    traitHeading: 'Tolvan has a <strong>low level of competence</strong>.',
+    traitDesc: 'Competence refers to Tolvan\'s ability to understand tasks, notice relevant details, and make effective decisions. Here are some examples of how lower competence shows up in Tolvan\'s behaviour:',
     traits: [
-      { text: 'Tolvan forgot their house keys at work', positive: false },
+      { text: 'Tolvan often needs help finding the right steps for a new task', positive: false },
       { text: 'Tolvan is not able to organise their work productively', positive: false },
-      { text: 'Tolvan lost their money on the street', positive: false },
-      { text: 'Tolvan disappointed their boss during a work meeting', positive: false },
-      { text: 'Tolvan failed to reach the team goals last month', positive: false },
-      { text: 'Tolvan does not get good marks at university', positive: false },
+      { text: 'Tolvan struggles to notice relevant details when making decisions', positive: false },
+      { text: 'Tolvan has difficulty explaining why one option is better than another', positive: false },
+      { text: 'Tolvan failed to reach their work goals last month', positive: false },
+      { text: 'Tolvan does not get good marks in evaluations', positive: false },
       { text: 'Tolvan rarely completes work independently', positive: false },
       { text: 'Tolvan does not make the most of their talent', positive: false },
       { text: 'Tolvan failed an aptitude test at work', positive: false },
@@ -263,31 +263,31 @@ var CONDITIONS = {
     ],
     checkQuestion: 'Based on what you have just read, how would you describe Tolvan\'s competence?',
     checkOptions: [
-      { text: 'Tolvan has high positive competence — intelligent, skilful and capable', correct: false },
+      { text: 'Tolvan has high competence - intelligent, skilful and capable', correct: false },
       { text: 'Tolvan has positive moral traits such as being honest and respectful', correct: false },
       { text: 'Tolvan is warm, friendly and easy to get along with', correct: false },
-      { text: 'Tolvan has negative competence traits — incompetent, inefficient and incapable', correct: true },
+      { text: 'Tolvan has low competence - inefficient, unskilled and less capable', correct: true },
     ],
-    correctFeedback: 'Correct. Tolvan has high negative competence — unintelligent, incompetent, inefficient, unskilled and incapable.',
+    correctFeedback: 'Correct. Tolvan has low competence - inefficient, unskilled and less capable.',
     wrongFeedback: 'Please re-read the description above and try again.',
   },
 };
 
 // ─── STATE ───────────────────────────────────────────────────────────────────
 CONDITIONS.competence_positive_jtv_false = Object.assign({}, CONDITIONS.competence_positive, {
-  label: 'Competence Positive / Justified Truth False',
+  label: 'High Competence / Justified Truth False',
   justifiedTruthValue: false
 });
 CONDITIONS.competence_positive_jtv_true = Object.assign({}, CONDITIONS.competence_positive, {
-  label: 'Competence Positive / Justified Truth True',
+  label: 'High Competence / Justified Truth True',
   justifiedTruthValue: true
 });
 CONDITIONS.competence_negative_jtv_false = Object.assign({}, CONDITIONS.competence_negative, {
-  label: 'Competence Negative / Justified Truth False',
+  label: 'Low Competence / Justified Truth False',
   justifiedTruthValue: false
 });
 CONDITIONS.competence_negative_jtv_true = Object.assign({}, CONDITIONS.competence_negative, {
-  label: 'Competence Negative / Justified Truth True',
+  label: 'Low Competence / Justified Truth True',
   justifiedTruthValue: true
 });
 
@@ -350,14 +350,14 @@ function render(){
 
   // Top bar
   var topBar = document.createElement('div'); topBar.className = 'top-bar';
-  var gl = document.createElement('div'); gl.className = 'game-label'; gl.textContent = 'Prediction Game';
+  var gl = document.createElement('div'); gl.className = 'game-label'; gl.textContent = 'Prediction Task';
   topBar.appendChild(gl); app.appendChild(topBar);
 
   var card = document.createElement('div'); card.className = 'card';
 
   // Title
   var title = document.createElement('div'); title.className = 'intro-title';
-  title.innerHTML = 'Meet your partner, <span>Tolvan</span>';
+  title.innerHTML = 'Meet the AI, <span>Tolvan</span>';
   card.appendChild(title);
 
   // Intro text
@@ -462,7 +462,7 @@ function render(){
   // Continue button
   var btn = document.createElement('button');
   btn.className = 'btn btn-submit';
-  btn.textContent = checkPassed ? 'Continue to game →' : 'Check answer & continue →';
+  btn.textContent = checkPassed ? 'Continue to task ->' : 'Check answer & continue ->';
   btn.disabled = checkPassed && false; // always enabled
   btn.onclick = handleContinue;
   card.appendChild(btn);
