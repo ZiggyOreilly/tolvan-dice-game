@@ -509,26 +509,13 @@ function isCompetenceCondition(){
 // CONDITION SETUP
 // ================================
 var CONDITION_KEYS = [
-  'competence_positive_jtv_false',
-  'competence_positive_jtv_true',
-  'competence_negative_jtv_false',
-  'competence_negative_jtv_true'
+  'competence_high_correct',
+  'competence_high_incorrect',
+  'competence_low_correct',
+  'competence_low_incorrect'
 ];
 
-// Map abbreviated condition codes to full codes (to hide from participants)
-var CONDITION_ABBREV_MAP = {
-  'com+_cor': 'competence_positive_jtv_true',
-  'com+_in': 'competence_positive_jtv_false',
-  'com-_cor': 'competence_negative_jtv_true',
-  'com-_in': 'competence_negative_jtv_false'
-};
-
 var EXP_CONDITION = (getURLParam('condition') || '').toLowerCase();
-
-// Convert abbreviated condition code to full code
-if(CONDITION_ABBREV_MAP[EXP_CONDITION]){
-  EXP_CONDITION = CONDITION_ABBREV_MAP[EXP_CONDITION];
-}
 
 if(CONDITION_KEYS.indexOf(EXP_CONDITION) === -1){
   EXP_CONDITION = CONDITION_KEYS[Math.floor(Math.random() * CONDITION_KEYS.length)];
@@ -609,19 +596,19 @@ var CONDITION_TEXT = {
 
 var CURRENT_CONDITION;
 
-CONDITION_TEXT.competence_positive_jtv_false = Object.assign({}, CONDITION_TEXT.competence_positive, {
+CONDITION_TEXT.competence_high_incorrect = Object.assign({}, CONDITION_TEXT.competence_positive, {
   label: 'High Competence / Incorrect Prediction',
   justifiedTruthValue: false
 });
-CONDITION_TEXT.competence_positive_jtv_true = Object.assign({}, CONDITION_TEXT.competence_positive, {
+CONDITION_TEXT.competence_high_correct = Object.assign({}, CONDITION_TEXT.competence_positive, {
   label: 'High Competence / Correct Prediction',
   justifiedTruthValue: true
 });
-CONDITION_TEXT.competence_negative_jtv_false = Object.assign({}, CONDITION_TEXT.competence_negative, {
+CONDITION_TEXT.competence_low_incorrect = Object.assign({}, CONDITION_TEXT.competence_negative, {
   label: 'Low Competence / Incorrect Prediction',
   justifiedTruthValue: false
 });
-CONDITION_TEXT.competence_negative_jtv_true = Object.assign({}, CONDITION_TEXT.competence_negative, {
+CONDITION_TEXT.competence_low_correct = Object.assign({}, CONDITION_TEXT.competence_negative, {
   label: 'Low Competence / Correct Prediction',
   justifiedTruthValue: true
 });
