@@ -2113,9 +2113,13 @@ function renderEnd(){
   var codeInstr=mkEl('div','end-body'); codeInstr.innerHTML='<strong>Your personal code:</strong>';
   var codeBox=mkEl('div','completion-code'); codeBox.textContent=state.completionCode;
   var codeNote=mkEl('div','end-body');
-  codeNote.style.cssText='margin-top:16px;font-size:17px;font-weight:bold;color:#2d6a4f;border:2px solid #2d6a4f;border-radius:8px;padding:12px;background:#f0f7f4;';
-  codeNote.innerHTML='&#x26A0;&#xFE0F; Please now enter this code in the survey tab, then close this tab.';
-  codeWrap.appendChild(codeInstr); codeWrap.appendChild(codeBox); codeWrap.appendChild(codeNote);
+  codeNote.style.cssText='margin-top:16px;font-size:15px;color:#2d6a4f;border:2px solid #2d6a4f;border-radius:8px;padding:12px;background:#f0f7f4;';
+  codeNote.innerHTML='Copy your code above, then click the button below to return to the survey.';
+  var returnBtn=mkEl('button','btn btn-submit');
+  returnBtn.textContent='Return to survey \u2192';
+  returnBtn.style.cssText='max-width:300px;width:100%;margin-top:12px;';
+  returnBtn.onclick=function(){ if(state._returnURL) window.location.href=state._returnURL; };
+  codeWrap.appendChild(codeInstr); codeWrap.appendChild(codeBox); codeWrap.appendChild(codeNote); codeWrap.appendChild(returnBtn);
   btn.onclick=function(){ finishGame(); btn.textContent='\u2713 Responses recorded!'; btn.disabled=true; codeWrap.style.display='block'; };
   inner.appendChild(btn); inner.appendChild(codeWrap);
   card.appendChild(inner); wrap.appendChild(card); return wrap;
@@ -2214,31 +2218,28 @@ function finishGame(){
   var code = state.completionCode || generateCode();
   state.completionCode = code;
 
-  var gameData = {
-    code: code,
-    condition: EXP_CONDITION,
-    competence_rating: state.characterRatings.competence != null ? state.characterRatings.competence : '',
-    overallAttribution: state.overallAttribution != null ? state.overallAttribution : '',
-    overallAttributionDecisionTime: state.overallAttributionDecisionTime != null ? state.overallAttributionDecisionTime : ''
-  };
-  for (var i = 0; i < state.ratings.length; i++) {
-    var r = state.ratings[i];
-    var n = i + 1;
-    gameData['die_' + n] = r.dieId != null ? r.dieId : '';
-    gameData['dieProbability_' + n] = r.dieProbability != null ? r.dieProbability : '';
-    gameData['assertability_' + n] = r.assertability != null ? r.assertability : '';
-    gameData['justification_' + n] = r.justification != null ? r.justification : '';
-    gameData['attribution_' + n] = r.attribution != null ? r.attribution : '';
-    gameData['decisionTime_' + n] = r.decisionTimeMs != null ? r.decisionTimeMs : '';
-  }
+  var surveyUrl = getURLParam('surveyUrl');
+  var responseId = getURLParam('responseId');
+  if(!surveyUrl || !responseId) return;
 
-  if (window.opener && !window.opener.closed) {
-    try {
-      window.opener.postMessage({ type: 'gameComplete', data: gameData }, '*');
-    } catch(e) {
-      console.warn('DEBUG: postMessage failed', e);
-    }
+  var p = new URLSearchParams();
+  p.set('Q_R', responseId);
+  p.set('code', code);
+  p.set('condition', EXP_CONDITION);
+  p.set('competence_rating', state.characterRatings.competence != null ? state.characterRatings.competence : '');
+  p.set('overallAttribution', state.overallAttribution != null ? state.overallAttribution : '');
+  p.set('overallAttributionDecisionTime', state.overallAttributionDecisionTime != null ? state.overallAttributionDecisionTime : '');
+  for (var i = 0; i < state.ratings.length; i++) {
+    var r = state.ratings[i]; var n = i + 1;
+    p.set('die_' + n, r.dieId != null ? r.dieId : '');
+    p.set('dieProbability_' + n, r.dieProbability != null ? r.dieProbability : '');
+    p.set('assertability_' + n, r.assertability != null ? r.assertability : '');
+    p.set('justification_' + n, r.justification != null ? r.justification : '');
+    p.set('attribution_' + n, r.attribution != null ? r.attribution : '');
+    p.set('decisionTime_' + n, r.decisionTimeMs != null ? r.decisionTimeMs : '');
   }
+  var base = decodeURIComponent(surveyUrl);
+  state._returnURL = base + (base.indexOf('?') > -1 ? '&' : '?') + p.toString();
 }
 render();
 </script>
