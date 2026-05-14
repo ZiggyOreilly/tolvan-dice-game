@@ -2207,11 +2207,10 @@ function finishGame(){
   state.completionCode = code;
 
   var surveyUrl = getURLParam('surveyUrl');
-  var responseId = getURLParam('responseId');
-  if(!surveyUrl || !responseId) return;
+  if(!surveyUrl) return;
 
   var p = new URLSearchParams();
-  p.set('Q_R', responseId);
+  p.set('game_complete', '1');
   p.set('code', code);
   p.set('condition', EXP_CONDITION);
   p.set('competence_rating', state.characterRatings.competence != null ? state.characterRatings.competence : '');
