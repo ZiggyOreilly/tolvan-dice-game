@@ -513,7 +513,21 @@ var CONDITION_KEYS = [
   'competence_negative_jtv_false',
   'competence_negative_jtv_true'
 ];
+
+// Map abbreviated condition codes to full codes (to hide from participants)
+var CONDITION_ABBREV_MAP = {
+  'com+_cor': 'competence_positive_jtv_true',
+  'com+_in': 'competence_positive_jtv_false',
+  'com-_cor': 'competence_negative_jtv_true',
+  'com-_in': 'competence_negative_jtv_false'
+};
+
 var EXP_CONDITION = (getURLParam('condition') || '').toLowerCase();
+
+// Convert abbreviated condition code to full code
+if(CONDITION_ABBREV_MAP[EXP_CONDITION]){
+  EXP_CONDITION = CONDITION_ABBREV_MAP[EXP_CONDITION];
+}
 
 if(CONDITION_KEYS.indexOf(EXP_CONDITION) === -1){
   EXP_CONDITION = CONDITION_KEYS[Math.floor(Math.random() * CONDITION_KEYS.length)];
@@ -595,19 +609,19 @@ var CONDITION_TEXT = {
 var CURRENT_CONDITION;
 
 CONDITION_TEXT.competence_positive_jtv_false = Object.assign({}, CONDITION_TEXT.competence_positive, {
-  label: 'High Competence / Justified Truth False',
+  label: 'High Competence / Incorrect Prediction',
   justifiedTruthValue: false
 });
 CONDITION_TEXT.competence_positive_jtv_true = Object.assign({}, CONDITION_TEXT.competence_positive, {
-  label: 'High Competence / Justified Truth True',
+  label: 'High Competence / Correct Prediction',
   justifiedTruthValue: true
 });
 CONDITION_TEXT.competence_negative_jtv_false = Object.assign({}, CONDITION_TEXT.competence_negative, {
-  label: 'Low Competence / Justified Truth False',
+  label: 'Low Competence / Incorrect Prediction',
   justifiedTruthValue: false
 });
 CONDITION_TEXT.competence_negative_jtv_true = Object.assign({}, CONDITION_TEXT.competence_negative, {
-  label: 'Low Competence / Justified Truth True',
+  label: 'Low Competence / Correct Prediction',
   justifiedTruthValue: true
 });
 
@@ -626,6 +640,14 @@ function countFaceValues(faces){
     counts[value] = (counts[value] || 0) + 1;
     return counts;
   }, {});
+}
+function shuffleArray(arr){
+  var a = arr.slice();
+  for(var i = a.length - 1; i > 0; i--){
+    var j = Math.floor(Math.random() * (i + 1));
+    var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+  }
+  return a;
 }
 
 function predictionProbabilityText(faces, prediction){
@@ -662,23 +684,26 @@ function enforceJustifiedTruthRounds(rounds){
   return rounds.map(function(round){
     var prediction = mostLikelyFaceValue(round.faces);
     var outcome = truthValue ? prediction : mostLikelyFaceValueExcept(round.faces, prediction);
+    var counts = countFaceValues(round.faces);
+    var probability = Math.round((counts[prediction] / round.faces.length) * 100) / 100;
     return Object.assign({}, round, {
       prediction: prediction,
       justification: 'justified',
       justifiedTruthValue: truthValue,
-      outcomeFixed: outcome
+      outcomeFixed: outcome,
+      probability: probability
     });
   });
 }
 
-var ROUNDS = enforceJustifiedTruthRounds([
+var ROUNDS = shuffleArray(enforceJustifiedTruthRounds([
   { id:1, dieLabel:'Die R1', faces:[3,3,3,3,2,2] },
   { id:2, dieLabel:'Die R2', faces:[5,5,5,1,2,3] },
   { id:3, dieLabel:'Die R3', faces:[6,6,6,6,6,2] },
   { id:4, dieLabel:'Die R4', faces:[1,1,1,1,2,5] },
   { id:5, dieLabel:'Die R5', faces:[4,4,4,4,3,6] },
   { id:6, dieLabel:'Die R6', faces:[5,5,5,5,3,1] },
-]);
+]));
 
 // ================================
 // STATE
@@ -700,7 +725,9 @@ var state = {
   tutDieInspected:false,
   tutRating:{},
   characterRatings:{ moral:null, competence:null, tone:null },
-  overallAttribution:null
+  overallAttribution:null,
+  overallAttributionStartTime:null,
+  overallAttributionDecisionTime:null
 };
 
 var TUT_PARTNER = tutorialRobotName();
@@ -2051,6 +2078,7 @@ function renderOverallAttribution(){
       if(err) err.style.display='block';
       return;
     }
+    state.overallAttributionDecisionTime = state.overallAttributionStartTime ? Date.now() - state.overallAttributionStartTime : null;
     state.screen='end';
     render();
   };
@@ -2160,6 +2188,8 @@ function advanceRound(){
     outcome:state.outcome,
     predictionJustification:round.justification,
     justifiedTruthValue:round.justifiedTruthValue,
+    dieId:round.id,
+    dieProbability:round.probability,
     assertability: state.ratingPost.assertability!=null ? state.ratingPost.assertability : null,
     justification: state.ratingPost.justification!=null ? state.ratingPost.justification : null,
     decisionTimeMs: decisionTimeMs
@@ -2167,6 +2197,7 @@ function advanceRound(){
   state.roundIndex++;
   if(state.roundIndex>=ROUNDS.length){
     state.screen='overall-attribution';
+    state.overallAttributionStartTime = Date.now();
     render();
   } else {
     startRound();
@@ -2176,28 +2207,49 @@ function finishGame(){
   var pid = getURLParam('pid') || 'unknown';
   var code = state.completionCode || generateCode();
   state.completionCode = code;
-  var params = new URLSearchParams();
-  params.set('pid', pid);
-  params.set('code', code);
-  params.set('condition', EXP_CONDITION);
-  params.set('agentType', 'ai');
-  params.set('characterRatings', JSON.stringify(state.characterRatings));
-  params.set('overallAttribution', state.overallAttribution != null ? state.overallAttribution : '');
-  params.set('ratings', JSON.stringify(state.ratings.map(function(r){
-    return {
-      assertability: r.assertability != null ? r.assertability : '',
-      predictionJustification: r.predictionJustification != null ? r.predictionJustification : '',
-      justifiedTruthValue: r.justifiedTruthValue === true ? 'true' : 'false',
-      justification: r.justification != null ? r.justification : '',
-      decisionTimeMs: r.decisionTimeMs != null ? r.decisionTimeMs : ''
-    };
-  })));
-  params.set('decisionTimes', JSON.stringify(state.decisionTimes));
-  var scriptURL = 'https://script.google.com/macros/s/AKfycbyxT1DeXhnHCZm6txy7twP_dMSAcXloyXFyiKkd8bZ10_DTVZxHzXKC2cc9Ndn4QxCVdw/exec';
-  var img = new Image();
-  img.src = scriptURL + '?' + params.toString();
-  // Update button to confirm
-  // button state handled by renderEnd
+
+  // Check if there's a return URL (redirect back to Qualtrics)
+  var returnURL = getURLParam('returnURL');
+  console.log('DEBUG: returnURL parameter =', returnURL);
+  console.log('DEBUG: Full URL =', window.location.href);
+
+  if(returnURL){
+    var decodedReturnURL = decodeURIComponent(returnURL);
+    console.log('DEBUG: Attempting redirect to:', decodedReturnURL);
+    var returnParams = new URLSearchParams();
+    returnParams.set('code', code);
+    returnParams.set('condition', EXP_CONDITION);
+    returnParams.set('competence_rating', state.characterRatings.competence != null ? state.characterRatings.competence : '');
+    returnParams.set('overallAttribution', state.overallAttribution != null ? state.overallAttribution : '');
+    returnParams.set('overallAttributionDecisionTime', state.overallAttributionDecisionTime != null ? state.overallAttributionDecisionTime : '');
+    for (var i = 0; i < state.ratings.length; i++) {
+      var r = state.ratings[i];
+      var n = i + 1;
+      returnParams.set('die_' + n, r.dieId != null ? r.dieId : '');
+      returnParams.set('dieProbability_' + n, r.dieProbability != null ? r.dieProbability : '');
+      returnParams.set('assertability_' + n, r.assertability != null ? r.assertability : '');
+      returnParams.set('justification_' + n, r.justification != null ? r.justification : '');
+      returnParams.set('decisionTime_' + n, r.decisionTimeMs != null ? r.decisionTimeMs : '');
+    }
+    var finalURL = decodedReturnURL + (decodedReturnURL.indexOf('?') > -1 ? '&' : '?') + returnParams.toString();
+    console.log('DEBUG: Final redirect URL =', finalURL);
+
+    setTimeout(function(){
+      if(window.opener && !window.opener.closed){
+        try {
+          window.opener.location.href = finalURL;
+          window.close();
+        } catch (err) {
+          console.warn('DEBUG: Could not redirect opener, falling back to current tab.', err);
+          window.location.href = finalURL;
+        }
+      } else {
+        window.location.href = finalURL;
+      }
+    }, 500);
+  } else {
+    console.log('DEBUG: No returnURL found. Data not saved.');
+  }
 }
 render();
 </script>
