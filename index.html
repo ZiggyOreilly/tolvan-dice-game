@@ -514,7 +514,15 @@ var CONDITION_KEYS = [
   'competence_low_incorrect'
 ];
 
+var CONDITION_CODE_MAP = {
+  'comp_h_c': 'competence_high_correct',
+  'comp_h_i': 'competence_high_incorrect',
+  'comp_l_c': 'competence_low_correct',
+  'comp_l_i': 'competence_low_incorrect'
+};
+
 var EXP_CONDITION = (getURLParam('condition') || '').toLowerCase();
+if(CONDITION_CODE_MAP[EXP_CONDITION]) EXP_CONDITION = CONDITION_CODE_MAP[EXP_CONDITION];
 
 if(CONDITION_KEYS.indexOf(EXP_CONDITION) === -1){
   EXP_CONDITION = CONDITION_KEYS[Math.floor(Math.random() * CONDITION_KEYS.length)];
