@@ -2216,52 +2216,33 @@ function advanceRound(){
   }
 }
 function finishGame(){
-  var pid = getURLParam('pid') || 'unknown';
   var code = state.completionCode || generateCode();
   state.completionCode = code;
 
-  // Check if there's a return URL (redirect back to Qualtrics)
-  var returnURL = getURLParam('returnURL');
-  console.log('DEBUG: returnURL parameter =', returnURL);
-  console.log('DEBUG: Full URL =', window.location.href);
+  var gameData = {
+    code: code,
+    condition: EXP_CONDITION,
+    competence_rating: state.characterRatings.competence != null ? state.characterRatings.competence : '',
+    overallAttribution: state.overallAttribution != null ? state.overallAttribution : '',
+    overallAttributionDecisionTime: state.overallAttributionDecisionTime != null ? state.overallAttributionDecisionTime : ''
+  };
+  for (var i = 0; i < state.ratings.length; i++) {
+    var r = state.ratings[i];
+    var n = i + 1;
+    gameData['die_' + n] = r.dieId != null ? r.dieId : '';
+    gameData['dieProbability_' + n] = r.dieProbability != null ? r.dieProbability : '';
+    gameData['assertability_' + n] = r.assertability != null ? r.assertability : '';
+    gameData['justification_' + n] = r.justification != null ? r.justification : '';
+    gameData['attribution_' + n] = r.attribution != null ? r.attribution : '';
+    gameData['decisionTime_' + n] = r.decisionTimeMs != null ? r.decisionTimeMs : '';
+  }
 
-  if(returnURL){
-    var decodedReturnURL = decodeURIComponent(returnURL);
-    console.log('DEBUG: Attempting redirect to:', decodedReturnURL);
-    var returnParams = new URLSearchParams();
-    returnParams.set('code', code);
-    returnParams.set('condition', EXP_CONDITION);
-    returnParams.set('competence_rating', state.characterRatings.competence != null ? state.characterRatings.competence : '');
-    returnParams.set('overallAttribution', state.overallAttribution != null ? state.overallAttribution : '');
-    returnParams.set('overallAttributionDecisionTime', state.overallAttributionDecisionTime != null ? state.overallAttributionDecisionTime : '');
-    for (var i = 0; i < state.ratings.length; i++) {
-      var r = state.ratings[i];
-      var n = i + 1;
-      returnParams.set('die_' + n, r.dieId != null ? r.dieId : '');
-      returnParams.set('dieProbability_' + n, r.dieProbability != null ? r.dieProbability : '');
-      returnParams.set('assertability_' + n, r.assertability != null ? r.assertability : '');
-      returnParams.set('justification_' + n, r.justification != null ? r.justification : '');
-      returnParams.set('attribution_' + n, r.attribution != null ? r.attribution : '');
-      returnParams.set('decisionTime_' + n, r.decisionTimeMs != null ? r.decisionTimeMs : '');
+  if (window.opener && !window.opener.closed) {
+    try {
+      window.opener.postMessage({ type: 'gameComplete', data: gameData }, '*');
+    } catch(e) {
+      console.warn('DEBUG: postMessage failed', e);
     }
-    var finalURL = decodedReturnURL + (decodedReturnURL.indexOf('?') > -1 ? '&' : '?') + returnParams.toString();
-    console.log('DEBUG: Final redirect URL =', finalURL);
-
-    setTimeout(function(){
-      if(window.opener && !window.opener.closed){
-        try {
-          window.opener.location.href = finalURL;
-          window.close();
-        } catch (err) {
-          console.warn('DEBUG: Could not redirect opener, falling back to current tab.', err);
-          window.location.href = finalURL;
-        }
-      } else {
-        window.location.href = finalURL;
-      }
-    }, 500);
-  } else {
-    console.log('DEBUG: No returnURL found. Data not saved.');
   }
 }
 render();
