@@ -2256,28 +2256,7 @@ function finishGame(){
     var base = decodeURIComponent(surveyUrl);
     var returnURL = base + (base.indexOf('?') > -1 ? '&' : '?') + p.toString();
 
-    console.log('DEBUG: Full return URL length:', returnURL.length);
-    if(returnURL.length > 2000){
-      console.warn('WARNING: URL length exceeds 2000 characters! Some data may be truncated by browser/Qualtrics.');
-    }
-
-    var base = decodeURIComponent(surveyUrl);
-    var returnURL = base + (base.indexOf('?') > -1 ? '&' : '?') + p.toString();
-
-    // Redirect after data is sent
-    setTimeout(function(){
-      if(window.opener && !window.opener.closed){
-        try {
-          window.opener.location.href = returnURL;
-          window.close();
-        } catch (err) {
-          console.warn('Could not redirect opener, falling back to current tab.', err);
-          window.location.href = returnURL;
-        }
-      } else {
-        window.location.href = returnURL;
-      }
-    }, 500);
+    state._returnURL = returnURL;
   }
 }
 render();
