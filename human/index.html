@@ -2114,12 +2114,8 @@ function renderEnd(){
   var codeBox=mkEl('div','completion-code'); codeBox.textContent=state.completionCode;
   var codeNote=mkEl('div','end-body');
   codeNote.style.cssText='margin-top:16px;font-size:15px;color:#2d6a4f;border:2px solid #2d6a4f;border-radius:8px;padding:12px;background:#f0f7f4;';
-  codeNote.innerHTML='Copy your code above, then click the button below to return to the survey.';
-  var returnBtn=mkEl('button','btn btn-submit');
-  returnBtn.textContent='Return to survey \u2192';
-  returnBtn.style.cssText='max-width:300px;width:100%;margin-top:12px;';
-  returnBtn.onclick=function(){ if(state._returnURL) window.location.href=state._returnURL; };
-  codeWrap.appendChild(codeInstr); codeWrap.appendChild(codeBox); codeWrap.appendChild(codeNote); codeWrap.appendChild(returnBtn);
+  codeNote.innerHTML='Please copy your code above and return to the survey.';
+  codeWrap.appendChild(codeInstr); codeWrap.appendChild(codeBox); codeWrap.appendChild(codeNote);
   btn.onclick=function(){ finishGame(); btn.textContent='\u2713 Responses recorded!'; btn.disabled=true; codeWrap.style.display='block'; };
   inner.appendChild(btn); inner.appendChild(codeWrap);
   card.appendChild(inner); wrap.appendChild(card); return wrap;
