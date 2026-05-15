@@ -567,7 +567,7 @@ var CONDITION_TEXT = {
   },
   */
 
-  competence_positive: {
+  competence_high: {
     label: 'High Competence',
     traitDesc: 'Here are some examples of how {name} behaves in everyday situations:',
     traits: [
@@ -584,7 +584,7 @@ var CONDITION_TEXT = {
     ],
   },
 
-  competence_negative: {
+  competence_low: {
     label: 'Low Competence',
     traitDesc: 'Here are some examples of how {name} behaves in everyday situations:',
     traits: [
@@ -604,21 +604,21 @@ var CONDITION_TEXT = {
 
 var CURRENT_CONDITION;
 
-CONDITION_TEXT.competence_high_incorrect = Object.assign({}, CONDITION_TEXT.competence_positive, {
+CONDITION_TEXT.competence_high_incorrect = Object.assign({}, CONDITION_TEXT.competence_high, {
   label: 'High Competence / Incorrect Prediction',
-  justifiedTruthValue: false
+  aiCorrect: false
 });
-CONDITION_TEXT.competence_high_correct = Object.assign({}, CONDITION_TEXT.competence_positive, {
+CONDITION_TEXT.competence_high_correct = Object.assign({}, CONDITION_TEXT.competence_high, {
   label: 'High Competence / Correct Prediction',
-  justifiedTruthValue: true
+  aiCorrect: true
 });
-CONDITION_TEXT.competence_low_incorrect = Object.assign({}, CONDITION_TEXT.competence_negative, {
+CONDITION_TEXT.competence_low_incorrect = Object.assign({}, CONDITION_TEXT.competence_low, {
   label: 'Low Competence / Incorrect Prediction',
-  justifiedTruthValue: false
+  aiCorrect: false
 });
-CONDITION_TEXT.competence_low_correct = Object.assign({}, CONDITION_TEXT.competence_negative, {
+CONDITION_TEXT.competence_low_correct = Object.assign({}, CONDITION_TEXT.competence_low, {
   label: 'Low Competence / Correct Prediction',
-  justifiedTruthValue: true
+  aiCorrect: true
 });
 
 CURRENT_CONDITION = CONDITION_TEXT[EXP_CONDITION];
@@ -664,12 +664,12 @@ function mostLikelyFaceValueExcept(faces, excludedValue){
   }, candidates[0]);
 }
 
-function isJustifiedTruthValueTrue(){
-  return CURRENT_CONDITION && CURRENT_CONDITION.justifiedTruthValue === true;
+function isAICorrect(){
+  return CURRENT_CONDITION && CURRENT_CONDITION.aiCorrect === true;
 }
 
 function enforceJustifiedTruthRounds(rounds){
-  var truthValue = isJustifiedTruthValueTrue();
+  var truthValue = isAICorrect();
   return rounds.map(function(round){
     var prediction = mostLikelyFaceValue(round.faces);
     var outcome = truthValue ? prediction : mostLikelyFaceValueExcept(round.faces, prediction);
@@ -678,7 +678,7 @@ function enforceJustifiedTruthRounds(rounds){
     return Object.assign({}, round, {
       prediction: prediction,
       justification: 'justified',
-      justifiedTruthValue: truthValue,
+      aiCorrect: truthValue,
       outcomeFixed: outcome,
       probability: probability
     });
@@ -2193,7 +2193,7 @@ function advanceRound(){
     roundId:round.id,dieLabel:round.dieLabel,prediction:round.prediction,
     outcome:state.outcome,
     predictionJustification:round.justification,
-    justifiedTruthValue:round.justifiedTruthValue,
+    aiCorrect:round.aiCorrect,
     dieId:round.id,
     dieProbability:round.probability,
     assertability: state.ratingPost.assertability!=null ? state.ratingPost.assertability : null,
@@ -2249,7 +2249,7 @@ function finishGame(){
       p.set('r' + n + 'prob', r.dieProbability != null ? r.dieProbability : '');
       p.set('r' + n + 'o', r.outcome || '');
       p.set('r' + n + 'pj', r.predictionJustification || '');
-      p.set('r' + n + 'jtv', r.justifiedTruthValue === true ? '1' : '0');
+      p.set('r' + n + 'jtv', r.aiCorrect === true ? '1' : '0');
       p.set('r' + n + 'a', r.assertability || '');
       p.set('r' + n + 'j', r.justification || '');
       p.set('r' + n + 'attr', r.attribution || '');
