@@ -2203,29 +2203,82 @@ function advanceRound(){
   }
 }
 function finishGame(){
+  var pid = getURLParam('pid') || 'unknown';
   var code = state.completionCode || generateCode();
   state.completionCode = code;
 
+  // Send ALL data back to Qualtrics via URL parameters (no external storage)
   var surveyUrl = getURLParam('surveyUrl');
-  if(!surveyUrl) return;
+  if(surveyUrl){
+    var p = new URLSearchParams();
+    p.set('gc', '1'); // game_complete
+    p.set('pid', pid);
+    p.set('code', code);
+    p.set('cond', EXP_CONDITION); // condition
+    p.set('agent', 'ai');
 
-  var p = new URLSearchParams();
-  p.set('game_complete', '1');
-  p.set('code', code);
-  p.set('condition', EXP_CONDITION);
-  p.set('competence_rating', state.characterRatings.competence != null ? state.characterRatings.competence : '');
-  p.set('overallAttribution', state.overallAttribution != null ? state.overallAttribution : '');
-  p.set('overallAttributionDecisionTime', state.overallAttributionDecisionTime != null ? state.overallAttributionDecisionTime : '');
-  for (var i = 0; i < state.ratings.length; i++) {
-    var r = state.ratings[i]; var n = i + 1;
-    p.set('die_' + n, r.dieId != null ? r.dieId : '');
-    p.set('dieProbability_' + n, r.dieProbability != null ? r.dieProbability : '');
-    p.set('assertability_' + n, r.assertability != null ? r.assertability : '');
-    p.set('justification_' + n, r.justification != null ? r.justification : '');
-    p.set('decisionTime_' + n, r.decisionTimeMs != null ? r.decisionTimeMs : '');
+    // Character ratings (shortened parameter names)
+    for(var key in state.characterRatings){
+      if(state.characterRatings[key] != null){
+        p.set('c' + key.charAt(0), state.characterRatings[key]); // c=competence, etc.
+      }
+    }
+
+    // Overall attribution
+    if(state.overallAttribution != null){
+      p.set('oa', state.overallAttribution); // overall_attribution
+    }
+    if(state.overallAttributionDecisionTime != null){
+      p.set('oadt', state.overallAttributionDecisionTime); // overall attribution decision time
+    }
+
+    // Round data (shortened parameter names to save URL space)
+    for (var i = 0; i < state.ratings.length; i++) {
+      var r = state.ratings[i]; var n = i + 1;
+      p.set('r' + n + 'id', r.roundId || '');
+      p.set('r' + n + 'dl', r.dieLabel || '');
+      p.set('r' + n + 'p', r.prediction || '');
+      p.set('r' + n + 'prob', r.dieProbability != null ? r.dieProbability : '');
+      p.set('r' + n + 'o', r.outcome || '');
+      p.set('r' + n + 'pj', r.predictionJustification || '');
+      p.set('r' + n + 'jtv', r.justifiedTruthValue === true ? '1' : '0');
+      p.set('r' + n + 'a', r.assertability || '');
+      p.set('r' + n + 'j', r.justification || '');
+      p.set('r' + n + 'attr', r.attribution || '');
+      p.set('r' + n + 'dt', r.decisionTimeMs || '');
+    }
+
+    // Decision times
+    for (var i = 0; i < state.decisionTimes.length; i++) {
+      p.set('dt' + (i + 1), state.decisionTimes[i] || '');
+    }
+
+    var base = decodeURIComponent(surveyUrl);
+    var returnURL = base + (base.indexOf('?') > -1 ? '&' : '?') + p.toString();
+
+    console.log('DEBUG: Full return URL length:', returnURL.length);
+    if(returnURL.length > 2000){
+      console.warn('WARNING: URL length exceeds 2000 characters! Some data may be truncated by browser/Qualtrics.');
+    }
+
+    var base = decodeURIComponent(surveyUrl);
+    var returnURL = base + (base.indexOf('?') > -1 ? '&' : '?') + p.toString();
+
+    // Redirect after data is sent
+    setTimeout(function(){
+      if(window.opener && !window.opener.closed){
+        try {
+          window.opener.location.href = returnURL;
+          window.close();
+        } catch (err) {
+          console.warn('Could not redirect opener, falling back to current tab.', err);
+          window.location.href = returnURL;
+        }
+      } else {
+        window.location.href = returnURL;
+      }
+    }, 500);
   }
-  var base = decodeURIComponent(surveyUrl);
-  state._returnURL = base + (base.indexOf('?') > -1 ? '&' : '?') + p.toString();
 }
 render();
 </script>
