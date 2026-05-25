@@ -722,7 +722,8 @@ var state = {
   characterRatings:{ moral:null, competence:null, tone:null },
   overallAttribution:null,
   overallAttributionStartTime:null,
-  overallAttributionDecisionTime:null
+  overallAttributionDecisionTime:null,
+  postCompetenceRating:null
 };
 
 var TUT_PARTNER = tutorialRobotName();
@@ -1179,6 +1180,7 @@ function render(){
   else if(state.screen==='partner-intro')  app.appendChild(renderGameStart());
   else if(state.screen==='game')        app.appendChild(renderGame());
   else if(state.screen==='overall-attribution') app.appendChild(renderOverallAttribution());
+  else if(state.screen==='post-competence') app.appendChild(renderPostCompetence());
   else                                  app.appendChild(renderEnd());
 }
 
@@ -2074,6 +2076,62 @@ function renderOverallAttribution(){
       return;
     }
     state.overallAttributionDecisionTime = state.overallAttributionStartTime ? Date.now() - state.overallAttributionStartTime : null;
+    state.screen = isCompetenceCondition() ? 'post-competence' : 'end';
+    render();
+  };
+  inner.appendChild(btn);
+  card.appendChild(inner);
+  wrap.appendChild(card);
+  return wrap;
+}
+
+function renderPostCompetence(){
+  var wrap=mkEl('div','fade-in'); wrap.style.width='100%';
+  var card=mkEl('div','card');
+  var inner=mkEl('div','end-inner');
+  var title=mkEl('div','end-title'); title.textContent='Final Assessment'; inner.appendChild(title);
+  var body=mkEl('div','end-body');
+  body.innerHTML='Now that you have seen '+eName()+'\'s predictions, please answer the following question:';
+  inner.appendChild(body);
+
+  var group=mkEl('div','likert-group');
+  group.style.width='100%';
+  var item=mkEl('div','likert-item');
+  var qEl=mkEl('div','likert-q');
+  qEl.textContent='In your opinion, how competent is '+eName()+' based on their predictions in the task? Consider whether they seem capable, skillful, efficient, and able to make good decisions. Please rate '+eName()+' on a scale from 1 (extremely incompetent) to 7 (extremely competent), where 4 indicates neither competent nor incompetent.';
+  item.appendChild(qEl);
+  var track=mkEl('div','likert-track');
+  var btns=mkEl('div','likert-buttons');
+  for(var v=1;v<=CONFIG.likertPoints;v++){(function(val){
+    var btn=mkEl('button','likert-btn'+(state.postCompetenceRating===val?' selected':''));
+    btn.textContent=String(val);
+    btn.type='button';
+    btn.onclick=function(){ state.postCompetenceRating=val; render(); };
+    btns.appendChild(btn);
+  })(v);}
+  var anchors=mkEl('div','likert-anchors');
+  anchors.appendChild(Object.assign(mkEl('span'),{textContent:'Extremely incompetent'}));
+  anchors.appendChild(Object.assign(mkEl('span'),{textContent:'Neither competent nor incompetent'}));
+  anchors.appendChild(Object.assign(mkEl('span'),{textContent:'Extremely competent'}));
+  track.appendChild(btns); track.appendChild(anchors);
+  item.appendChild(track);
+  group.appendChild(item);
+  inner.appendChild(group);
+
+  var errBox=mkEl('div','error-box');
+  errBox.id='post-comp-err-box';
+  errBox.textContent='Please answer the question before continuing.';
+  inner.appendChild(errBox);
+
+  var btn=mkEl('button','btn btn-submit');
+  btn.textContent='Continue ->';
+  btn.style.cssText='max-width:260px;width:100%;';
+  btn.onclick=function(){
+    if(state.postCompetenceRating === null){
+      var err=document.getElementById('post-comp-err-box');
+      if(err) err.style.display='block';
+      return;
+    }
     state.screen='end';
     render();
   };
@@ -2226,6 +2284,11 @@ function finishGame(){
     }
     if(state.overallAttributionDecisionTime != null){
       p.set('oadt', state.overallAttributionDecisionTime); // overall attribution decision time
+    }
+
+    // Post-game competence rating (post-measure)
+    if(state.postCompetenceRating != null){
+      p.set('pcc', state.postCompetenceRating); // post_competence_check
     }
 
     // Round data (shortened parameter names to save URL space)
