@@ -2087,7 +2087,7 @@ function renderOverallAttribution(){
       return;
     }
     state.overallAttributionDecisionTime = state.overallAttributionStartTime ? Date.now() - state.overallAttributionStartTime : null;
-    state.screen = isCompetenceCondition() ? 'post-competence' : 'end';
+    state.screen='end';
     render();
   };
   inner.appendChild(btn);
@@ -2143,7 +2143,7 @@ function renderPostCompetence(){
       if(err) err.style.display='block';
       return;
     }
-    state.screen='end';
+    state.screen='overall-attribution';
     render();
   };
   inner.appendChild(btn);
@@ -2261,7 +2261,7 @@ function advanceRound(){
   });
   state.roundIndex++;
   if(state.roundIndex>=ROUNDS.length){
-    state.screen='overall-attribution';
+    state.screen = isCompetenceCondition() ? 'post-competence' : 'overall-attribution';
     state.overallAttributionStartTime = Date.now();
     render();
   } else {
