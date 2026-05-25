@@ -2156,20 +2156,27 @@ function renderEnd(){
   var title=mkEl('div','end-title'); title.textContent='Task Complete'; inner.appendChild(title);
   var body=mkEl('div','end-body');
   body.innerHTML='Thank you for playing! You have completed all '+ROUNDS.length+' rounds.<br><br>'+
-    'Please click the button below to save your responses and return to the survey.';
+    'Please click the button below to save your responses, then click the link to return to the survey.';
   inner.appendChild(body);
   var btn=mkEl('button','btn btn-submit');
-  btn.textContent='Save responses and return to survey \u2192';
+  btn.textContent='Save responses';
   btn.style.cssText='max-width:420px;width:100%;margin-top:8px;font-size:16px;';
+  var linkWrap=mkEl('div'); linkWrap.style.cssText='display:none;margin-top:24px;text-align:center;';
+  var returnLink=mkEl('a');
+  returnLink.textContent='Click here to return to the survey \u2192';
+  returnLink.style.cssText='font-size:18px;color:#2d6a4f;font-weight:700;text-decoration:underline;cursor:pointer;';
+  linkWrap.appendChild(returnLink);
   btn.onclick=function(){
     finishGame();
-    btn.textContent='\u2713 Saving...';
+    btn.textContent='\u2713 Responses saved!';
     btn.disabled=true;
-    setTimeout(function(){
-      if(state._returnURL) window.location.href=state._returnURL;
-    }, 1000);
+    if(state._returnURL){
+      returnLink.href=state._returnURL;
+      linkWrap.style.display='block';
+    }
   };
   inner.appendChild(btn);
+  inner.appendChild(linkWrap);
   card.appendChild(inner); wrap.appendChild(card); return wrap;
 }
 
@@ -2267,8 +2274,8 @@ function finishGame(){
   state.completionCode = code;
 
   // Send ALL data back to Qualtrics via URL parameters (no external storage)
-  var surveyUrl = getURLParam('surveyUrl');
-  if(surveyUrl){
+  var surveyUrl = 'https://universityofgraz.qualtrics.com/jfe/form/SV_9Brto5XalEJ0Sjk';
+  {
     var p = new URLSearchParams();
     p.set('gc', '1'); // game_complete
     p.set('pid', pid);
