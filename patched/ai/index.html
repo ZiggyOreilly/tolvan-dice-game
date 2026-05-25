@@ -528,7 +528,9 @@ var CONDITION_CODE_MAP = {
   'comp_l_i': 'competence_low_incorrect'
 };
 
-var EXP_CONDITION = (getURLParam('condition') || '').toLowerCase();
+var LAUNCH_CONDITION = (getURLParam('condition') || '').toLowerCase();
+
+var EXP_CONDITION = LAUNCH_CONDITION;
 if(CONDITION_CODE_MAP[EXP_CONDITION]) EXP_CONDITION = CONDITION_CODE_MAP[EXP_CONDITION];
 
 if(CONDITION_KEYS.indexOf(EXP_CONDITION) === -1){
@@ -2082,7 +2084,7 @@ function renderOverallAttribution(){
     }
     state.overallAttributionDecisionTime = state.overallAttributionStartTime ? Date.now() - state.overallAttributionStartTime : null;
     state.screen='end';
-    finishGame();  // fires postMessage HERE
+    finishGame();
     render();
   };
   inner.appendChild(btn);
@@ -2149,16 +2151,29 @@ function renderPostCompetence(){
 
 // END
 function renderEnd(){
-  var wrap = mkEl('div','fade-in'); wrap.style.width='100%';
-  var card = mkEl('div','card');
-  var inner = mkEl('div','end-inner');
-  var title = mkEl('div','end-title'); title.textContent='All done!'; inner.appendChild(title);
-  var body = mkEl('div','end-body');
+  if(!state.completionCode) state.completionCode=generateCode();
+  if(!state._returnURL) finishGame();
+
+  var wrap=mkEl('div','fade-in'); wrap.style.width='100%';
+  var card=mkEl('div','card'); var inner=mkEl('div','end-inner');
+  var title=mkEl('div','end-title'); title.textContent='All done!'; inner.appendChild(title);
+  var body=mkEl('div','end-body');
   body.textContent='Sending your responses. The survey will continue automatically...';
   inner.appendChild(body);
-  var spinner = mkEl('div'); spinner.style.cssText='font-size:40px;margin-top:8px;';
-  spinner.textContent='?'; inner.appendChild(spinner);
+  var codeBox=mkEl('div','completion-code');
+  codeBox.textContent=state.completionCode || '';
+  codeBox.style.cssText='font-size:28px;margin:16px 0;font-weight:700;';
+  inner.appendChild(codeBox);
+  if(!getReturnSurveyUrl()){
+    var warn=mkEl('div','end-body');
+    warn.style.cssText='color:#b00020;font-weight:600;';
+    warn.textContent='No return_address/surveyUrl in launch link — cannot return to Qualtrics.';
+    inner.appendChild(warn);
+  }
   card.appendChild(inner); wrap.appendChild(card);
+  if(state._returnURL){
+    setTimeout(function(){ (window.top||window).location.href=state._returnURL; }, 1200);
+  }
   return wrap;
 }// ================================
 // LOGIC
@@ -2249,38 +2264,39 @@ function advanceRound(){
   }
 }
 function finishGame(){
-  var pid = getParticipantId();
   var code = state.completionCode || generateCode();
   state.completionCode = code;
 
-  var payload = {
-    type: 'gameComplete',
-    pid: pid,
-    code: code,
-    condition: EXP_CONDITION,
-    agent: 'ai',
-    cc: state.characterRatings && state.characterRatings.competence != null ? state.characterRatings.competence : null,
-    postCompetenceRating: state.postCompetenceRating,
-    oa: state.overallAttribution,
-    oadt: state.overallAttributionDecisionTime,
-    rounds: state.ratings.map(function(r){
-      return {
-        roundId: r.roundId || '',
-        dieLabel: r.dieLabel || '',
-        prediction: r.prediction || '',
-        probability: r.dieProbability != null ? r.dieProbability : '',
-        outcome: r.outcome || '',
-        predictionJustification: r.predictionJustification || '',
-        justifiedTruthValue: r.aiCorrect === true ? 1 : 0,
-        assertability: r.assertability != null ? r.assertability : '',
-        justification: r.justification != null ? r.justification : '',
-        attribution: r.attribution != null ? r.attribution : '',
-        decisionTimeMs: r.decisionTimeMs != null ? r.decisionTimeMs : ''
-      };
-    }),
-    decisionTimes: state.decisionTimes
-  };
-  window.parent.postMessage(payload, 'https://universityofgraz.qualtrics.com');
+  var surveyUrl = getReturnSurveyUrl();
+  if(!surveyUrl) return;
+
+  var params = new URLSearchParams();
+  params.set('game_complete', '1');
+  params.set('code', code);
+  params.set('condition', LAUNCH_CONDITION || EXP_CONDITION);
+
+  if(state.postCompetenceRating != null){
+    params.set('competence_rating', state.postCompetenceRating);
+  }
+  if(state.overallAttribution != null){
+    params.set('overallAttribution', state.overallAttribution);
+  }
+  if(state.overallAttributionDecisionTime != null){
+    params.set('overallAttributionDecisionTime', state.overallAttributionDecisionTime);
+  }
+
+  for(var i = 0; i < state.ratings.length; i++){
+    var r = state.ratings[i]; var n = i + 1;
+    if(r.dieLabel) params.set('die_' + n, r.dieLabel);
+    if(r.dieProbability != null && r.dieProbability !== ''){
+      params.set('dieProbability_' + n, r.dieProbability);
+    }
+    if(r.assertability) params.set('assertability_' + n, r.assertability);
+    if(r.justification) params.set('justification_' + n, r.justification);
+  }
+
+  var base = decodeURIComponent(surveyUrl);
+  state._returnURL = base + (base.indexOf('?') > -1 ? '&' : '?') + params.toString();
 }render();
 </script>
 </body>
