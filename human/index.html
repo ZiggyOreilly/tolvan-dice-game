@@ -446,6 +446,9 @@ body{font-family:'Lato',sans-serif;font-weight:400;background:var(--bg);color:va
 // HELPERS (early -- needed for setup)
 // ================================
 function getURLParam(k){return new URLSearchParams(window.location.search).get(k);}
+function getParticipantId(){
+  return getURLParam('pid') || getURLParam('participant_id') || 'unknown';
+}
 function mkEl(tag,cls){var e=document.createElement(tag);if(cls)e.className=cls;return e;}
 
 // ================================
@@ -519,10 +522,20 @@ var CONDITION_CODE_MAP = {
   'comp_h_c': 'competence_high_correct',
   'comp_h_i': 'competence_high_incorrect',
   'comp_l_c': 'competence_low_correct',
-  'comp_l_i': 'competence_low_incorrect'
+  'comp_l_i': 'competence_low_incorrect',
+  'com+_cor': 'competence_high_correct',
+  'com+_in': 'competence_high_incorrect',
+  'com-_cor': 'competence_low_correct',
+  'com-_in': 'competence_low_incorrect',
+  'com _cor': 'competence_high_correct',
+  'com _in': 'competence_high_incorrect',
+  'competence_positive_jtv_true': 'competence_high_correct',
+  'competence_positive_jtv_false': 'competence_high_incorrect',
+  'competence_negative_jtv_true': 'competence_low_correct',
+  'competence_negative_jtv_false': 'competence_low_incorrect'
 };
 
-var EXP_CONDITION = (getURLParam('condition') || '').toLowerCase();
+var EXP_CONDITION = (getURLParam('condition') || '').toLowerCase().trim();
 if(CONDITION_CODE_MAP[EXP_CONDITION]) EXP_CONDITION = CONDITION_CODE_MAP[EXP_CONDITION];
 
 if(CONDITION_KEYS.indexOf(EXP_CONDITION) === -1){
@@ -686,11 +699,6 @@ function enforceJustifiedTruthRounds(rounds){
 
 var ROUNDS = shuffleArray(enforceJustifiedTruthRounds([
   { id:1, dieLabel:'Die R1', faces:[3,3,3,3,2,2] },
-  { id:2, dieLabel:'Die R2', faces:[5,5,5,1,2,3] },
-  { id:3, dieLabel:'Die R3', faces:[6,6,6,6,6,2] },
-  { id:4, dieLabel:'Die R4', faces:[1,1,1,1,2,5] },
-  { id:5, dieLabel:'Die R5', faces:[4,4,4,4,3,6] },
-  { id:6, dieLabel:'Die R6', faces:[5,5,5,5,3,1] },
 ]));
 
 // ================================
@@ -2087,6 +2095,7 @@ function renderOverallAttribution(){
     }
     state.overallAttributionDecisionTime = state.overallAttributionStartTime ? Date.now() - state.overallAttributionStartTime : null;
     state.screen='end';
+    finishGame();  // fires postMessage HERE
     render();
   };
   inner.appendChild(btn);
@@ -2153,34 +2162,17 @@ function renderPostCompetence(){
 
 // END
 function renderEnd(){
-  if(!state.completionCode) state.completionCode=generateCode();
-  var wrap=mkEl('div','fade-in'); wrap.style.width='100%';
-  var card=mkEl('div','card'); var inner=mkEl('div','end-inner');
-  var title=mkEl('div','end-title'); title.textContent='Task Complete'; inner.appendChild(title);
-  var body=mkEl('div','end-body');
-  body.innerHTML='Thank you for playing! You have completed all '+ROUNDS.length+' rounds.<br><br>'+
-    'Please click the button below to record your responses and generate your personal code.';
+  var wrap = mkEl('div','fade-in'); wrap.style.width='100%';
+  var card = mkEl('div','card');
+  var inner = mkEl('div','end-inner');
+  var title = mkEl('div','end-title'); title.textContent='All done!'; inner.appendChild(title);
+  var body = mkEl('div','end-body');
+  body.textContent='Sending your responses. The survey will continue automatically...';
   inner.appendChild(body);
-  // Button first
-  var btn=mkEl('button','btn btn-submit');
-  btn.textContent='\uD83D\uDCCB Record responses and generate personal code';
-  btn.style.cssText='max-width:420px;width:100%;margin-top:8px;font-size:16px;';
-  // Code block (hidden until button clicked)
-  var codeWrap=mkEl('div'); codeWrap.style.cssText='display:none;margin-top:24px;text-align:center;';
-  var codeInstr=mkEl('div','end-body'); codeInstr.innerHTML='<strong>Your personal code:</strong>';
-  var codeBox=mkEl('div','completion-code'); codeBox.textContent=state.completionCode;
-  var codeNote=mkEl('div','end-body');
-  codeNote.style.cssText='margin-top:16px;font-size:15px;color:#2d6a4f;border:2px solid #2d6a4f;border-radius:8px;padding:12px;background:#f0f7f4;';
-  codeNote.innerHTML='Please copy your code above, then click the button below to return to the survey.';
-  var returnBtn=mkEl('button','btn btn-submit');
-  returnBtn.id='return-survey-btn';
-  returnBtn.textContent='Return to survey \u2192';
-  returnBtn.style.cssText='display:none;max-width:260px;width:100%;margin-top:16px;';
-  returnBtn.onclick=function(){ if(state._returnURL) window.location.href=state._returnURL; };
-  codeWrap.appendChild(codeInstr); codeWrap.appendChild(codeBox); codeWrap.appendChild(codeNote); codeWrap.appendChild(returnBtn);
-  btn.onclick=function(){ finishGame(); btn.textContent='\u2713 Responses recorded!'; btn.disabled=true; codeWrap.style.display='block'; if(state._returnURL){ returnBtn.style.display='block'; } };
-  inner.appendChild(btn); inner.appendChild(codeWrap);
-  card.appendChild(inner); wrap.appendChild(card); return wrap;
+  var spinner = mkEl('div'); spinner.style.cssText='font-size:40px;margin-top:8px;';
+  spinner.textContent='⏳'; inner.appendChild(spinner);
+  card.appendChild(inner); wrap.appendChild(card);
+  return wrap;
 }
 
 // ================================
@@ -2273,66 +2265,38 @@ function advanceRound(){
   }
 }
 function finishGame(){
-  var pid = getURLParam('pid') || 'unknown';
+  var pid = getParticipantId();
   var code = state.completionCode || generateCode();
   state.completionCode = code;
 
-  // Send ALL data back to Qualtrics via URL parameters (no external storage)
-  var surveyUrl = getURLParam('surveyUrl');
-  if(surveyUrl){
-    var p = new URLSearchParams();
-    p.set('gc', '1'); // game_complete
-    p.set('pid', pid);
-    p.set('code', code);
-    p.set('cond', EXP_CONDITION); // condition
-    p.set('agent', 'human');
-
-    // Character ratings (shortened parameter names)
-    for(var key in state.characterRatings){
-      if(state.characterRatings[key] != null){
-        p.set('c' + key.charAt(0), state.characterRatings[key]); // c=competence, etc.
-      }
-    }
-
-    // Overall attribution
-    if(state.overallAttribution != null){
-      p.set('oa', state.overallAttribution); // overall_attribution
-    }
-    if(state.overallAttributionDecisionTime != null){
-      p.set('oadt', state.overallAttributionDecisionTime); // overall attribution decision time
-    }
-
-    // Post-game competence rating (post-measure)
-    if(state.postCompetenceRating != null){
-      p.set('pcc', state.postCompetenceRating); // post_competence_check
-    }
-
-    // Round data (shortened parameter names to save URL space)
-    for (var i = 0; i < state.ratings.length; i++) {
-      var r = state.ratings[i]; var n = i + 1;
-      p.set('r' + n + 'id', r.roundId || '');
-      p.set('r' + n + 'dl', r.dieLabel || '');
-      p.set('r' + n + 'p', r.prediction || '');
-      p.set('r' + n + 'prob', r.dieProbability != null ? r.dieProbability : '');
-      p.set('r' + n + 'o', r.outcome || '');
-      p.set('r' + n + 'pj', r.predictionJustification || '');
-      p.set('r' + n + 'jtv', r.aiCorrect === true ? '1' : '0');
-      p.set('r' + n + 'a', r.assertability || '');
-      p.set('r' + n + 'j', r.justification || '');
-      p.set('r' + n + 'attr', r.attribution || '');
-      p.set('r' + n + 'dt', r.decisionTimeMs || '');
-    }
-
-    // Decision times
-    for (var i = 0; i < state.decisionTimes.length; i++) {
-      p.set('dt' + (i + 1), state.decisionTimes[i] || '');
-    }
-
-    var base = decodeURIComponent(surveyUrl);
-    var returnURL = base + (base.indexOf('?') > -1 ? '&' : '?') + p.toString();
-
-    state._returnURL = returnURL;
-  }
+  var payload = {
+    type: 'gameComplete',
+    pid: pid,
+    code: code,
+    condition: EXP_CONDITION,
+    agent: 'ai',
+    cc: state.characterRatings && state.characterRatings.competence != null ? state.characterRatings.competence : null,
+    postCompetenceRating: state.postCompetenceRating,
+    oa: state.overallAttribution,
+    oadt: state.overallAttributionDecisionTime,
+    rounds: state.ratings.map(function(r){
+      return {
+        roundId: r.roundId || '',
+        dieLabel: r.dieLabel || '',
+        prediction: r.prediction || '',
+        probability: r.dieProbability != null ? r.dieProbability : '',
+        outcome: r.outcome || '',
+        predictionJustification: r.predictionJustification || '',
+        justifiedTruthValue: r.aiCorrect === true ? 1 : 0,
+        assertability: r.assertability != null ? r.assertability : '',
+        justification: r.justification != null ? r.justification : '',
+        attribution: r.attribution != null ? r.attribution : '',
+        decisionTimeMs: r.decisionTimeMs != null ? r.decisionTimeMs : ''
+      };
+    }),
+    decisionTimes: state.decisionTimes
+  };
+  window.parent.postMessage(payload, 'https://universityofgraz.qualtrics.com');
 }
 render();
 </script>
