@@ -518,10 +518,20 @@ var CONDITION_CODE_MAP = {
   'comp_h_c': 'competence_high_correct',
   'comp_h_i': 'competence_high_incorrect',
   'comp_l_c': 'competence_low_correct',
-  'comp_l_i': 'competence_low_incorrect'
+  'comp_l_i': 'competence_low_incorrect',
+  'com+_cor': 'competence_high_correct',
+  'com+_in': 'competence_high_incorrect',
+  'com-_cor': 'competence_low_correct',
+  'com-_in': 'competence_low_incorrect',
+  'com _cor': 'competence_high_correct',
+  'com _in': 'competence_high_incorrect',
+  'competence_positive_jtv_true': 'competence_high_correct',
+  'competence_positive_jtv_false': 'competence_high_incorrect',
+  'competence_negative_jtv_true': 'competence_low_correct',
+  'competence_negative_jtv_false': 'competence_low_incorrect'
 };
 
-var EXP_CONDITION = (getURLParam('condition') || '').toLowerCase();
+var EXP_CONDITION = (getURLParam('condition') || '').toLowerCase().trim();
 if(CONDITION_CODE_MAP[EXP_CONDITION]) EXP_CONDITION = CONDITION_CODE_MAP[EXP_CONDITION];
 
 if(CONDITION_KEYS.indexOf(EXP_CONDITION) === -1){
@@ -2141,33 +2151,25 @@ function renderPostCompetence(){
 
 // END
 function renderEnd(){
-  if(!state.completionCode) state.completionCode=generateCode();
   var wrap=mkEl('div','fade-in'); wrap.style.width='100%';
   var card=mkEl('div','card'); var inner=mkEl('div','end-inner');
   var title=mkEl('div','end-title'); title.textContent='Task Complete'; inner.appendChild(title);
   var body=mkEl('div','end-body');
   body.innerHTML='Thank you for playing! You have completed all '+ROUNDS.length+' rounds.<br><br>'+
-    'Please click the button below to record your responses and generate your personal code.';
+    'Please click the button below to save your responses and return to the survey.';
   inner.appendChild(body);
-  // Button first
   var btn=mkEl('button','btn btn-submit');
-  btn.textContent='\uD83D\uDCCB Record responses and generate personal code';
+  btn.textContent='Save responses and return to survey \u2192';
   btn.style.cssText='max-width:420px;width:100%;margin-top:8px;font-size:16px;';
-  // Code block (hidden until button clicked)
-  var codeWrap=mkEl('div'); codeWrap.style.cssText='display:none;margin-top:24px;text-align:center;';
-  var codeInstr=mkEl('div','end-body'); codeInstr.innerHTML='<strong>Your personal code:</strong>';
-  var codeBox=mkEl('div','completion-code'); codeBox.textContent=state.completionCode;
-  var codeNote=mkEl('div','end-body');
-  codeNote.style.cssText='margin-top:16px;font-size:15px;color:#2d6a4f;border:2px solid #2d6a4f;border-radius:8px;padding:12px;background:#f0f7f4;';
-  codeNote.innerHTML='Please copy your code above, then click the button below to return to the survey.';
-  var returnBtn=mkEl('button','btn btn-submit');
-  returnBtn.id='return-survey-btn';
-  returnBtn.textContent='Return to survey \u2192';
-  returnBtn.style.cssText='display:none;max-width:260px;width:100%;margin-top:16px;';
-  returnBtn.onclick=function(){ if(state._returnURL) window.location.href=state._returnURL; };
-  codeWrap.appendChild(codeInstr); codeWrap.appendChild(codeBox); codeWrap.appendChild(codeNote); codeWrap.appendChild(returnBtn);
-  btn.onclick=function(){ finishGame(); btn.textContent='\u2713 Responses recorded!'; btn.disabled=true; codeWrap.style.display='block'; if(state._returnURL){ returnBtn.style.display='block'; } };
-  inner.appendChild(btn); inner.appendChild(codeWrap);
+  btn.onclick=function(){
+    finishGame();
+    btn.textContent='\u2713 Saving...';
+    btn.disabled=true;
+    setTimeout(function(){
+      if(state._returnURL) window.location.href=state._returnURL;
+    }, 1000);
+  };
+  inner.appendChild(btn);
   card.appendChild(inner); wrap.appendChild(card); return wrap;
 }
 
