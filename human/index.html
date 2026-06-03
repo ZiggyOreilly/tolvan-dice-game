@@ -334,6 +334,8 @@ body{font-family:'Lato',sans-serif;font-weight:400;background:var(--bg);color:va
 .likert-anchors span:first-child{grid-column:1;}
 .likert-anchors span:nth-child(2):nth-last-child(2){grid-column:4;}
 .likert-anchors span:last-child{grid-column:7;}
+.likert-anchors.competence-anchors{font-size:9px;letter-spacing:0.03em;}
+.likert-anchors.assessment-anchors{font-size:9px;letter-spacing:0.03em;}
 
 /* Tutorial */
 .tut-header{display:flex;align-items:center;gap:12px;}
@@ -1389,6 +1391,7 @@ function buildCharacterRatingItem(key, question, leftAnchor, midAnchor, rightAnc
   track.appendChild(buttons);
 
   var anchors=mkEl('div','likert-anchors');
+  if(key === 'competence') anchors.classList.add('competence-anchors');
   anchors.appendChild(Object.assign(mkEl('span'),{textContent:leftAnchor}));
   anchors.appendChild(Object.assign(mkEl('span'),{textContent:midAnchor}));
   anchors.appendChild(Object.assign(mkEl('span'),{textContent:rightAnchor}));
@@ -1612,6 +1615,7 @@ function tutStep4_combined(){
 
     item.appendChild(btns);
     var anch=mkEl('div','likert-anchors');
+    anch.classList.add('assessment-anchors');
     anch.appendChild(Object.assign(mkEl('span'),{textContent:q.left}));
     anch.appendChild(Object.assign(mkEl('span'),{textContent:q.right}));
     item.appendChild(anch);
@@ -2056,6 +2060,7 @@ function buildLikert(){
       btns.appendChild(btn);
     })(v);}
     var anchors=mkEl('div','likert-anchors');
+    anchors.classList.add('assessment-anchors');
     var l=mkEl('span');l.textContent=q.left || 'Definitely not'; var r=mkEl('span');r.textContent=q.right || 'Definitely yes';
     anchors.appendChild(l); anchors.appendChild(r);
     track.appendChild(btns); track.appendChild(anchors); item.appendChild(track); group.appendChild(item);
@@ -2168,6 +2173,7 @@ function renderPostCompetence(){
     btns.appendChild(btn);
   })(v);}
   var anchors=mkEl('div','likert-anchors');
+  anchors.classList.add('competence-anchors');
   anchors.appendChild(Object.assign(mkEl('span'),{textContent:'Extremely incompetent'}));
   anchors.appendChild(Object.assign(mkEl('span'),{textContent:'Neither competent nor incompetent'}));
   anchors.appendChild(Object.assign(mkEl('span'),{textContent:'Extremely competent'}));
