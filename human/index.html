@@ -765,7 +765,7 @@ var state = {
   inspectedDie:false,
   tutDieInspected:false,
   tutRating:{},
-  characterRatings:{ moral:null, competence:null, tone:null },
+  characterRatings:{ moral:null, competence:null },
   overallAttribution:null,
   overallAttributionStartTime:null,
   overallAttributionDecisionTime:null,
@@ -1345,13 +1345,6 @@ function renderManipulation(){
       'Extremely competent'
     ));
   }
-  ratingGroup.appendChild(buildCharacterRatingItem(
-    'tone',
-    'In your opinion, how positive or negative is the overall tone of '+robotName()+'\'s response? Please rate it on a scale from 1 (extremely negative) to 7 (extremely positive), where 4 indicates neither positive nor negative.',
-    'Extremely negative',
-    'Neither positive nor negative',
-    'Extremely positive'
-  ));
   checkSec.appendChild(ratingGroup);
 
   card.appendChild(checkSec);
@@ -1408,7 +1401,7 @@ function buildCharacterRatingItem(key, question, leftAnchor, midAnchor, rightAnc
 function handleManipulationContinue(){
   var missingMoral = isMoralCondition() && state.characterRatings.moral === null;
   var missingCompetence = isCompetenceCondition() && state.characterRatings.competence === null;
-  if(missingMoral || missingCompetence || state.characterRatings.tone === null){
+  if(missingMoral || missingCompetence){
     var ratingErr=document.getElementById('err-box');
     if(ratingErr) ratingErr.style.display='block';
     return;
@@ -1598,8 +1591,7 @@ function tutStep4_combined(){
 
   [
     {key:'assertability', text:'Should '+TUT_PARTNER+' have said that?', left:'Definitely not', right:'Definitely yes'},
-    {key:'justification', text:'Did '+TUT_PARTNER+' have good reasons for making this prediction?', left:'Definitely not', right:'Definitely yes'},
-    {key:'attribution', text:'Was the agent\'s response primarily caused by the agent itself, regardless of the situation, or primarily caused by the situation the agent was in?', left:'Mostly by the situation', right:'Mostly by the agent'}
+    {key:'justification', text:'Did '+TUT_PARTNER+' have good reasons for making this prediction?', left:'Definitely not', right:'Definitely yes'}
   ].forEach(function(q){
     var key=q.key;
     var item=mkEl('div'); item.style.marginTop='12px';
@@ -1639,8 +1631,7 @@ function selectTutRating(key,val){
 
 function tutBothRated(){
   return state.tutRating.assertability != null &&
-    state.tutRating.justification != null &&
-    state.tutRating.attribution != null;
+    state.tutRating.justification != null;
 }
 
 function tutStep_partner(){
@@ -1993,7 +1984,7 @@ function renderGame(){
       ob.style.marginTop='0';
       var om=mkEl('div','outcome-main');
       var emoji=mkEl('span','emoji'); emoji.textContent=isMatch?'🎉':'😕';
-      var ot=mkEl('span'); ot.innerHTML='Die shows <strong>'+state.outcome+'</strong> -- prediction was <strong>'+round.prediction+'</strong>. '+(isMatch?'Match!':'No match.');
+      var ot=mkEl('span'); ot.innerHTML='Die shows <strong>'+state.outcome+'</strong> -- prediction was <strong>'+round.prediction+'</strong>. '+(isMatch?'Match!':'Incorrect.');
       om.appendChild(emoji); om.appendChild(ot); ob.appendChild(om);
       var sub=mkEl('div','outcome-sub'); sub.style.marginTop='8px';
       if(isMatch){
@@ -2047,7 +2038,6 @@ function buildLikert(){
   var questions=[
     {key:'assertability',text:'Should '+eName()+' have said that?'}
   ,{key:'justification', text:'Did '+eName()+' have good reasons to say that?'}
-  ,{key:'attribution', text:'Was the agent\'s response primarily caused by the agent itself, regardless of the situation, or primarily caused by the situation the agent was in?', left:'Mostly by the situation', right:'Mostly by the agent'}
   ];
 
   var group=mkEl('div','likert-group');
@@ -2083,8 +2073,7 @@ function selectRating(key,val){
 function bothRated(){
   return state.inspectedDie &&
   state.ratingPost.assertability != null &&
-  state.ratingPost.justification != null &&
-  state.ratingPost.attribution != null;
+  state.ratingPost.justification != null;
 }
 
 // Generate a completion code: 5 random digits + z (e.g. "48392z")
