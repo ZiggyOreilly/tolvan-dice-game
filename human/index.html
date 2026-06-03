@@ -1276,7 +1276,7 @@ function renderManipulation(){
   card.appendChild(title);
 
   var intro=mkEl('div','intro-body');
-  intro.innerHTML='Before the task starts, please read the following information about your partner, <strong>'+robotName()+'</strong>. '+robotName()+' is a human partner who works in everyday environments such as workplaces and community settings, where they interact with people on a daily basis.';
+  intro.innerHTML='Before the task starts, please read the following information about your partner, <strong>'+robotName()+'</strong>. '+robotName()+' is a human partner recruited from Prolific. Prior to this session, '+robotName()+' completed a short questionnaire about how they typically approach tasks and interact with others in everyday settings such as work and community environments.';
   card.appendChild(intro);
 
   var partnerBox=mkEl('div','partner-box');
@@ -1974,14 +1974,12 @@ function renderGame(){
       var emoji=mkEl('span','emoji'); emoji.textContent=isMatch?'🎉':'😕';
       var ot=mkEl('span'); ot.innerHTML='Die shows <strong>'+state.outcome+'</strong> -- prediction was <strong>'+round.prediction+'</strong>. '+(isMatch?'Match!':'Incorrect.');
       om.appendChild(emoji); om.appendChild(ot); ob.appendChild(om);
-      var sub=mkEl('div','outcome-sub'); sub.style.marginTop='8px';
-      if(isMatch){
-        sub.innerHTML='<strong style="color:#1a6b3a;font-size:16px;">The prediction matched the outcome.</strong>';
-      } else {
-        sub.innerHTML='<strong style="color:#8b1a1a;font-size:16px;">The prediction did not match the outcome.</strong>';
-      }
-      ob.appendChild(sub);
       card.appendChild(ob);
+
+      var probNote=mkEl('div');
+      probNote.style.cssText='font-size:13px;color:var(--text-mid);margin:10px 0 4px;padding:10px 14px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);';
+      probNote.textContent=predictionProbabilityText(round.faces, round.prediction);
+      card.appendChild(probNote);
 
       // Type of die -- with explanatory note
       card.appendChild(makeDivider('Type of Die'));
