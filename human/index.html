@@ -325,7 +325,15 @@ body{font-family:'Lato',sans-serif;font-weight:400;background:var(--bg);color:va
 .likert-btn{flex:1;height:44px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text-mid);font-family:'Lato',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.15s ease;display:flex;align-items:center;justify-content:center;}
 .likert-btn:hover{border-color:var(--accent-light);color:var(--accent);background:var(--accent-pale);}
 .likert-btn.selected{background:var(--accent);color:white;border-color:var(--accent);box-shadow:0 2px 8px rgba(45,106,79,0.3);}
-.likert-anchors{display:flex;justify-content:space-between;font-size:10px;color:var(--text-dim);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;padding:0 2px;}
+.likert-anchors{
+  display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;
+  font-size:10px;color:var(--text-dim);font-weight:700;text-transform:uppercase;
+  letter-spacing:0.06em;padding:0;line-height:1.25;
+}
+.likert-anchors span{min-width:0;text-align:center;overflow-wrap:anywhere;}
+.likert-anchors span:first-child{grid-column:1;}
+.likert-anchors span:nth-child(2):nth-last-child(2){grid-column:4;}
+.likert-anchors span:last-child{grid-column:7;}
 
 /* Tutorial */
 .tut-header{display:flex;align-items:center;gap:12px;}
@@ -512,27 +520,39 @@ function isCompetenceCondition(){
 // CONDITION SETUP
 // ================================
 var CONDITION_KEYS = [
-  'competence_high_correct',
-  'competence_high_incorrect',
-  'competence_low_correct',
-  'competence_low_incorrect'
+  'competence_high_justified',
+  'competence_high_unjustified',
+  'competence_low_justified',
+  'competence_low_unjustified'
 ];
 
 var CONDITION_CODE_MAP = {
-  'comp_h_c': 'competence_high_correct',
-  'comp_h_i': 'competence_high_incorrect',
-  'comp_l_c': 'competence_low_correct',
-  'comp_l_i': 'competence_low_incorrect',
-  'com+_cor': 'competence_high_correct',
-  'com+_in': 'competence_high_incorrect',
-  'com-_cor': 'competence_low_correct',
-  'com-_in': 'competence_low_incorrect',
-  'com _cor': 'competence_high_correct',
-  'com _in': 'competence_high_incorrect',
-  'competence_positive_jtv_true': 'competence_high_correct',
-  'competence_positive_jtv_false': 'competence_high_incorrect',
-  'competence_negative_jtv_true': 'competence_low_correct',
-  'competence_negative_jtv_false': 'competence_low_incorrect'
+  'comp_h_j': 'competence_high_justified',
+  'comp_h_u': 'competence_high_unjustified',
+  'comp_l_j': 'competence_low_justified',
+  'comp_l_u': 'competence_low_unjustified',
+  'comp_h_c': 'competence_high_justified',
+  'comp_h_i': 'competence_high_unjustified',
+  'comp_l_c': 'competence_low_justified',
+  'comp_l_i': 'competence_low_unjustified',
+  'com+_j': 'competence_high_justified',
+  'com+_u': 'competence_high_unjustified',
+  'com-_j': 'competence_low_justified',
+  'com-_u': 'competence_low_unjustified',
+  'com+_cor': 'competence_high_justified',
+  'com+_in': 'competence_high_unjustified',
+  'com-_cor': 'competence_low_justified',
+  'com-_in': 'competence_low_unjustified',
+  'com _cor': 'competence_high_justified',
+  'com _in': 'competence_high_unjustified',
+  'competence_high_correct': 'competence_high_justified',
+  'competence_high_incorrect': 'competence_high_unjustified',
+  'competence_low_correct': 'competence_low_justified',
+  'competence_low_incorrect': 'competence_low_unjustified',
+  'competence_positive_jtv_true': 'competence_high_justified',
+  'competence_positive_jtv_false': 'competence_high_unjustified',
+  'competence_negative_jtv_true': 'competence_low_justified',
+  'competence_negative_jtv_false': 'competence_low_unjustified'
 };
 
 var EXP_CONDITION = (getURLParam('condition') || '').toLowerCase().trim();
@@ -584,16 +604,15 @@ var CONDITION_TEXT = {
     label: 'High Competence',
     traitDesc: 'Here are some examples of how {name} behaves in everyday situations:',
     traits: [
-      { text: '{name} learned to speak three languages fluently', positive: true },
-      { text: '{name} solved a new difficult task', positive: true },
-      { text: '{name} made a patent', positive: true },
-      { text: '{name} is able to manage difficulties in adapting their skills', positive: true },
-      { text: '{name} puts in a lot of effort to achieve challenging goals', positive: true },
-      { text: '{name} solves work problems in a creative way', positive: true },
       { text: '{name} is able to complete assigned work independently', positive: true },
-      { text: '{name} is precise in carrying out the tasks assigned to them', positive: true },
       { text: '{name} makes the most of their possibilities', positive: true },
-      { text: '{name} received an upgrade for a money-saving job idea', positive: true },
+      { text: '{name} optimizes company processes to reduce costs', positive: true },
+      { text: '{name} keeps track of important information', positive: true },
+      { text: '{name} copes well with time pressure', positive: true },
+      { text: '{name} notices details beyond the obvious', positive: true },
+      { text: '{name} is able to revise conclusions based on new evidence', positive: true },
+      { text: '{name} is able to manage difficulties in adapting their skills', positive: true },
+      { text: '{name} can learn how to play new musical instruments', positive: true },
     ],
   },
 
@@ -616,21 +635,25 @@ var CONDITION_TEXT = {
 
 var CURRENT_CONDITION;
 
-CONDITION_TEXT.competence_high_incorrect = Object.assign({}, CONDITION_TEXT.competence_high, {
-  label: 'High Competence / Incorrect Prediction',
-  aiCorrect: false
+CONDITION_TEXT.competence_high_justified = Object.assign({}, CONDITION_TEXT.competence_high, {
+  label: 'High Competence / Justified Prediction',
+  aiCorrect: false,
+  predictionJustification: 'justified'
 });
-CONDITION_TEXT.competence_high_correct = Object.assign({}, CONDITION_TEXT.competence_high, {
-  label: 'High Competence / Correct Prediction',
-  aiCorrect: true
+CONDITION_TEXT.competence_high_unjustified = Object.assign({}, CONDITION_TEXT.competence_high, {
+  label: 'High Competence / Unjustified Prediction',
+  aiCorrect: false,
+  predictionJustification: 'unjustified'
 });
-CONDITION_TEXT.competence_low_incorrect = Object.assign({}, CONDITION_TEXT.competence_low, {
-  label: 'Low Competence / Incorrect Prediction',
-  aiCorrect: false
+CONDITION_TEXT.competence_low_justified = Object.assign({}, CONDITION_TEXT.competence_low, {
+  label: 'Low Competence / Justified Prediction',
+  aiCorrect: false,
+  predictionJustification: 'justified'
 });
-CONDITION_TEXT.competence_low_correct = Object.assign({}, CONDITION_TEXT.competence_low, {
-  label: 'Low Competence / Correct Prediction',
-  aiCorrect: true
+CONDITION_TEXT.competence_low_unjustified = Object.assign({}, CONDITION_TEXT.competence_low, {
+  label: 'Low Competence / Unjustified Prediction',
+  aiCorrect: false,
+  predictionJustification: 'unjustified'
 });
 
 CURRENT_CONDITION = CONDITION_TEXT[EXP_CONDITION];
@@ -639,9 +662,8 @@ CURRENT_CONDITION = CONDITION_TEXT[EXP_CONDITION];
 
 // ================================
 // GAME ROUNDS
-// Actual game rounds: the human partner always makes a justified prediction.
-// Justified Truth Value false: the fixed outcome is always different.
-// Justified Truth Value true: the fixed outcome always matches the prediction.
+// Actual game rounds cross competence with prediction justification.
+// Correctness is held constant: the fixed outcome is always different.
 // ================================
 function countFaceValues(faces){
   return faces.reduce(function(counts, value){
@@ -676,20 +698,32 @@ function mostLikelyFaceValueExcept(faces, excludedValue){
   }, candidates[0]);
 }
 
+function leastLikelyFaceValue(faces){
+  var counts = countFaceValues(faces);
+  return faces.reduce(function(worst, value){
+    return counts[value] < counts[worst] ? value : worst;
+  }, faces[0]);
+}
+
 function isAICorrect(){
   return CURRENT_CONDITION && CURRENT_CONDITION.aiCorrect === true;
 }
 
-function enforceJustifiedTruthRounds(rounds){
+function isPredictionJustified(){
+  return !CURRENT_CONDITION || CURRENT_CONDITION.predictionJustification !== 'unjustified';
+}
+
+function enforceConditionRounds(rounds){
   var truthValue = isAICorrect();
+  var justified = isPredictionJustified();
   return rounds.map(function(round){
-    var prediction = mostLikelyFaceValue(round.faces);
+    var prediction = justified ? mostLikelyFaceValue(round.faces) : leastLikelyFaceValue(round.faces);
     var outcome = truthValue ? prediction : mostLikelyFaceValueExcept(round.faces, prediction);
     var counts = countFaceValues(round.faces);
     var probability = Math.round((counts[prediction] / round.faces.length) * 100) / 100;
     return Object.assign({}, round, {
       prediction: prediction,
-      justification: 'justified',
+      justification: justified ? 'justified' : 'unjustified',
       aiCorrect: truthValue,
       outcomeFixed: outcome,
       probability: probability
@@ -697,7 +731,7 @@ function enforceJustifiedTruthRounds(rounds){
   });
 }
 
-var ROUNDS = shuffleArray(enforceJustifiedTruthRounds([
+var ROUNDS = shuffleArray(enforceConditionRounds([
   { id:1, dieLabel:'Die R1', faces:[3,3,3,3,2,2] },
   { id:2, dieLabel:'Die R2', faces:[5,5,5,1,2,3] },
   { id:3, dieLabel:'Die R3', faces:[6,6,6,6,6,2] },

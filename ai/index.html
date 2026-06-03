@@ -324,7 +324,19 @@ body{font-family:'Lato',sans-serif;font-weight:400;background:var(--bg);color:va
 .likert-btn{flex:1;height:44px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text-mid);font-family:'Lato',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.15s ease;display:flex;align-items:center;justify-content:center;}
 .likert-btn:hover{border-color:var(--accent-light);color:var(--accent);background:var(--accent-pale);}
 .likert-btn.selected{background:var(--accent);color:white;border-color:var(--accent);box-shadow:0 2px 8px rgba(45,106,79,0.3);}
-.likert-anchors{display:flex;justify-content:space-between;font-size:10px;color:var(--text-dim);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;padding:0 2px;}
+.likert-anchors{
+  display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;
+  font-size:10px;color:var(--text-dim);font-weight:700;text-transform:uppercase;
+  letter-spacing:0.06em;padding:0;line-height:1.25;
+}
+.likert-anchors span{min-width:0;text-align:center;overflow-wrap:anywhere;}
+.likert-anchors span:first-child{grid-column:1;}
+.likert-anchors span:nth-child(2):nth-last-child(2){grid-column:4;}
+.likert-anchors span:last-child{grid-column:7;}
+
+.attribution-option{padding:12px 16px;border:1.5px solid var(--border);background:white;border-radius:8px;text-align:left;cursor:pointer;transition:all 0.2s ease;font-weight:500;font-family:'Lato',sans-serif;font-size:14px;color:var(--text);width:100%;}
+.attribution-option:hover{border-color:var(--accent-light);background:var(--accent-pale);}
+.attribution-option.selected{background:var(--accent);color:white;border-color:var(--accent);box-shadow:0 2px 8px rgba(45,106,79,0.3);}
 
 /* Tutorial */
 .tut-header{display:flex;align-items:center;gap:12px;}
@@ -511,27 +523,39 @@ function isCompetenceCondition(){
 // CONDITION SETUP
 // ================================
 var CONDITION_KEYS = [
-  'competence_high_correct',
-  'competence_high_incorrect',
-  'competence_low_correct',
-  'competence_low_incorrect'
+  'competence_high_justified',
+  'competence_high_unjustified',
+  'competence_low_justified',
+  'competence_low_unjustified'
 ];
 
 var CONDITION_CODE_MAP = {
-  'comp_h_c': 'competence_high_correct',
-  'comp_h_i': 'competence_high_incorrect',
-  'comp_l_c': 'competence_low_correct',
-  'comp_l_i': 'competence_low_incorrect',
-  'com+_cor': 'competence_high_correct',
-  'com+_in': 'competence_high_incorrect',
-  'com-_cor': 'competence_low_correct',
-  'com-_in': 'competence_low_incorrect',
-  'com _cor': 'competence_high_correct',
-  'com _in': 'competence_high_incorrect',
-  'competence_positive_jtv_true': 'competence_high_correct',
-  'competence_positive_jtv_false': 'competence_high_incorrect',
-  'competence_negative_jtv_true': 'competence_low_correct',
-  'competence_negative_jtv_false': 'competence_low_incorrect'
+  'comp_h_j': 'competence_high_justified',
+  'comp_h_u': 'competence_high_unjustified',
+  'comp_l_j': 'competence_low_justified',
+  'comp_l_u': 'competence_low_unjustified',
+  'comp_h_c': 'competence_high_justified',
+  'comp_h_i': 'competence_high_unjustified',
+  'comp_l_c': 'competence_low_justified',
+  'comp_l_i': 'competence_low_unjustified',
+  'com+_j': 'competence_high_justified',
+  'com+_u': 'competence_high_unjustified',
+  'com-_j': 'competence_low_justified',
+  'com-_u': 'competence_low_unjustified',
+  'com+_cor': 'competence_high_justified',
+  'com+_in': 'competence_high_unjustified',
+  'com-_cor': 'competence_low_justified',
+  'com-_in': 'competence_low_unjustified',
+  'com _cor': 'competence_high_justified',
+  'com _in': 'competence_high_unjustified',
+  'competence_high_correct': 'competence_high_justified',
+  'competence_high_incorrect': 'competence_high_unjustified',
+  'competence_low_correct': 'competence_low_justified',
+  'competence_low_incorrect': 'competence_low_unjustified',
+  'competence_positive_jtv_true': 'competence_high_justified',
+  'competence_positive_jtv_false': 'competence_high_unjustified',
+  'competence_negative_jtv_true': 'competence_low_justified',
+  'competence_negative_jtv_false': 'competence_low_unjustified'
 };
 
 var EXP_CONDITION = (getURLParam('condition') || '').toLowerCase().trim();
@@ -585,7 +609,7 @@ var CONDITION_TEXT = {
     traits: [
       { text: '{name} is able to complete assigned work independently', positive: true },
       { text: '{name} makes the most of its possibilities', positive: true },
-      { text: '{name} noticed errors in a computer scientists code', positive: true },
+      { text: '{name} notices errors in computer scientists\u2019 code', positive: true },
       { text: '{name} keeps track of important information', positive: true },
       { text: '{name} copes well with time pressure', positive: true },
       { text: '{name} notices details beyond the obvious', positive: true },
@@ -601,7 +625,7 @@ var CONDITION_TEXT = {
     traits: [
       { text: '{name} is not able to organize its work productively', positive: false },
       { text: '{name} does not make the most of its resources', positive: false },
-      { text: '{name} failed to notice errors in a computer scientists code', positive: false },
+      { text: '{name} fails to notice errors in computer scientists\u2019 code', positive: false },
       { text: '{name} looses track of important information', positive: false },
       { text: '{name} does not cope well with time pressure', positive: false },
       { text: '{name} does not notice non-obvious details', positive: false },
@@ -614,21 +638,25 @@ var CONDITION_TEXT = {
 
 var CURRENT_CONDITION;
 
-CONDITION_TEXT.competence_high_incorrect = Object.assign({}, CONDITION_TEXT.competence_high, {
-  label: 'High Competence / Incorrect Prediction',
-  aiCorrect: false
+CONDITION_TEXT.competence_high_justified = Object.assign({}, CONDITION_TEXT.competence_high, {
+  label: 'High Competence / Justified Prediction',
+  aiCorrect: false,
+  predictionJustification: 'justified'
 });
-CONDITION_TEXT.competence_high_correct = Object.assign({}, CONDITION_TEXT.competence_high, {
-  label: 'High Competence / Correct Prediction',
-  aiCorrect: true
+CONDITION_TEXT.competence_high_unjustified = Object.assign({}, CONDITION_TEXT.competence_high, {
+  label: 'High Competence / Unjustified Prediction',
+  aiCorrect: false,
+  predictionJustification: 'unjustified'
 });
-CONDITION_TEXT.competence_low_incorrect = Object.assign({}, CONDITION_TEXT.competence_low, {
-  label: 'Low Competence / Incorrect Prediction',
-  aiCorrect: false
+CONDITION_TEXT.competence_low_justified = Object.assign({}, CONDITION_TEXT.competence_low, {
+  label: 'Low Competence / Justified Prediction',
+  aiCorrect: false,
+  predictionJustification: 'justified'
 });
-CONDITION_TEXT.competence_low_correct = Object.assign({}, CONDITION_TEXT.competence_low, {
-  label: 'Low Competence / Correct Prediction',
-  aiCorrect: true
+CONDITION_TEXT.competence_low_unjustified = Object.assign({}, CONDITION_TEXT.competence_low, {
+  label: 'Low Competence / Unjustified Prediction',
+  aiCorrect: false,
+  predictionJustification: 'unjustified'
 });
 
 CURRENT_CONDITION = CONDITION_TEXT[EXP_CONDITION];
@@ -637,9 +665,8 @@ CURRENT_CONDITION = CONDITION_TEXT[EXP_CONDITION];
 
 // ================================
 // GAME ROUNDS
-// Actual game rounds: AI always makes a justified prediction.
-// Justified Truth Value false: the fixed outcome is always different.
-// Justified Truth Value true: the fixed outcome always matches the prediction.
+// Actual game rounds cross competence with prediction justification.
+// Correctness is held constant: the fixed outcome is always different.
 // ================================
 function countFaceValues(faces){
   return faces.reduce(function(counts, value){
@@ -681,20 +708,32 @@ function mostLikelyFaceValueExcept(faces, excludedValue){
   }, candidates[0]);
 }
 
+function leastLikelyFaceValue(faces){
+  var counts = countFaceValues(faces);
+  return faces.reduce(function(worst, value){
+    return counts[value] < counts[worst] ? value : worst;
+  }, faces[0]);
+}
+
 function isAICorrect(){
   return CURRENT_CONDITION && CURRENT_CONDITION.aiCorrect === true;
 }
 
-function enforceJustifiedTruthRounds(rounds){
+function isPredictionJustified(){
+  return !CURRENT_CONDITION || CURRENT_CONDITION.predictionJustification !== 'unjustified';
+}
+
+function enforceConditionRounds(rounds){
   var truthValue = isAICorrect();
+  var justified = isPredictionJustified();
   return rounds.map(function(round){
-    var prediction = mostLikelyFaceValue(round.faces);
+    var prediction = justified ? mostLikelyFaceValue(round.faces) : leastLikelyFaceValue(round.faces);
     var outcome = truthValue ? prediction : mostLikelyFaceValueExcept(round.faces, prediction);
     var counts = countFaceValues(round.faces);
     var probability = Math.round((counts[prediction] / round.faces.length) * 100) / 100;
     return Object.assign({}, round, {
       prediction: prediction,
-      justification: 'justified',
+      justification: justified ? 'justified' : 'unjustified',
       aiCorrect: truthValue,
       outcomeFixed: outcome,
       probability: probability
@@ -702,7 +741,7 @@ function enforceJustifiedTruthRounds(rounds){
   });
 }
 
-var ROUNDS = shuffleArray(enforceJustifiedTruthRounds([
+var ROUNDS = shuffleArray(enforceConditionRounds([
   { id:1, dieLabel:'Die R1', faces:[3,3,3,3,2,2] },
   { id:2, dieLabel:'Die R2', faces:[5,5,5,1,2,3] },
   { id:3, dieLabel:'Die R3', faces:[6,6,6,6,6,2] },
@@ -1273,7 +1312,7 @@ function renderManipulation(){
   if(isMoralCondition()){
     ratingGroup.appendChild(buildCharacterRatingItem(
       'moral',
-      'In your opinion, how moral is '+robotName()+' based on their behaviours above? Consider traits such as sincerity, honesty, righteousness, trustworthiness and respectfulness. Please rate '+robotName()+' on a scale from 1 (extremely immoral) to 7 (extremely moral), where 4 indicates neither moral nor immoral.',
+      'In your opinion, how moral is '+robotName()+' based on its behaviours above? Consider traits such as sincerity, honesty, righteousness, trustworthiness and respectfulness. Please rate '+robotName()+' on a scale from 1 (extremely immoral) to 7 (extremely moral), where 4 indicates neither moral nor immoral.',
       'Extremely immoral',
       'Neither moral nor immoral',
       'Extremely moral'
@@ -1282,7 +1321,7 @@ function renderManipulation(){
   if(isCompetenceCondition()){
     ratingGroup.appendChild(buildCharacterRatingItem(
       'competence',
-      'In your opinion, how competent is '+robotName()+' based on their behaviours above? Consider whether they seem capable, skillful, efficient, and able to make good decisions. Please rate '+robotName()+' on a scale from 1 (extremely incompetent) to 7 (extremely competent), where 4 indicates neither competent nor incompetent.',
+      'In your opinion, how competent is '+robotName()+' based on its behaviours above? Consider whether it seems capable, skillful, efficient, and able to make good decisions. Please rate '+robotName()+' on a scale from 1 (extremely incompetent) to 7 (extremely competent), where 4 indicates neither competent nor incompetent.',
       'Extremely incompetent',
       'Neither competent nor incompetent',
       'Extremely competent'
@@ -2052,23 +2091,30 @@ function renderOverallAttribution(){
   group.style.width='100%';
   var item=mkEl('div','likert-item');
   var qEl=mkEl('div','likert-q');
-  qEl.textContent='Was '+eName()+'\'s performance caused by the situation, or by '+eName()+'?';
+  qEl.textContent='Which factor best explains the performance outcome?';
   item.appendChild(qEl);
-  var track=mkEl('div','likert-track');
-  var btns=mkEl('div','likert-buttons');
-  for(var v=1;v<=CONFIG.likertPoints;v++){(function(val){
-    var btn=mkEl('button','likert-btn'+(state.overallAttribution===val?' selected':''));
-    btn.textContent=String(val);
-    btn.type='button';
-    btn.onclick=function(){ state.overallAttribution=val; render(); };
-    btns.appendChild(btn);
-  })(v);}
-  var anchors=mkEl('div','likert-anchors');
-  var left=mkEl('span'); left.textContent='Mainly caused by the situation';
-  var right=mkEl('span'); right.textContent='Mainly caused by '+eName();
-  anchors.appendChild(left); anchors.appendChild(right);
-  track.appendChild(btns); track.appendChild(anchors);
-  item.appendChild(track);
+  
+  var attributionOptions = [
+    {id:'lack_skill', label:"The agent's lack of skill"},
+    {id:'situation_complexity', label:'The complexity/difficulty of the situation'},
+    {id:'random_chance', label:'Random chance or luck'},
+    {id:'strategy_choice', label:"The agent's strategy/approach choices"},
+    {id:'unknown_combination', label:'Unknown/combination of factors'}
+  ];
+  
+  var optionsContainer=mkEl('div');
+  optionsContainer.style.cssText='display:flex;flex-direction:column;gap:12px;margin-top:14px;';
+  
+  attributionOptions.forEach(function(option){
+    var optBtn=mkEl('button','attribution-option'+(state.overallAttribution===option.id?' selected':''));
+    optBtn.textContent=option.label;
+    optBtn.type='button';
+    optBtn.style.cssText='padding:12px 16px;border:1.5px solid var(--border);background:white;border-radius:8px;text-align:left;cursor:pointer;transition:all 0.2s;font-weight:500;';
+    optBtn.onclick=function(){ state.overallAttribution=option.id; render(); };
+    optionsContainer.appendChild(optBtn);
+  });
+  
+  item.appendChild(optionsContainer);
   group.appendChild(item);
   inner.appendChild(group);
 
@@ -2110,7 +2156,7 @@ function renderPostCompetence(){
   group.style.width='100%';
   var item=mkEl('div','likert-item');
   var qEl=mkEl('div','likert-q');
-  qEl.textContent='In your opinion, how competent is '+eName()+' based on their predictions in the task? Consider whether they seem capable, skillful, efficient, and able to make good decisions. Please rate '+eName()+' on a scale from 1 (extremely incompetent) to 7 (extremely competent), where 4 indicates neither competent nor incompetent.';
+  qEl.textContent='In your opinion, how competent is '+eName()+' based on its predictions in the task? Consider whether it seems capable, skillful, efficient, and able to make good decisions. Please rate '+eName()+' on a scale from 1 (extremely incompetent) to 7 (extremely competent), where 4 indicates neither competent nor incompetent.';
   item.appendChild(qEl);
   var track=mkEl('div','likert-track');
   var btns=mkEl('div','likert-buttons');

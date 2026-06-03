@@ -325,7 +325,19 @@ body{font-family:'Lato',sans-serif;font-weight:400;background:var(--bg);color:va
 .likert-btn{flex:1;height:44px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text-mid);font-family:'Lato',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.15s ease;display:flex;align-items:center;justify-content:center;}
 .likert-btn:hover{border-color:var(--accent-light);color:var(--accent);background:var(--accent-pale);}
 .likert-btn.selected{background:var(--accent);color:white;border-color:var(--accent);box-shadow:0 2px 8px rgba(45,106,79,0.3);}
-.likert-anchors{display:flex;justify-content:space-between;font-size:10px;color:var(--text-dim);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;padding:0 2px;}
+.likert-anchors{
+  display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;
+  font-size:10px;color:var(--text-dim);font-weight:700;text-transform:uppercase;
+  letter-spacing:0.06em;padding:0;line-height:1.25;
+}
+.likert-anchors span{min-width:0;text-align:center;overflow-wrap:anywhere;}
+.likert-anchors span:first-child{grid-column:1;}
+.likert-anchors span:nth-child(2):nth-last-child(2){grid-column:4;}
+.likert-anchors span:last-child{grid-column:7;}
+
+.attribution-option{padding:12px 16px;border:1.5px solid var(--border);background:white;border-radius:8px;text-align:left;cursor:pointer;transition:all 0.2s ease;font-weight:500;font-family:'Lato',sans-serif;font-size:14px;color:var(--text);width:100%;}
+.attribution-option:hover{border-color:var(--accent-light);background:var(--accent-pale);}
+.attribution-option.selected{background:var(--accent);color:white;border-color:var(--accent);box-shadow:0 2px 8px rgba(45,106,79,0.3);}
 
 /* Tutorial */
 .tut-header{display:flex;align-items:center;gap:12px;}
@@ -2058,23 +2070,30 @@ function renderOverallAttribution(){
   group.style.width='100%';
   var item=mkEl('div','likert-item');
   var qEl=mkEl('div','likert-q');
-  qEl.textContent='Were those predictions mainly caused by the situation, or mainly caused by '+eName()+'?';
+  qEl.textContent='Which factor best explains why the predictions were incorrect?';
   item.appendChild(qEl);
-  var track=mkEl('div','likert-track');
-  var btns=mkEl('div','likert-buttons');
-  for(var v=1;v<=CONFIG.likertPoints;v++){(function(val){
-    var btn=mkEl('button','likert-btn'+(state.overallAttribution===val?' selected':''));
-    btn.textContent=String(val);
-    btn.type='button';
-    btn.onclick=function(){ state.overallAttribution=val; render(); };
-    btns.appendChild(btn);
-  })(v);}
-  var anchors=mkEl('div','likert-anchors');
-  var left=mkEl('span'); left.textContent='Mainly caused by the situation';
-  var right=mkEl('span'); right.textContent='Mainly caused by '+eName();
-  anchors.appendChild(left); anchors.appendChild(right);
-  track.appendChild(btns); track.appendChild(anchors);
-  item.appendChild(track);
+  
+  var attributionOptions = [
+    {id:'lack_skill', label:"The agent's lack of skill"},
+    {id:'situation_complexity', label:'The complexity/difficulty of the situation'},
+    {id:'random_chance', label:'Random chance or luck'},
+    {id:'strategy_choice', label:"The agent's strategy/approach choices"},
+    {id:'unknown_combination', label:'Unknown/combination of factors'}
+  ];
+  
+  var optionsContainer=mkEl('div');
+  optionsContainer.style.cssText='display:flex;flex-direction:column;gap:12px;margin-top:14px;';
+  
+  attributionOptions.forEach(function(option){
+    var optBtn=mkEl('button','attribution-option'+(state.overallAttribution===option.id?' selected':''));
+    optBtn.textContent=option.label;
+    optBtn.type='button';
+    optBtn.style.cssText='padding:12px 16px;border:1.5px solid var(--border);background:white;border-radius:8px;text-align:left;cursor:pointer;transition:all 0.2s;font-weight:500;';
+    optBtn.onclick=function(){ state.overallAttribution=option.id; render(); };
+    optionsContainer.appendChild(optBtn);
+  });
+  
+  item.appendChild(optionsContainer);
   group.appendChild(item);
   inner.appendChild(group);
 
