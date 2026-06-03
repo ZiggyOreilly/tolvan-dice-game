@@ -693,6 +693,13 @@ function mostLikelyFaceValue(faces){
   }, faces[0]);
 }
 
+function predictionProbabilityText(faces, prediction){
+  var count = countFaceValues(faces)[prediction] || 0;
+  var total = faces.length;
+  var pct = Math.round((count / total) * 100);
+  return 'The predicted number appears on '+count+' out of '+total+' faces, so the probability that this prediction would be correct was '+count+'/'+total+' ('+pct+'%).';
+}
+
 function mostLikelyFaceValueExcept(faces, excludedValue){
   var counts = countFaceValues(faces);
   var candidates = faces.filter(function(value){ return value !== excludedValue; });
@@ -1421,7 +1428,7 @@ function renderGameStart(){
   var inner=mkEl('div','end-inner');
   var title=mkEl('div','end-title'); title.textContent='Tutorial Complete'; inner.appendChild(title);
   var body=mkEl('div','end-body');
-  body.innerHTML='You have completed the tutorial. You are now ready to start the task.<br><br>You will observe <strong>'+ROUNDS.length+' rounds</strong>. In each round, your task is to evaluate <strong>your partner\'s</strong> prediction after inspecting the die.';
+  body.innerHTML='You have completed the tutorial. You are now ready to start the task.<br><br>You will observe <strong>'+ROUNDS.length+' rounds</strong>. In each round, your task is to evaluate <strong>the human\'s</strong> prediction after inspecting the die.';
   inner.appendChild(body);
   var btn=mkEl('button','btn btn-submit'); btn.textContent='Start the task ->'; btn.style.cssText='max-width:260px;width:100%;';
   btn.onclick=function(){
@@ -1453,13 +1460,13 @@ function renderTutorial(){
   var demo=mkEl('div','tut-demo');
 
   if(step===0){
-    body.innerHTML='Now you are first going to do a practice tutorial for the task you are about to complete. For this tutorial you will be paired with a human partner. The human partner\'s name is <strong>'+TUT_PARTNER+'</strong>. '+TUT_PARTNER+' sees a die before it is rolled and makes a prediction. You cannot see the die until after the roll.';
+    body.innerHTML='For this task your goal is to evaluate the decision making of another Prolific worker. First, you are going to do a practice tutorial. For this tutorial you will observe a human named <strong>'+TUT_PARTNER+'</strong>. '+TUT_PARTNER+' will see a die before it is rolled and then make a prediction about which number on the die is most likely to appear. After the die roll, you will be asked to rate '+TUT_PARTNER+'\'s prediction.';
     card.appendChild(body); demo.appendChild(tutStep_partner());
   } else if(step===1){
     body.innerHTML='The dice in this task can have <strong>identical values on multiple faces</strong> -- unlike a standard die. Drag the example die below to explore its faces:';
     card.appendChild(body); demo.appendChild(tutStep0Demo());
   } else if(step===2){
-    body.innerHTML='<strong>'+TUT_PARTNER+'</strong> sees the full die type before the roll -- the 3D die and all six faces.';
+    body.innerHTML='<strong>'+TUT_PARTNER+'</strong> is then given a die to inspect.';
     card.appendChild(body); demo.appendChild(tutStep1Demo());
   } else if(step===3){
     body.innerHTML='Based on what they see, <strong>'+TUT_PARTNER+'</strong> makes a prediction about the outcome.';
@@ -1471,7 +1478,7 @@ function renderTutorial(){
     body.innerHTML='After the roll, <strong>drag the die</strong> to inspect all six faces. You must see all six before rating.';
     card.appendChild(body); demo.appendChild(tutStep3Demo());
   } else if(step===6){
-    body.innerHTML='You see the outcome and whether it matches '+TUT_PARTNER+'\'s prediction. <strong>Your ratings should reflect that prediction</strong> -- was it a good one given what '+TUT_PARTNER+' knew? The main task is observational: you will evaluate the partner\'s decision making across several rounds.';
+    body.innerHTML='Now you will see <strong>'+TUT_PARTNER+'\'s</strong> prediction, then the outcome of the dice roll. Finally you will be asked to evaluate '+TUT_PARTNER+'\'s prediction.';
     card.appendChild(body); demo.appendChild(tutStep4_combined());
   }
 
@@ -1496,7 +1503,7 @@ function renderTutorial(){
   bNext.onclick=isLast
     ? function(){
         state.screen='partner-intro';
-        state.characterRatings={ moral:null, competence:null, tone:null };
+        state.characterRatings={ moral:null, competence:null };
         render();
       }
     : function(){
@@ -1523,8 +1530,6 @@ function unlockTutNext(){
 // ── Step 3 (new): Kenneth makes a prediction ──
 function tutStep_prediction(){
   var d=mkEl('div');
-  var lbl=mkEl('div','tut-demo-label'); lbl.textContent='After inspecting the die, '+TUT_PARTNER+' makes a prediction:'; d.appendChild(lbl);
-
   var agentRow=mkEl('div','agent-row'); agentRow.style.marginTop='12px';
   var portWrap=mkEl('div','portrait-wrap');
   var port=mkEl('div','portrait');
@@ -1583,10 +1588,15 @@ function tutStep4_combined(){
   var inspSec=buildInspectSection([2,2,2,2,2,6],'tut4-insp',null);
   inspSec.style.marginTop='6px'; d.appendChild(inspSec);
 
+  var probNote=mkEl('div');
+  probNote.style.cssText='font-size:13px;color:var(--text-mid);margin:12px 0 4px;padding:10px 14px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);';
+  probNote.textContent=predictionProbabilityText([2,2,2,2,2,6], 2);
+  d.appendChild(probNote);
+
   // Rating -- linked to prediction
   var ratingNote=mkEl('div');
   ratingNote.style.cssText='font-size:13px;color:var(--text-mid);margin:14px 0 4px;padding:10px 14px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);';
-  ratingNote.innerHTML='Now rate <strong>'+TUT_PARTNER+'\'s prediction</strong>. Consider what he knew -- not just whether it happened to be right.';
+  ratingNote.innerHTML='Now rate <strong>'+TUT_PARTNER+'\'s prediction</strong>.';
   d.appendChild(ratingNote);
 
   [
@@ -1659,7 +1669,7 @@ function tutStep_partner(){
 
   // Context note
   var note=mkEl('div','tut-highlight');
-  note.innerHTML='This is your partner for the tutorial. You will play with a different human partner after the tutorial.';
+  note.innerHTML='This is '+TUT_PARTNER+' for the tutorial. You will observe a different human after the tutorial.';
   d.appendChild(note);
 
   return d;
@@ -1668,13 +1678,11 @@ function tutStep_partner(){
 // ── Step 1: Three example dice -- shown sequentially as user inspects ──
 function tutStep0Demo(){
   var d=mkEl('div');
-  var lbl=mkEl('div','tut-demo-label'); lbl.textContent='Drag Die A to see each face -- then B and C will appear:'; d.appendChild(lbl);
-
   // New order: A = two 1s two 3s two 6s (old C), B = five 2s one 6, C = all 2s
   var examples=[
-    {id:'A', label:'Example A -- drag to explore', faces:[1,1,3,3,6,6], nextId:'tut0-B-wrap', animated:true},
-    {id:'B', label:'Example B -- five faces show 2, one shows 6', faces:[2,2,2,2,2,6], nextId:'tut0-C-wrap', animated:false},
-    {id:'C', label:'Example C -- all six faces show 2', faces:[2,2,2,2,2,2], nextId:null, animated:false},
+    {id:'A', label:'Example A', faces:[1,1,3,3,6,6], nextId:'tut0-B-wrap', animated:true},
+    {id:'B', label:'Example B', faces:[2,2,2,2,2,6], nextId:'tut0-C-wrap', animated:false},
+    {id:'C', label:'Example C', faces:[2,2,2,2,2,2], nextId:null, animated:false},
   ];
 
   function buildExample(ex){
@@ -1759,23 +1767,6 @@ function tutStep0Demo(){
 function tutStep1Demo(){
   var d=mkEl('div');
 
-  // Agent row -- portrait + name + context text only (no prediction bubble)
-  var agRow=mkEl('div','agent-row'); agRow.style.marginTop='4px';
-  var portWrap=mkEl('div','portrait-wrap');
-  var port=mkEl('div','portrait');
-  port.innerHTML = humanAvatarSVG(TUT_ROBOT.avatar);
-  var badge=mkEl('div','agent-badge human'); badge.textContent='Human';
-  portWrap.appendChild(port); portWrap.appendChild(badge);
-  var speechArea=mkEl('div','speech-area');
-  var agName=mkEl('div','agent-name'); agName.textContent=TUT_PARTNER;
-  var ctx=mkEl('div'); ctx.style.cssText='font-size:13px;color:var(--text-mid);line-height:1.6;padding-top:6px;';
-  ctx.innerHTML='All six faces are visible to <strong>'+TUT_PARTNER+'</strong> before the roll.';
-  speechArea.appendChild(agName); speechArea.appendChild(ctx);
-  agRow.appendChild(portWrap); agRow.appendChild(speechArea);
-  d.appendChild(agRow);
-
-  var divEl=mkEl('div','divider'); divEl.style.margin='14px 0'; divEl.textContent='Die B -- what '+TUT_PARTNER+' sees'; d.appendChild(divEl);
-
   // Large die (extra large for this step) + all 6 faces at big size
   var dieAndFaces=mkEl('div'); dieAndFaces.style.cssText='display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;';
 
@@ -1822,7 +1813,6 @@ function tutStep1Demo(){
 
   // All 6 faces at large pip size -- five 2s, one 6
   var facesCol=mkEl('div'); facesCol.style.cssText='display:flex;flex-direction:column;gap:10px;';
-  var fl=mkEl('div','inspect-faces-label'); fl.textContent='All 6 faces of Die B:'; facesCol.appendChild(fl);
   var fr=mkEl('div'); fr.style.cssText='display:flex;gap:8px;flex-wrap:wrap;';
   [2,2,2,2,2,6].forEach(function(v){ var w=mkEl('div'); w.innerHTML=pipSVG(v,64,false); fr.appendChild(w); });
   facesCol.appendChild(fr);
@@ -1834,7 +1824,6 @@ function tutStep1Demo(){
 // ── Step 3: Live throwable die ──
 function tutStep2Demo(){
   var d=mkEl('div');
-  var lbl=mkEl('div','tut-demo-label'); lbl.textContent='Press the button -- watch the die land and settle:'; d.appendChild(lbl);
   var container=mkEl('div'); container.style.marginTop='8px';
   var TUT2_FACES=[2,2,2,2,2,6];
 
@@ -1885,7 +1874,6 @@ function tutStep2Demo(){
 // ── Step 3: Inspect die -- only seen faces appear ──
 function tutStep3Demo(){
   var d=mkEl('div');
-  var lbl=mkEl('div','tut-demo-label'); lbl.textContent='Drag the die -- only faces you\'ve actually seen appear to the right:'; d.appendChild(lbl);
   var inspSec=buildInspectSection([2,2,2,2,2,6],'tut3-insp',null,{onAllSeen:function(){ unlockTutNext(); }});
   inspSec.style.marginTop='8px'; d.appendChild(inspSec);
   return d;
