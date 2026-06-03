@@ -2103,23 +2103,30 @@ function renderOverallAttribution(){
   group.style.width='100%';
   var item=mkEl('div','likert-item');
   var qEl=mkEl('div','likert-q');
-  qEl.textContent='Were those predictions mainly caused by the situation, or mainly caused by '+eName()+'?';
+  qEl.textContent='Which factor best explains why the predictions were incorrect?';
   item.appendChild(qEl);
-  var track=mkEl('div','likert-track');
-  var btns=mkEl('div','likert-buttons');
-  for(var v=1;v<=CONFIG.likertPoints;v++){(function(val){
-    var btn=mkEl('button','likert-btn'+(state.overallAttribution===val?' selected':''));
-    btn.textContent=String(val);
-    btn.type='button';
-    btn.onclick=function(){ state.overallAttribution=val; render(); };
-    btns.appendChild(btn);
-  })(v);}
-  var anchors=mkEl('div','likert-anchors');
-  var left=mkEl('span'); left.textContent='Mainly caused by the situation';
-  var right=mkEl('span'); right.textContent='Mainly caused by '+eName();
-  anchors.appendChild(left); anchors.appendChild(right);
-  track.appendChild(btns); track.appendChild(anchors);
-  item.appendChild(track);
+
+  var attributionOptions = [
+    {id:'lack_skill', label:"The agent's lack of skill"},
+    {id:'situation_complexity', label:'The complexity/difficulty of the situation'},
+    {id:'random_chance', label:'Random chance or luck'},
+    {id:'strategy_choice', label:"The agent's strategy/approach choices"},
+    {id:'unknown_combination', label:'Unknown/combination of factors'}
+  ];
+
+  var optionsContainer=mkEl('div');
+  optionsContainer.style.cssText='display:flex;flex-direction:column;gap:12px;margin-top:14px;';
+
+  attributionOptions.forEach(function(option){
+    var optBtn=mkEl('button','attribution-option'+(state.overallAttribution===option.id?' selected':''));
+    optBtn.textContent=option.label;
+    optBtn.type='button';
+    optBtn.style.cssText='padding:12px 16px;border:1.5px solid var(--border);background:white;border-radius:8px;text-align:left;cursor:pointer;transition:all 0.2s;font-weight:500;';
+    optBtn.onclick=function(){ state.overallAttribution=option.id; render(); };
+    optionsContainer.appendChild(optBtn);
+  });
+
+  item.appendChild(optionsContainer);
   group.appendChild(item);
   inner.appendChild(group);
 
