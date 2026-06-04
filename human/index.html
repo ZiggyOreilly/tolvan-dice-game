@@ -1576,7 +1576,7 @@ function tutStep4_combined(){
   var ob=mkEl('div','outcome-block win'); ob.style.marginTop='0';
   var om=mkEl('div','outcome-main');
   var em=mkEl('span','emoji'); em.textContent='🎉';
-  var ot=mkEl('span'); ot.innerHTML='Die shows <strong>2</strong> -- prediction was <strong>2</strong>. Match!';
+  var ot=mkEl('span'); ot.innerHTML='Die shows <strong>2</strong> -- prediction was <strong>2</strong>. Correct!';
   om.appendChild(em); om.appendChild(ot); ob.appendChild(om);
   var osub=mkEl('div','outcome-sub'); osub.style.marginTop='8px';
   osub.innerHTML='<strong style="color:#1a6b3a;font-size:16px;">The prediction matched the outcome.</strong>';
@@ -1972,7 +1972,7 @@ function renderGame(){
       ob.style.marginTop='0';
       var om=mkEl('div','outcome-main');
       var emoji=mkEl('span','emoji'); emoji.textContent=isMatch?'🎉':'😕';
-      var ot=mkEl('span'); ot.innerHTML='Die shows <strong>'+state.outcome+'</strong> -- prediction was <strong>'+round.prediction+'</strong>. '+(isMatch?'Match!':'Incorrect.');
+      var ot=mkEl('span'); ot.innerHTML='Die shows <strong>'+state.outcome+'</strong> -- prediction was <strong>'+round.prediction+'</strong>. '+(isMatch?'Correct!':'Incorrect.');
       om.appendChild(emoji); om.appendChild(ot); ob.appendChild(om);
       card.appendChild(ob);
 
