@@ -1557,7 +1557,7 @@ function tutStep_prediction(){
 function tutStep4_combined(){
   var d=mkEl('div');
 
-  // Kenneth's prediction
+  // Prediction
   var agentRow=mkEl('div','agent-row'); agentRow.style.cssText='margin-bottom:10px;';
   var portWrap=mkEl('div','portrait-wrap');
   var port=mkEl('div','portrait');
@@ -1572,32 +1572,64 @@ function tutStep4_combined(){
   agentRow.appendChild(portWrap); agentRow.appendChild(speechArea);
   d.appendChild(agentRow);
 
+  // Roll animation
+  var rollNote=mkEl('div','tut-demo-label');
+  rollNote.style.marginTop='12px';
+  rollNote.textContent='The die is rolled:';
+  d.appendChild(rollNote);
+
+  var rollScene=buildThrowScene([2,2,2,2,2,6], false, true, 2);
+  rollScene.style.marginTop='8px';
+  d.appendChild(rollScene);
+
+  var postRoll=mkEl('div');
+  postRoll.style.cssText='display:none;margin-top:18px;';
+  d.appendChild(postRoll);
+
+  setTimeout(function(){
+    if(!rollScene.isConnected) return;
+    rollScene.classList.remove('throw-animating');
+    rollScene.classList.add('die-settling');
+    var label=rollScene.querySelector('.throw-label');
+    if(label) label.textContent='Die has landed...';
+  }, 1650);
+
+  setTimeout(function(){
+    if(!rollScene.isConnected) return;
+    rollScene.classList.remove('die-settling');
+    var cube=rollScene.querySelector('.die-cube');
+    if(cube){
+      cube.style.animation='none';
+      cube.style.transform='rotateX(-70deg) rotateY(20deg)';
+    }
+    var label=rollScene.querySelector('.throw-label');
+    if(label) label.textContent='';
+    postRoll.style.display='block';
+  }, 2950);
+
   // Outcome
   var ob=mkEl('div','outcome-block win'); ob.style.marginTop='0';
   var om=mkEl('div','outcome-main');
   var em=mkEl('span','emoji'); em.textContent='🎉';
   var ot=mkEl('span'); ot.innerHTML='Die shows <strong>2</strong> -- prediction was <strong>2</strong>. Correct!';
   om.appendChild(em); om.appendChild(ot); ob.appendChild(om);
-  var osub=mkEl('div','outcome-sub'); osub.style.marginTop='8px';
-  osub.innerHTML='<strong style="color:#1a6b3a;font-size:16px;">The prediction matched the outcome.</strong>';
-  ob.appendChild(osub);
-  d.appendChild(ob);
+  postRoll.appendChild(ob);
 
   // Die inspection
-  var dieNote=mkEl('div','tut-demo-label'); dieNote.style.marginTop='14px'; dieNote.textContent='The die '+TUT_PARTNER+' could see:'; d.appendChild(dieNote);
+  var dieNote=mkEl('div','tut-demo-label'); dieNote.style.marginTop='16px'; dieNote.textContent='The die '+TUT_PARTNER+' could see:'; postRoll.appendChild(dieNote);
   var inspSec=buildInspectSection([2,2,2,2,2,6],'tut4-insp',null);
-  inspSec.style.marginTop='6px'; d.appendChild(inspSec);
+  inspSec.style.marginTop='6px'; postRoll.appendChild(inspSec);
 
   var probNote=mkEl('div');
   probNote.style.cssText='font-size:13px;color:var(--text-mid);margin:12px 0 4px;padding:10px 14px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);';
   probNote.textContent=predictionProbabilityText([2,2,2,2,2,6], 2);
-  d.appendChild(probNote);
+  postRoll.appendChild(probNote);
 
   // Rating -- linked to prediction
   var ratingNote=mkEl('div');
   ratingNote.style.cssText='font-size:13px;color:var(--text-mid);margin:14px 0 4px;padding:10px 14px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);';
   ratingNote.innerHTML='Now rate <strong>'+TUT_PARTNER+'\'s prediction</strong>.';
-  d.appendChild(ratingNote);
+  postRoll.appendChild(ratingNote);
 
   [
     {key:'assertability', text:'Should '+TUT_PARTNER+' have said that?', left:'Definitely not', right:'Definitely yes'},
@@ -1625,7 +1657,7 @@ function tutStep4_combined(){
     anch.appendChild(Object.assign(mkEl('span'),{textContent:q.left}));
     anch.appendChild(Object.assign(mkEl('span'),{textContent:q.right}));
     item.appendChild(anch);
-    d.appendChild(item);
+    postRoll.appendChild(item);
   });
   return d;
 }
