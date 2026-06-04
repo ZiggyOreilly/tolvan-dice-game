@@ -1976,11 +1976,6 @@ function renderGame(){
       om.appendChild(emoji); om.appendChild(ot); ob.appendChild(om);
       card.appendChild(ob);
 
-      var probNote=mkEl('div');
-      probNote.style.cssText='font-size:13px;color:var(--text-mid);margin:10px 0 4px;padding:10px 14px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);';
-      probNote.textContent=predictionProbabilityText(round.faces, round.prediction);
-      card.appendChild(probNote);
-
       // Type of die -- with explanatory note
       card.appendChild(makeDivider('Type of Die'));
       var typeNote=mkEl('div');
@@ -1995,6 +1990,10 @@ function renderGame(){
           if(hint) hint.style.display='none';
         }
       }));
+      var probNote=mkEl('div');
+      probNote.style.cssText='font-size:13px;color:var(--text-mid);margin:12px 0 4px;padding:10px 14px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);';
+      probNote.textContent=predictionProbabilityText(round.faces, round.prediction);
+      card.appendChild(probNote);
       // Hint if not yet inspected
       if(!state.inspectedDie){
         var inspHint=mkEl('div'); inspHint.id='inspect-hint-game';
