@@ -647,7 +647,7 @@ CONDITION_TEXT.competence_high_justified = Object.assign({}, CONDITION_TEXT.comp
 });
 CONDITION_TEXT.competence_high_unjustified = Object.assign({}, CONDITION_TEXT.competence_high, {
   label: 'High Competence / Unjustified Prediction',
-  aiCorrect: false,
+  aiCorrect: true,
   predictionJustification: 'unjustified'
 });
 CONDITION_TEXT.competence_low_justified = Object.assign({}, CONDITION_TEXT.competence_low, {
@@ -657,7 +657,7 @@ CONDITION_TEXT.competence_low_justified = Object.assign({}, CONDITION_TEXT.compe
 });
 CONDITION_TEXT.competence_low_unjustified = Object.assign({}, CONDITION_TEXT.competence_low, {
   label: 'Low Competence / Unjustified Prediction',
-  aiCorrect: false,
+  aiCorrect: true,
   predictionJustification: 'unjustified'
 });
 
@@ -729,7 +729,9 @@ function enforceConditionRounds(rounds){
   var truthValue = isAICorrect();
   var justified = isPredictionJustified();
   return rounds.map(function(round){
-    var prediction = justified ? mostLikelyFaceValue(round.faces) : leastLikelyFaceValue(round.faces);
+    var prediction = justified
+      ? mostLikelyFaceValue(round.faces)
+      : (round.unjustifiedPrediction !== undefined ? round.unjustifiedPrediction : leastLikelyFaceValue(round.faces));
     var outcome = truthValue ? prediction : mostLikelyFaceValueExcept(round.faces, prediction);
     var counts = countFaceValues(round.faces);
     var probability = Math.round((counts[prediction] / round.faces.length) * 100) / 100;
@@ -744,12 +746,12 @@ function enforceConditionRounds(rounds){
 }
 
 var ROUNDS = shuffleArray(enforceConditionRounds([
-  { id:1, dieLabel:'Die R1', faces:[3,3,3,3,2,2] },
-  { id:2, dieLabel:'Die R2', faces:[5,5,5,1,2,3] },
-  { id:3, dieLabel:'Die R3', faces:[6,6,6,6,6,2] },
-  { id:4, dieLabel:'Die R4', faces:[1,1,1,1,2,5] },
-  { id:5, dieLabel:'Die R5', faces:[4,4,4,4,3,6] },
-  { id:6, dieLabel:'Die R6', faces:[5,5,5,5,3,1] },
+  { id:1, dieLabel:'D1', faces:[3,3,3,3,2,2], unjustifiedPrediction:2 },
+  { id:2, dieLabel:'D2', faces:[5,5,5,3,3,3], unjustifiedPrediction:3 },
+  { id:3, dieLabel:'D3', faces:[6,6,6,6,6,2], unjustifiedPrediction:2 },
+  { id:4, dieLabel:'D4', faces:[1,1,1,1,2,2], unjustifiedPrediction:2 },
+  { id:5, dieLabel:'D5', faces:[4,4,4,4,3,3], unjustifiedPrediction:3 },
+  { id:6, dieLabel:'D6', faces:[5,5,5,5,3,3], unjustifiedPrediction:3 },
 ]));
 
 // ================================
