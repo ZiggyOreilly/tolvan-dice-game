@@ -1,4 +1,4 @@
-# JOE-GAME
+# DIE-GAME
 
 Qualtrics-integrated dice prediction task.
 
