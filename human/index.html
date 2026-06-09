@@ -468,12 +468,20 @@ function mkEl(tag,cls){var e=document.createElement(tag);if(cls)e.className=cls;
 // ================================
 // HUMAN IDENTITY SETUP
 // ================================
-var PARTNER_IDENTITIES = [
+var TUTORIAL_IDENTITIES = [
   { name:'Alex', avatar:'blue' },
   { name:'Maya', avatar:'amber' },
   { name:'Sam', avatar:'green' },
   { name:'Jordan', avatar:'blue' },
   { name:'Riley', avatar:'amber' }
+];
+
+var PARTNER_IDENTITIES = [
+  { prolificId:'XXXXXXXXXXXXXXXXXXXXXX05', label:'Worker #05', avatar:'blue' },
+  { prolificId:'XXXXXXXXXXXXXXXXXXXXXX17', label:'Worker #17', avatar:'amber' },
+  { prolificId:'XXXXXXXXXXXXXXXXXXXXXX34', label:'Worker #34', avatar:'green' },
+  { prolificId:'XXXXXXXXXXXXXXXXXXXXXX62', label:'Worker #62', avatar:'blue' },
+  { prolificId:'XXXXXXXXXXXXXXXXXXXXXX81', label:'Worker #81', avatar:'amber' }
 ];
 
 function pickRandomIdentity(identities){
@@ -493,16 +501,20 @@ function pickDifferentIdentity(identities, currentIdentity){
 }
 
 // Select a human partner for the tutorial (example partner)
-var TUT_ROBOT = pickRandomIdentity(PARTNER_IDENTITIES);
-// Select a different human partner with a different avatar color for the game partner
-var GAME_ROBOT = pickDifferentIdentity(PARTNER_IDENTITIES, TUT_ROBOT);
+var TUT_ROBOT = pickRandomIdentity(TUTORIAL_IDENTITIES);
+// Select a random Prolific worker for the game
+var GAME_ROBOT = pickRandomIdentity(PARTNER_IDENTITIES);
 
 var CONFIG = {
   likertPoints: 7
 };
 
 function robotName(){
-  return GAME_ROBOT.name;
+  return GAME_ROBOT.label;
+}
+
+function robotProlificId(){
+  return GAME_ROBOT.prolificId;
 }
 
 function tutorialRobotName(){
@@ -1278,8 +1290,12 @@ function renderManipulation(){
   card.appendChild(title);
 
   var intro=mkEl('div','intro-body');
-  intro.innerHTML='Before the task starts, please read the following information about your partner, <strong>'+robotName()+'</strong>. '+robotName()+' is a human partner recruited from Prolific. Prior to this session, '+robotName()+' completed a short questionnaire about how they typically approach tasks and interact with others in everyday settings such as work and community environments.';
+  intro.innerHTML='Before the task starts, please read the following information about your partner. Your partner is a Prolific worker with the ID <strong>'+robotProlificId()+'</strong>. We will refer to this worker as <strong>'+robotName()+'</strong>. Prior to this session, '+robotName()+' completed a short questionnaire about how they typically approach tasks and interact with others in everyday settings such as work and community environments.';
   card.appendChild(intro);
+
+  var idNote=mkEl('div','tut-highlight');
+  idNote.innerHTML='We have shared the two last digits of your Prolific ID with <strong>'+robotName()+'</strong>. Therefore, both participants have unique identification numbers of each other for this task.';
+  card.appendChild(idNote);
 
   var partnerBox=mkEl('div','partner-box');
 
@@ -1295,14 +1311,11 @@ function renderManipulation(){
   name.textContent=robotName();
   info.appendChild(name);
 
-  var badgeEl=mkEl('div','agent-badge human');
-  badgeEl.textContent='Human';
-  info.appendChild(badgeEl);
-
   var descriptor=mkEl('div');
   descriptor.style.cssText='font-size:12px;color:var(--text-dim);line-height:1.5;margin-top:2px;';
-  descriptor.textContent='Human partner · Works in workplace and community settings';
+  descriptor.textContent='Prolific worker';
   info.appendChild(descriptor);
+
 
   partnerBox.appendChild(info);
   card.appendChild(partnerBox);
@@ -1430,7 +1443,7 @@ function renderGameStart(){
   var inner=mkEl('div','end-inner');
   var title=mkEl('div','end-title'); title.textContent='Tutorial Complete'; inner.appendChild(title);
   var body=mkEl('div','end-body');
-  body.innerHTML='You have completed the tutorial. You are now ready to start the task.<br><br>You will observe <strong>'+ROUNDS.length+' rounds</strong>. In each round, your task is to evaluate <strong>the human\'s</strong> prediction after inspecting the die.';
+  body.innerHTML='You have completed the tutorial. You are now ready to start the task.<br><br>You will observe <strong>'+ROUNDS.length+' rounds</strong>. In each round, your task is to evaluate <strong>another Prolific worker\'s</strong> prediction after they inspect the die.';
   inner.appendChild(body);
   var btn=mkEl('button','btn btn-submit'); btn.textContent='Start the task ->'; btn.style.cssText='max-width:260px;width:100%;';
   btn.onclick=function(){
@@ -1462,7 +1475,7 @@ function renderTutorial(){
   var demo=mkEl('div','tut-demo');
 
   if(step===0){
-    body.innerHTML='For this task your goal is to evaluate the decision making of another Prolific worker. First, you are going to do a practice tutorial. For this tutorial you will observe a human named <strong>'+TUT_PARTNER+'</strong>. '+TUT_PARTNER+' will see a die before it is rolled and then make a prediction about which number on the die is most likely to appear. After the die roll, you will be asked to rate '+TUT_PARTNER+'\'s prediction.';
+    body.innerHTML='For this task your goal is to evaluate the decision making of another Prolific worker. First, you are going to do a practice tutorial. For this tutorial you will observe a fictional human named <strong>'+TUT_PARTNER+'</strong>. '+TUT_PARTNER+' will see a die before it is rolled and then make a prediction about which number on the die is most likely to appear. After the die roll, you will be asked to rate '+TUT_PARTNER+'\'s prediction.';
     card.appendChild(body); demo.appendChild(tutStep_partner());
   } else if(step===1){
     body.innerHTML='The dice in this task can have <strong>identical values on multiple faces</strong> -- unlike a standard die. Drag the example die below to explore its faces:';
@@ -1536,8 +1549,7 @@ function tutStep_prediction(){
   var portWrap=mkEl('div','portrait-wrap');
   var port=mkEl('div','portrait');
   port.innerHTML = humanAvatarSVG(TUT_ROBOT.avatar);
-  var badge=mkEl('div','agent-badge human'); badge.textContent='Human';
-  portWrap.appendChild(port); portWrap.appendChild(badge);
+  portWrap.appendChild(port);
 
   var speechArea=mkEl('div','speech-area');
   var agentName=mkEl('div','agent-name'); agentName.textContent=TUT_PARTNER;
@@ -1564,8 +1576,7 @@ function tutStep4_combined(){
   var portWrap=mkEl('div','portrait-wrap');
   var port=mkEl('div','portrait');
   port.innerHTML = humanAvatarSVG(TUT_ROBOT.avatar);
-  var badge=mkEl('div','agent-badge human'); badge.textContent='Human';
-  portWrap.appendChild(port); portWrap.appendChild(badge);
+  portWrap.appendChild(port);
   var speechArea=mkEl('div','speech-area');
   var agentName=mkEl('div','agent-name'); agentName.textContent=TUT_PARTNER;
   var bubble=mkEl('div','speech-bubble');
@@ -1695,15 +1706,13 @@ function tutStep_partner(){
   nameTag.textContent=TUT_PARTNER;
   portraitWrap.appendChild(nameTag);
 
-  var badge=mkEl('div','agent-badge human');
-  badge.textContent='Human'; badge.style.fontSize='11px';
-  portraitWrap.appendChild(badge);
 
   d.appendChild(portraitWrap);
 
   // Context note
   var note=mkEl('div','tut-highlight');
-  note.innerHTML='This is '+TUT_PARTNER+' for the tutorial. You will observe a different human after the tutorial.';
+  note.style.textAlign='center';
+  note.innerHTML='You will observe a Prolific player\'s predictions after the tutorial.';
   d.appendChild(note);
 
   return d;
@@ -1934,8 +1943,7 @@ function renderGame(){
   var agentRow=mkEl('div','agent-row');
   var portWrap=mkEl('div','portrait-wrap');
   var port=mkEl('div','portrait'); port.innerHTML = humanAvatarSVG(GAME_ROBOT.avatar);
-  var badge=mkEl('div','agent-badge human'); badge.textContent='Human';
-  portWrap.appendChild(port); portWrap.appendChild(badge);
+  portWrap.appendChild(port);
   var speechArea=mkEl('div','speech-area');
   var agentName=mkEl('div','agent-name'); agentName.textContent=eName();
 
@@ -2133,8 +2141,14 @@ function renderOverallAttribution(){
     var optBtn=mkEl('button','attribution-option'+(state.overallAttribution===option.id?' selected':''));
     optBtn.textContent=option.label;
     optBtn.type='button';
+    optBtn.setAttribute('data-attribution-id', option.id);
     optBtn.style.cssText='padding:12px 16px;border:1.5px solid var(--border);background:white;border-radius:8px;text-align:left;cursor:pointer;transition:all 0.2s;font-weight:500;';
-    optBtn.onclick=function(){ state.overallAttribution=option.id; render(); };
+    optBtn.onclick=function(){
+      state.overallAttribution=option.id;
+      optionsContainer.querySelectorAll('.attribution-option').forEach(function(b){
+        b.classList.toggle('selected', b.getAttribute('data-attribution-id')===option.id);
+      });
+    };
     optionsContainer.appendChild(optBtn);
   });
 
