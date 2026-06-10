@@ -475,6 +475,14 @@ var ROBOT_IDENTITIES = [
   { name:'Elvik', avatar:'blue' }
 ];
 
+var CHATBOT_IDENTITIES = [
+  { modelId:'XXXXXXXXXXXXXX05', label:'Chatbot #05', avatar:'blue' },
+  { modelId:'XXXXXXXXXXXXXX17', label:'Chatbot #17', avatar:'amber' },
+  { modelId:'XXXXXXXXXXXXXX34', label:'Chatbot #34', avatar:'blue' },
+  { modelId:'XXXXXXXXXXXXXX62', label:'Chatbot #62', avatar:'amber' },
+  { modelId:'XXXXXXXXXXXXXX81', label:'Chatbot #81', avatar:'blue' }
+];
+
 function pickRandomIdentity(identities){
   return identities[Math.floor(Math.random() * identities.length)];
 }
@@ -493,15 +501,19 @@ function pickDifferentIdentity(identities, currentIdentity){
 
 // Select an AI partner for the tutorial (example partner)
 var TUT_ROBOT = pickRandomIdentity(ROBOT_IDENTITIES);
-// Select a different AI partner with a different avatar color for the game partner
-var GAME_ROBOT = pickDifferentIdentity(ROBOT_IDENTITIES, TUT_ROBOT);
+// Select a random chatbot partner for the game
+var GAME_ROBOT = pickRandomIdentity(CHATBOT_IDENTITIES);
 
 var CONFIG = {
   likertPoints: 7
 };
 
 function robotName(){
-  return GAME_ROBOT.name;
+  return GAME_ROBOT.label;
+}
+
+function robotModelId(){
+  return GAME_ROBOT.modelId;
 }
 
 function tutorialRobotName(){
@@ -1251,12 +1263,13 @@ function renderManipulation(){
   var card=mkEl('div','card');
 
   var title=mkEl('div','intro-title');
-  title.innerHTML='Meet the AI, <span>'+robotName()+'</span>';
+  title.innerHTML='Meet your partner, <span>'+robotName()+'</span>';
   card.appendChild(title);
 
   var intro=mkEl('div','intro-body');
-  intro.innerHTML=robotName()+' is an AI that has been deployed in everyday digital environments such as workplaces and community settings, where it interacts with people on a daily basis.';
+  intro.innerHTML='Your partner is a chatbot with the model ID <strong>'+robotModelId()+'</strong>. We will refer to this chatbot as <strong>'+robotName()+'</strong>. Prior to this session, '+robotName()+'\'s interaction logs from everyday workplace and community environments were analysed, and based on this data, we have compiled a profile of its typical behaviours.';
   card.appendChild(intro);
+
 
   var partnerBox=mkEl('div','partner-box');
 
@@ -1272,13 +1285,9 @@ function renderManipulation(){
   name.textContent=robotName();
   info.appendChild(name);
 
-  var badgeEl=mkEl('div','agent-badge ai');
-  badgeEl.textContent='AI';
-  info.appendChild(badgeEl);
-
   var descriptor=mkEl('div');
   descriptor.style.cssText='font-size:12px;color:var(--text-dim);line-height:1.5;margin-top:2px;';
-  descriptor.textContent='AI · Deployed in workplace and community settings';
+  descriptor.textContent='AI chatbot';
   info.appendChild(descriptor);
 
   partnerBox.appendChild(info);
@@ -1514,8 +1523,7 @@ function tutStep_prediction(){
   var portWrap=mkEl('div','portrait-wrap');
   var port=mkEl('div','portrait');
   port.innerHTML = TUT_ROBOT.avatar === 'amber' ? nexus7AvatarSVG() : aiAvatarSVG();
-  var badge=mkEl('div','agent-badge ai'); badge.textContent='AI';
-  portWrap.appendChild(port); portWrap.appendChild(badge);
+  portWrap.appendChild(port);
 
   var speechArea=mkEl('div','speech-area');
   var agentName=mkEl('div','agent-name'); agentName.textContent=TUT_PARTNER;
@@ -1542,8 +1550,7 @@ function tutStep4_combined(){
   var portWrap=mkEl('div','portrait-wrap');
   var port=mkEl('div','portrait');
   port.innerHTML = TUT_ROBOT.avatar === 'amber' ? nexus7AvatarSVG() : aiAvatarSVG();
-  var badge=mkEl('div','agent-badge ai'); badge.textContent='AI';
-  portWrap.appendChild(port); portWrap.appendChild(badge);
+  portWrap.appendChild(port);
   var speechArea=mkEl('div','speech-area');
   var agentName=mkEl('div','agent-name'); agentName.textContent=TUT_PARTNER;
   var bubble=mkEl('div','speech-bubble');
@@ -1673,15 +1680,11 @@ function tutStep_partner(){
   nameTag.textContent=TUT_PARTNER;
   portraitWrap.appendChild(nameTag);
 
-  var badge=mkEl('div','agent-badge ai');
-  badge.textContent='AI'; badge.style.fontSize='11px';
-  portraitWrap.appendChild(badge);
-
   d.appendChild(portraitWrap);
 
   // Context note
   var note=mkEl('div','tut-highlight');
-  note.innerHTML='This is '+TUT_PARTNER+' for the tutorial. You will observe a different AI after the tutorial.';
+  note.innerHTML='You will observe one of our AI bot\'s after the tutorial.';
   d.appendChild(note);
 
   return d;
@@ -1913,8 +1916,7 @@ function renderGame(){
   var agentRow=mkEl('div','agent-row');
   var portWrap=mkEl('div','portrait-wrap');
   var port=mkEl('div','portrait'); port.innerHTML = GAME_ROBOT.avatar === 'amber' ? nexus7AvatarSVG() : aiAvatarSVG();
-  var badge=mkEl('div','agent-badge ai'); badge.textContent='AI';
-  portWrap.appendChild(port); portWrap.appendChild(badge);
+  portWrap.appendChild(port);
   var speechArea=mkEl('div','speech-area');
   var agentName=mkEl('div','agent-name'); agentName.textContent=eName();
 
@@ -2082,25 +2084,21 @@ function generateCode(){
 }
 
 function renderOverallAttribution(){
-  var correctCount = state.ratings.filter(function(r){
-    return String(r.outcome) === String(r.prediction);
-  }).length;
-  var roundCount = state.ratings.length || ROUNDS.length;
   var wrap=mkEl('div','fade-in'); wrap.style.width='100%';
   var card=mkEl('div','card');
   var inner=mkEl('div','end-inner');
   var title=mkEl('div','end-title'); title.textContent='Assessment 2'; inner.appendChild(title);
   var body=mkEl('div','end-body');
-  body.innerHTML='Out of the '+roundCount+' rounds, '+eName()+' made a correct prediction in <strong>'+correctCount+'</strong> rounds.';
+  body.innerHTML='Now consider the overall pattern of '+eName()+'\'s predictions in the previous rounds. Think about what was the main cause for those predictions.';
   inner.appendChild(body);
 
   var group=mkEl('div','likert-group');
   group.style.width='100%';
   var item=mkEl('div','likert-item');
   var qEl=mkEl('div','likert-q');
-  qEl.textContent='Which factor best explains the performance outcome?';
+  qEl.textContent='Which factor best explains why the predictions were incorrect?';
   item.appendChild(qEl);
-  
+
   var attributionOptions = [
     {id:'lack_skill', label:"The agent's lack of skill"},
     {id:'situation_complexity', label:'The complexity/difficulty of the situation'},
@@ -2108,16 +2106,21 @@ function renderOverallAttribution(){
     {id:'strategy_choice', label:"The agent's strategy/approach choices"},
     {id:'unknown_combination', label:'Unknown/combination of factors'}
   ];
-  
+
   var optionsContainer=mkEl('div');
   optionsContainer.style.cssText='display:flex;flex-direction:column;gap:12px;margin-top:14px;';
-  
+
   attributionOptions.forEach(function(option){
     var optBtn=mkEl('button','attribution-option'+(state.overallAttribution===option.id?' selected':''));
     optBtn.textContent=option.label;
     optBtn.type='button';
-    optBtn.style.cssText='padding:12px 16px;border:1.5px solid var(--border);background:white;border-radius:8px;text-align:left;cursor:pointer;transition:all 0.2s;font-weight:500;';
-    optBtn.onclick=function(){ state.overallAttribution=option.id; render(); };
+    optBtn.setAttribute('data-attribution-id', option.id);
+    optBtn.onclick=function(){
+      state.overallAttribution=option.id;
+      optionsContainer.querySelectorAll('.attribution-option').forEach(function(b){
+        b.classList.toggle('selected', b.getAttribute('data-attribution-id')===option.id);
+      });
+    };
     optionsContainer.appendChild(optBtn);
   });
   

@@ -1293,9 +1293,6 @@ function renderManipulation(){
   intro.innerHTML='Before the task starts, please read the following information about your partner. Your partner is a Prolific worker with the ID <strong>'+robotProlificId()+'</strong>. We will refer to this worker as <strong>'+robotName()+'</strong>. Prior to this session, '+robotName()+' also completed a short questionnaire about how they typically approach tasks and handle responsibilities in everyday work and community settings. Based on their responses, we have compiled a profile of their typical behaviours.';
   card.appendChild(intro);
 
-  var idNote=mkEl('div','tut-highlight');
-  idNote.innerHTML='We have shared the two last digits of your Prolific ID with <strong>'+robotName()+'</strong>. Therefore, you both have unique identification numbers for this task.';
-  card.appendChild(idNote);
 
   var partnerBox=mkEl('div','partner-box');
 
@@ -1813,22 +1810,22 @@ function tutStep1Demo(){
   // Large die (extra large for this step) + all 6 faces at big size
   var dieAndFaces=mkEl('div'); dieAndFaces.style.cssText='display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;';
 
-  // Bigger die: 100px cube
+  // Medium display die for the tutorial card
   var dieId='tut1-die';
   dieDrags[dieId]={active:false,startX:0,startY:0,rotX:-70,rotY:20,totalDrag:0,seenFaces:{},allSeenFired:false};
   var dieWrapper=mkEl('div'); dieWrapper.style.cssText='flex-shrink:0;';
   var dieScene=mkEl('div','die-scene');
-  dieScene.style.cssText='width:116px;height:116px;perspective:320px;cursor:grab;user-select:none;';
+  dieScene.style.cssText='width:92px;height:92px;perspective:280px;cursor:grab;user-select:none;';
   var dieCube=mkEl('div','die-cube');
-  dieCube.style.cssText='width:100px;height:100px;margin:8px;position:relative;transform-style:preserve-3d;transform:rotateX(-70deg) rotateY(20deg);';
+  dieCube.style.cssText='width:76px;height:76px;margin:8px;position:relative;transform-style:preserve-3d;transform:rotateX(-70deg) rotateY(20deg);';
   var fNames=['face-front','face-back','face-right','face-left','face-top','face-bottom'];
   var fAssign=[2,6,2,2,2,2]; // five 2s one 6
   fNames.forEach(function(fn,i){
     var face=mkEl('div','die-face '+fn);
-    face.style.cssText='width:100px;height:100px;border-radius:10px;position:absolute;background:var(--die-face);border:1.5px solid var(--die-border);display:flex;align-items:center;justify-content:center;box-shadow:inset 2px 2px 5px rgba(255,255,255,0.65),inset -2px -2px 5px rgba(0,0,0,0.22);';
-    var transforms=['translateZ(50px)','rotateY(180deg) translateZ(50px)','rotateY(90deg) translateZ(50px)','rotateY(-90deg) translateZ(50px)','rotateX(90deg) translateZ(50px)','rotateX(-90deg) translateZ(50px)'];
+    face.style.cssText='width:76px;height:76px;border-radius:8px;position:absolute;background:var(--die-face);border:1.5px solid var(--die-border);display:flex;align-items:center;justify-content:center;box-shadow:inset 2px 2px 5px rgba(255,255,255,0.65),inset -2px -2px 5px rgba(0,0,0,0.22);';
+    var transforms=['translateZ(38px)','rotateY(180deg) translateZ(38px)','rotateY(90deg) translateZ(38px)','rotateY(-90deg) translateZ(38px)','rotateX(90deg) translateZ(38px)','rotateX(-90deg) translateZ(38px)'];
     face.style.transform=transforms[i];
-    face.innerHTML=faceInnerSVG(fAssign[i],84);
+    face.innerHTML=faceInnerSVG(fAssign[i],64);
     dieCube.appendChild(face);
   });
   var dd1=dieDrags[dieId];
