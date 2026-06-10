@@ -1290,11 +1290,11 @@ function renderManipulation(){
   card.appendChild(title);
 
   var intro=mkEl('div','intro-body');
-  intro.innerHTML='Before the task starts, please read the following information about your partner. Your partner is a Prolific worker with the ID <strong>'+robotProlificId()+'</strong>. We will refer to this worker as <strong>'+robotName()+'</strong>. Prior to this session, '+robotName()+' also completed a short questionnaire about how they typically approach tasks and handle responsibilities with others in everyday work and community settings. Based on their responses, we have compiled a profile of their typical behaviours.';
+  intro.innerHTML='Before the task starts, please read the following information about your partner. Your partner is a Prolific worker with the ID <strong>'+robotProlificId()+'</strong>. We will refer to this worker as <strong>'+robotName()+'</strong>. Prior to this session, '+robotName()+' also completed a short questionnaire about how they typically approach tasks and handle responsibilities in everyday work and community settings. Based on their responses, we have compiled a profile of their typical behaviours.';
   card.appendChild(intro);
 
   var idNote=mkEl('div','tut-highlight');
-  idNote.innerHTML='We have shared the two last digits of your Prolific ID with <strong>'+robotName()+'</strong>. Therefore, both participants have unique identification numbers of each other for this task.';
+  idNote.innerHTML='We have shared the two last digits of your Prolific ID with <strong>'+robotName()+'</strong>. Therefore, you both have unique identification numbers for this task.';
   card.appendChild(idNote);
 
   var partnerBox=mkEl('div','partner-box');
