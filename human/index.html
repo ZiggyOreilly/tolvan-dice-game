@@ -1290,7 +1290,7 @@ function renderManipulation(){
   card.appendChild(title);
 
   var intro=mkEl('div','intro-body');
-  intro.innerHTML='Before the task starts, please read the following information about your partner. Your partner is a Prolific worker with the ID <strong>'+robotProlificId()+'</strong>. We will refer to this worker as <strong>'+robotName()+'</strong>. Prior to this session, '+robotName()+' completed a short questionnaire about how they typically approach tasks and interact with others in everyday settings such as work and community environments.';
+  intro.innerHTML='Before the task starts, please read the following information about your partner. Your partner is a Prolific worker with the ID <strong>'+robotProlificId()+'</strong>. We will refer to this worker as <strong>'+robotName()+'</strong>. Prior to this session, '+robotName()+' also completed a short questionnaire about how they typically approach tasks and handle responsibilities with others in everyday work and community settings. Based on their responses, we have compiled a profile of their typical behaviours.';
   card.appendChild(intro);
 
   var idNote=mkEl('div','tut-highlight');
@@ -2142,7 +2142,6 @@ function renderOverallAttribution(){
     optBtn.textContent=option.label;
     optBtn.type='button';
     optBtn.setAttribute('data-attribution-id', option.id);
-    optBtn.style.cssText='padding:12px 16px;border:1.5px solid var(--border);background:white;border-radius:8px;text-align:left;cursor:pointer;transition:all 0.2s;font-weight:500;';
     optBtn.onclick=function(){
       state.overallAttribution=option.id;
       optionsContainer.querySelectorAll('.attribution-option').forEach(function(b){
