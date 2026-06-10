@@ -476,11 +476,11 @@ var ROBOT_IDENTITIES = [
 ];
 
 var CHATBOT_IDENTITIES = [
-  { modelId:'XXXXXXXXXXXXXX05', label:'Chatbot #05', avatar:'blue' },
-  { modelId:'XXXXXXXXXXXXXX17', label:'Chatbot #17', avatar:'amber' },
-  { modelId:'XXXXXXXXXXXXXX34', label:'Chatbot #34', avatar:'blue' },
-  { modelId:'XXXXXXXXXXXXXX62', label:'Chatbot #62', avatar:'amber' },
-  { modelId:'XXXXXXXXXXXXXX81', label:'Chatbot #81', avatar:'blue' }
+  { modelId:'XXXXXXXXXXXXXXXXXXXXXX03', label:'Chatbot #03', avatar:'blue' },
+  { modelId:'XXXXXXXXXXXXXXXXXXXXXX05', label:'Chatbot #05', avatar:'amber' },
+  { modelId:'XXXXXXXXXXXXXXXXXXXXXX07', label:'Chatbot #07', avatar:'blue' },
+  { modelId:'XXXXXXXXXXXXXXXXXXXXXX09', label:'Chatbot #09', avatar:'amber' },
+  { modelId:'XXXXXXXXXXXXXXXXXXXXXX12', label:'Chatbot #12', avatar:'blue' }
 ];
 
 function pickRandomIdentity(identities){
@@ -1267,7 +1267,7 @@ function renderManipulation(){
   card.appendChild(title);
 
   var intro=mkEl('div','intro-body');
-  intro.innerHTML='Your partner is a chatbot with the model ID <strong>'+robotModelId()+'</strong>. We will refer to this chatbot as <strong>'+robotName()+'</strong>. Prior to this session, '+robotName()+'\'s interaction logs from everyday workplace and community environments were analysed, and based on this data, we have compiled a profile of its typical behaviours.';
+  intro.innerHTML='Before the task starts, please read the following information about your partner. Your partner is a chatbot with the model ID <strong>'+robotModelId()+'</strong>. We will refer to this chatbot as <strong>'+robotName()+'</strong>. Prior to this session, '+robotName()+'\'s interaction logs from everyday workplace and community environments were analysed. Based on this data, we have compiled a profile of its typical behaviours.';
   card.appendChild(intro);
 
 
@@ -1684,6 +1684,7 @@ function tutStep_partner(){
 
   // Context note
   var note=mkEl('div','tut-highlight');
+  note.style.textAlign='center';
   note.innerHTML='You will observe one of our AI bot\'s after the tutorial.';
   d.appendChild(note);
 
