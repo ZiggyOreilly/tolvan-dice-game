@@ -1430,14 +1430,14 @@ function renderGameStart(){
 // ================================
 // TUTORIAL STEPS
 // ================================
-var TUT_TITLES = ['Practice Tutorial','The Special Die','What '+TUT_PARTNER+' Sees', TUT_PARTNER + ' Makes a Prediction','Roll the Die','Inspect the Die','Your Assessment'];
+var TUT_TITLES = ['Practice Tutorial','The Special Die','What '+TUT_PARTNER+' Sees', TUT_PARTNER + ' Makes a Prediction','Your Assessment'];
 
 function renderTutorial(){
   var wrap=mkEl('div','fade-in'); wrap.style.cssText='display:flex;flex-direction:column;gap:18px;width:100%';
   var topBar=mkEl('div','top-bar'); var gl=mkEl('div','game-label'); gl.textContent='Tutorial'; topBar.appendChild(gl); wrap.appendChild(topBar);
   var card=mkEl('div','card');
   var step=state.tutStep;
-  var TOTAL_STEPS=7;
+  var TOTAL_STEPS=5;
 
   var hdr=mkEl('div','tut-header');
   var badge=mkEl('div','tut-step-badge'); badge.textContent=String(step+1);
@@ -1461,12 +1461,6 @@ function renderTutorial(){
     body.innerHTML='Based on what it sees, <strong>'+TUT_PARTNER+'</strong> makes a prediction about the outcome.';
     card.appendChild(body); demo.appendChild(tutStep_prediction());
   } else if(step===4){
-    body.innerHTML='You press the button to roll the die. Watch it land and settle.';
-    card.appendChild(body); demo.appendChild(tutStep2Demo());
-  } else if(step===5){
-    body.innerHTML='After you have rolled the die, <strong>drag the die</strong> to inspect all six faces. You must see all six before rating.';
-    card.appendChild(body); demo.appendChild(tutStep3Demo());
-  } else if(step===6){
     body.innerHTML='Now you will see '+TUT_PARTNER+'\'s prediction, then the outcome of the dice roll. Finally you will be asked to evaluate '+TUT_PARTNER+'\'s prediction.';
     card.appendChild(body); demo.appendChild(tutStep4_combined());
   }
@@ -1477,8 +1471,8 @@ function renderTutorial(){
   for(var i=0;i<TOTAL_STEPS;i++){var dot=mkEl('div','tut-dot'+(i===step?' active':'')); dots.appendChild(dot);}
   card.appendChild(dots);
 
-  var requiresInspect = (step===1 || step===5);
-  var requiresTutRatings = (step===6);
+  var requiresInspect = (step===1);
+  var requiresTutRatings = (step===4);
   if(step===2) state.tutDieInspected=true;
 
   var nav=mkEl('div','tut-nav');
@@ -1619,7 +1613,7 @@ function tutStep4_combined(){
   postRoll.appendChild(ratingNote);
 
   [
-    {key:'assertability', text:'Should '+TUT_PARTNER+' have said that?', left:'Definitely not', right:'Definitely yes'},
+    {key:'assertability', text:'Should '+TUT_PARTNER+' have said that prediction?', left:'Definitely not', right:'Definitely yes'},
     {key:'justification', text:'Did '+TUT_PARTNER+' have good reasons for making this prediction?', left:'Definitely not', right:'Definitely yes'}
   ].forEach(function(q){
     var key=q.key;
@@ -2037,7 +2031,7 @@ function makeDivider(label){var d=mkEl('div','divider'); d.textContent=label; re
 function buildLikert(){
   var n=CONFIG.likertPoints;
   var questions=[
-    {key:'assertability',text:'Should '+eName()+' have said that?'}
+    {key:'assertability',text:'Should '+eName()+' have said that prediction?'}
   ,{key:'justification', text:'Did '+eName()+' have good reasons to say that?'}
   ];
 
@@ -2237,7 +2231,7 @@ function startRound(){
   delete dieDrags['throw'];
   render();
   // Random inspect time: 3-8 seconds
-  var inspectMs = 3000 + Math.random() * 5000;
+  var inspectMs = 5000 + Math.random() * 3000;
   // Show "has inspected" 1.2s before rolling becomes available
   setTimeout(function(){
     if(state.phase==='inspecting'){ state.inspected=true; render(); }
