@@ -1431,7 +1431,7 @@ function renderTutorial(){
     body.innerHTML='Now you are first going to do a practice tutorial for the task you are about to complete. For this tutorial you will be paired with a human partner. The human partner\'s name is <strong>'+TUT_PARTNER+'</strong>. '+TUT_PARTNER+' sees a die before it is rolled and makes a prediction. You cannot see the die until after the roll.';
     card.appendChild(body); demo.appendChild(tutStep_partner());
   } else if(step===1){
-    body.innerHTML='The dice in this task can have <strong>identical values on multiple faces</strong> -- unlike a standard die. Drag the example die below to explore its faces:';
+    body.innerHTML='The die in this task can have <strong>identical values on multiple faces</strong> -- unlike a standard die. Drag the example die below to explore its faces:';
     card.appendChild(body); demo.appendChild(tutStep0Demo());
   } else if(step===2){
     body.innerHTML='<strong>'+TUT_PARTNER+'</strong> sees the full die type before the roll -- the 3D die and all six faces.';
@@ -1443,7 +1443,7 @@ function renderTutorial(){
     body.innerHTML='You press the button to roll the die. Watch it land and settle.';
     card.appendChild(body); demo.appendChild(tutStep2Demo());
   } else if(step===5){
-    body.innerHTML='After the roll, <strong>drag the die</strong> to inspect all six faces. You must see all six before rating.';
+    body.innerHTML='After you have rolled the die, <strong>drag the die</strong> to inspect all six faces. You must see all six before rating.';
     card.appendChild(body); demo.appendChild(tutStep3Demo());
   } else if(step===6){
     body.innerHTML='You see the outcome and whether it matches '+TUT_PARTNER+'\'s prediction. <strong>Your ratings should reflect that prediction</strong> -- was it a good one given what '+TUT_PARTNER+' knew? The main task is observational: you will evaluate the partner\'s decision making across several rounds.';

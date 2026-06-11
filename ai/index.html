@@ -1451,7 +1451,7 @@ function renderTutorial(){
     body.innerHTML='For this task your goal is to evaluate the decision making of an AI. First, you are going to do a practise tutorial. For the practise tutorial you will observe an AI named <strong>'+TUT_PARTNER+'</strong>. '+TUT_PARTNER+' will see a die before it is rolled and then make a prediction about which number on the die is most likely to appear. After the die roll, you will be asked to rate '+TUT_PARTNER+'\'s prediction.';
     card.appendChild(body); demo.appendChild(tutStep_partner());
   } else if(step===1){
-    body.innerHTML='The dice in this task can have <strong>identical values on multiple faces</strong> -- unlike a standard die. Drag the example die below to explore its faces:';
+    body.innerHTML='The die in this task can have <strong>identical values on multiple faces</strong> -- unlike a standard die. Drag the example die below to explore its faces:';
     card.appendChild(body); demo.appendChild(tutStep0Demo());
   } else if(step===2){
     body.innerHTML='<strong>'+TUT_PARTNER+'</strong> is then given a die to inspect.';
@@ -1464,7 +1464,7 @@ function renderTutorial(){
     body.innerHTML='You press the button to roll the die. Watch it land and settle.';
     card.appendChild(body); demo.appendChild(tutStep2Demo());
   } else if(step===5){
-    body.innerHTML='After the roll, <strong>drag the die</strong> to inspect all six faces. You must see all six before rating.';
+    body.innerHTML='After you have rolled the die, <strong>drag the die</strong> to inspect all six faces. You must see all six before rating.';
     card.appendChild(body); demo.appendChild(tutStep3Demo());
   } else if(step===6){
     body.innerHTML='Now you will see '+TUT_PARTNER+'\'s prediction, then the outcome of the dice roll. Finally you will be asked to evaluate '+TUT_PARTNER+'\'s prediction.';
