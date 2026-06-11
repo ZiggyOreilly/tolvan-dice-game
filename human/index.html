@@ -1267,6 +1267,7 @@ function render(){
   if(state.screen==='manipulation')     app.appendChild(renderManipulation());
   else if(state.screen==='tutorial')    app.appendChild(renderTutorial());
   else if(state.screen==='partner-intro')  app.appendChild(renderGameStart());
+  else if(state.screen==='matching')    app.appendChild(renderMatching());
   else if(state.screen==='game')        app.appendChild(renderGame());
   else if(state.screen==='overall-attribution') app.appendChild(renderOverallAttribution());
   else if(state.screen==='post-competence') app.appendChild(renderPostCompetence());
@@ -1433,6 +1434,22 @@ function handleManipulationContinue(){
 }
 
 
+function renderMatching(){
+  var wrap=mkEl('div','fade-in'); wrap.style.cssText='display:flex;flex-direction:column;gap:18px;width:100%';
+  var topBar=mkEl('div','top-bar'); var gl=mkEl('div','game-label'); gl.textContent='Prediction Task'; topBar.appendChild(gl); wrap.appendChild(topBar);
+  var card=mkEl('div','card');
+  var inner=mkEl('div','end-inner');
+  inner.style.cssText='text-align:center;padding:40px 20px;';
+  var msg=mkEl('div'); msg.style.cssText='font-size:18px;color:var(--text-main);margin-bottom:12px;'; msg.textContent='Matching you to your partner';
+  inner.appendChild(msg);
+  var dots=mkEl('span','inspecting-dots');
+  for(var i=0;i<3;i++){ var s=mkEl('span'); s.textContent='.'; dots.appendChild(s); }
+  inner.appendChild(dots);
+  card.appendChild(inner); wrap.appendChild(card);
+  setTimeout(function(){ state.screen='manipulation'; render(); }, 3000);
+  return wrap;
+}
+
 function renderGameStart(){
   var wrap=mkEl('div','fade-in'); wrap.style.cssText='display:flex;flex-direction:column;gap:18px;width:100%';
   var topBar=mkEl('div','top-bar'); var gl=mkEl('div','game-label'); gl.textContent='Prediction Task'; topBar.appendChild(gl); wrap.appendChild(topBar);
@@ -1444,7 +1461,7 @@ function renderGameStart(){
   inner.appendChild(body);
   var btn=mkEl('button','btn btn-submit'); btn.textContent='Start the task ->'; btn.style.cssText='max-width:260px;width:100%;';
   btn.onclick=function(){
-  state.screen='manipulation';
+  state.screen='matching';
   render();
 };
   inner.appendChild(btn); card.appendChild(inner); wrap.appendChild(card); return wrap;
