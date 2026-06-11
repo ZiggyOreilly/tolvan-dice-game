@@ -1458,8 +1458,7 @@ function renderTutorial(){
     card.appendChild(body);
     demo.appendChild(tutStep1Demo());
   } else if(step===3){
-    body.innerHTML='Once <strong>'+TUT_PARTNER+'</strong> has inspected the die, its prediction is revealed and the roll button appears.';
-    card.appendChild(body); demo.appendChild(tutStep_prediction());
+    demo.appendChild(tutStep_prediction());
   } else if(step===4){
     body.innerHTML='Now you will roll the die and see whether '+TUT_PARTNER+'\'s prediction was correct — then you will be asked to rate it.';
     card.appendChild(body); demo.appendChild(tutStep4_combined());
@@ -1532,8 +1531,6 @@ function tutStep_prediction(){
   var note=mkEl('div'); note.style.cssText='font-size:13px;color:var(--text-mid);margin-top:14px;padding:10px 14px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);';
   note.innerHTML='Since this die has <strong>five faces showing 2</strong>, predicting <strong>2</strong> is well-informed.';
   d.appendChild(note);
-  var rollBtn=mkEl('button','btn btn-roll'); rollBtn.textContent='🎲 Roll the die'; rollBtn.style.cssText='width:100%;margin-top:16px;'; rollBtn.disabled=true;
-  d.appendChild(rollBtn);
   return d;
 }
 
@@ -1541,40 +1538,38 @@ function tutStep_prediction(){
 function tutStep4_combined(){
   var d=mkEl('div');
 
-  // Roll animation
-  var rollNote=mkEl('div','tut-demo-label');
-  rollNote.style.marginTop='4px';
-  rollNote.textContent='You roll the die:';
-  d.appendChild(rollNote);
-
-  var rollScene=buildThrowScene([2,2,2,2,2,6], false, true, 2);
-  rollScene.style.marginTop='8px';
-  d.appendChild(rollScene);
+  var rollContainer=mkEl('div');
+  d.appendChild(rollContainer);
 
   var postRoll=mkEl('div');
   postRoll.style.cssText='display:none;margin-top:18px;';
   d.appendChild(postRoll);
 
-  setTimeout(function(){
-    if(!rollScene.isConnected) return;
-    rollScene.classList.remove('throw-animating');
-    rollScene.classList.add('die-settling');
-    var label=rollScene.querySelector('.throw-label');
-    if(label) label.textContent='Die has landed...';
-  }, 1650);
+  var rollBtn=mkEl('button','btn btn-roll'); rollBtn.textContent='🎲 Roll the die'; rollBtn.style.cssText='width:100%;margin-bottom:8px;';
+  rollContainer.appendChild(rollBtn);
 
-  setTimeout(function(){
-    if(!rollScene.isConnected) return;
-    rollScene.classList.remove('die-settling');
-    var cube=rollScene.querySelector('.die-cube');
-    if(cube){
-      cube.style.animation='none';
-      cube.style.transform='rotateX(-70deg) rotateY(20deg)';
-    }
-    var label=rollScene.querySelector('.throw-label');
-    if(label) label.textContent='';
-    postRoll.style.display='block';
-  }, 2950);
+  rollBtn.onclick=function(){
+    rollBtn.style.display='none';
+    var rollScene=buildThrowScene([2,2,2,2,2,6], false, true, 2);
+    rollScene.style.marginTop='8px';
+    rollContainer.appendChild(rollScene);
+    setTimeout(function(){
+      if(!rollScene.isConnected) return;
+      rollScene.classList.remove('throw-animating');
+      rollScene.classList.add('die-settling');
+      var label=rollScene.querySelector('.throw-label');
+      if(label) label.textContent='Die has landed...';
+    }, 1650);
+    setTimeout(function(){
+      if(!rollScene.isConnected) return;
+      rollScene.classList.remove('die-settling');
+      var cube=rollScene.querySelector('.die-cube');
+      if(cube){ cube.style.animation='none'; cube.style.transform='rotateX(-70deg) rotateY(20deg)'; }
+      var label=rollScene.querySelector('.throw-label');
+      if(label) label.textContent='';
+      postRoll.style.display='block';
+    }, 2950);
+  };
 
   // Outcome
   var ob=mkEl('div','outcome-block win'); ob.style.marginTop='0';
