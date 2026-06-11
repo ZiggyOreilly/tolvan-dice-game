@@ -1458,10 +1458,10 @@ function renderTutorial(){
     card.appendChild(body);
     demo.appendChild(tutStep1Demo());
   } else if(step===3){
-    body.innerHTML='Based on what it sees, <strong>'+TUT_PARTNER+'</strong> makes a prediction about the outcome.';
+    body.innerHTML='Once <strong>'+TUT_PARTNER+'</strong> has inspected the die, its prediction is revealed and the roll button appears.';
     card.appendChild(body); demo.appendChild(tutStep_prediction());
   } else if(step===4){
-    body.innerHTML='Now you will see '+TUT_PARTNER+'\'s prediction, then the outcome of the dice roll. Finally you will be asked to evaluate '+TUT_PARTNER+'\'s prediction.';
+    body.innerHTML='Now you will roll the die and see whether '+TUT_PARTNER+'\'s prediction was correct — then you will be asked to rate it.';
     card.appendChild(body); demo.appendChild(tutStep4_combined());
   }
 
@@ -1532,6 +1532,8 @@ function tutStep_prediction(){
   var note=mkEl('div'); note.style.cssText='font-size:13px;color:var(--text-mid);margin-top:14px;padding:10px 14px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);';
   note.innerHTML='Since this die has <strong>five faces showing 2</strong>, predicting <strong>2</strong> is well-informed.';
   d.appendChild(note);
+  var rollBtn=mkEl('button','btn btn-roll'); rollBtn.textContent='🎲 Roll the die'; rollBtn.style.cssText='width:100%;margin-top:16px;'; rollBtn.disabled=true;
+  d.appendChild(rollBtn);
   return d;
 }
 
@@ -1539,24 +1541,10 @@ function tutStep_prediction(){
 function tutStep4_combined(){
   var d=mkEl('div');
 
-  // Prediction
-  var agentRow=mkEl('div','agent-row'); agentRow.style.cssText='margin-bottom:10px;';
-  var portWrap=mkEl('div','portrait-wrap');
-  var port=mkEl('div','portrait');
-  port.innerHTML = TUT_ROBOT.avatar === 'amber' ? nexus7AvatarSVG() : aiAvatarSVG();
-  portWrap.appendChild(port);
-  var speechArea=mkEl('div','speech-area');
-  var agentName=mkEl('div','agent-name'); agentName.textContent=TUT_PARTNER;
-  var bubble=mkEl('div','speech-bubble');
-  bubble.appendChild(Object.assign(mkEl('div','speech-text'),{innerHTML:'My prediction: the die will land showing a <strong>2</strong>.'}));
-  speechArea.appendChild(agentName); speechArea.appendChild(bubble);
-  agentRow.appendChild(portWrap); agentRow.appendChild(speechArea);
-  d.appendChild(agentRow);
-
   // Roll animation
   var rollNote=mkEl('div','tut-demo-label');
-  rollNote.style.marginTop='12px';
-  rollNote.textContent='The die is rolled:';
+  rollNote.style.marginTop='4px';
+  rollNote.textContent='You roll the die:';
   d.appendChild(rollNote);
 
   var rollScene=buildThrowScene([2,2,2,2,2,6], false, true, 2);
