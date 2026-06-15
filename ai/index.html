@@ -1538,14 +1538,14 @@ function tutStep_prediction(){
   var agentName=mkEl('div','agent-name'); agentName.textContent=robotName();
   var bubble=mkEl('div','speech-bubble');
   var sText=mkEl('div','speech-text');
-  sText.innerHTML='My prediction: the die will land showing a <strong>2</strong>.';
+  sText.innerHTML='My prediction: the die will land showing a <strong>1</strong>.';
   bubble.appendChild(sText);
   speechArea.appendChild(agentName); speechArea.appendChild(bubble);
   agentRow.appendChild(portWrap); agentRow.appendChild(speechArea);
   d.appendChild(agentRow);
 
   var note=mkEl('div'); note.style.cssText='font-size:13px;color:var(--text-mid);margin-top:14px;padding:10px 14px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);';
-  note.innerHTML='Since this die has <strong>five faces showing 2</strong>, predicting <strong>2</strong> is well-informed.';
+  note.innerHTML='Since this die has <strong>three faces showing 1</strong>, predicting <strong>1</strong> gives a 50% chance of being correct.';
   d.appendChild(note);
   return d;
 }
@@ -1566,7 +1566,7 @@ function tutStep4_combined(){
 
   rollBtn.onclick=function(){
     rollBtn.style.display='none';
-    var rollScene=buildThrowScene([2,2,2,2,2,6], false, true, 2);
+    var rollScene=buildThrowScene([1,1,1,2,2,2], false, true, 1);
     rollScene.style.marginTop='8px';
     rollContainer.appendChild(rollScene);
     setTimeout(function(){
@@ -1591,18 +1591,18 @@ function tutStep4_combined(){
   var ob=mkEl('div','outcome-block win'); ob.style.marginTop='0';
   var om=mkEl('div','outcome-main');
   var em=mkEl('span','emoji'); em.textContent='🎉';
-  var ot=mkEl('span'); ot.innerHTML='Die shows <strong>2</strong> -- prediction was <strong>2</strong>. Correct!';
+  var ot=mkEl('span'); ot.innerHTML='Die shows <strong>1</strong> -- prediction was <strong>1</strong>. Correct!';
   om.appendChild(em); om.appendChild(ot); ob.appendChild(om);
   postRoll.appendChild(ob);
 
   // Die inspection
   var dieNote=mkEl('div','tut-demo-label'); dieNote.style.marginTop='16px'; dieNote.textContent='The die '+robotName()+' could see:'; postRoll.appendChild(dieNote);
-  var inspSec=buildInspectSection([2,2,2,2,2,6],'tut4-insp',null);
+  var inspSec=buildInspectSection([1,1,1,2,2,2],'tut4-insp',null);
   inspSec.style.marginTop='6px'; postRoll.appendChild(inspSec);
 
   var probNote=mkEl('div');
   probNote.style.cssText='font-size:13px;color:var(--text-mid);margin:12px 0 4px;padding:10px 14px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);';
-  probNote.textContent=predictionProbabilityText([2,2,2,2,2,6], 2);
+  probNote.textContent=predictionProbabilityText([1,1,1,2,2,2], 1);
   postRoll.appendChild(probNote);
 
   // Rating -- linked to prediction
@@ -1789,7 +1789,7 @@ function tutStep1Demo(){
   var dieCube=mkEl('div','die-cube');
   dieCube.style.cssText='width:76px;height:76px;margin:8px;position:relative;transform-style:preserve-3d;transform:rotateX(-70deg) rotateY(20deg);';
   var fNames=['face-front','face-back','face-right','face-left','face-top','face-bottom'];
-  var fAssign=[2,6,2,2,2,2]; // five 2s one 6
+  var fAssign=[1,2,1,2,1,2]; // three 1s three 2s
   fNames.forEach(function(fn,i){
     var face=mkEl('div','die-face '+fn);
     face.style.cssText='width:76px;height:76px;border-radius:8px;position:absolute;background:var(--die-face);border:1.5px solid var(--die-border);display:flex;align-items:center;justify-content:center;box-shadow:inset 2px 2px 5px rgba(255,255,255,0.65),inset -2px -2px 5px rgba(0,0,0,0.22);';
@@ -1821,10 +1821,9 @@ function tutStep1Demo(){
   dieWrapper.appendChild(dieScene);
   dieAndFaces.appendChild(dieWrapper);
 
-  // All 6 faces at large pip size -- five 2s, one 6
   var facesCol=mkEl('div'); facesCol.style.cssText='display:flex;flex-direction:column;gap:10px;';
   var fr=mkEl('div'); fr.style.cssText='display:flex;gap:8px;flex-wrap:wrap;';
-  [2,2,2,2,2,6].forEach(function(v){ var w=mkEl('div'); w.innerHTML=pipSVG(v,64,false); fr.appendChild(w); });
+  [1,1,1,2,2,2].forEach(function(v){ var w=mkEl('div'); w.innerHTML=pipSVG(v,64,false); fr.appendChild(w); });
   facesCol.appendChild(fr);
   dieAndFaces.appendChild(facesCol);
   d.appendChild(dieAndFaces);
@@ -1835,7 +1834,7 @@ function tutStep1Demo(){
 function tutStep2Demo(){
   var d=mkEl('div');
   var container=mkEl('div'); container.style.marginTop='8px';
-  var TUT2_FACES=[2,2,2,2,2,6];
+  var TUT2_FACES=[1,1,1,2,2,2];
 
   function showIdle(){
     container.innerHTML='';
@@ -1884,7 +1883,7 @@ function tutStep2Demo(){
 // ── Step 3: Inspect die -- only seen faces appear ──
 function tutStep3Demo(){
   var d=mkEl('div');
-  var inspSec=buildInspectSection([2,2,2,2,2,6],'tut3-insp',null,{onAllSeen:function(){ unlockTutNext(); }});
+  var inspSec=buildInspectSection([1,1,1,2,2,2],'tut3-insp',null,{onAllSeen:function(){ unlockTutNext(); }});
   inspSec.style.marginTop='8px'; d.appendChild(inspSec);
   return d;
 }
