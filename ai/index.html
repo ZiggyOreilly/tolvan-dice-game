@@ -1438,8 +1438,7 @@ function renderGameStart(){
   inner.appendChild(body);
   var btn=mkEl('button','btn btn-submit'); btn.textContent='Start the task ->'; btn.style.cssText='max-width:260px;width:100%;';
   btn.onclick=function(){
-  state.screen='matching';
-  render();
+  startGame();
 };
   inner.appendChild(btn); card.appendChild(inner); wrap.appendChild(card); return wrap;
 }
@@ -1478,7 +1477,7 @@ function renderTutorial(){
   } else if(step===3){
     demo.appendChild(tutStep_prediction());
   } else if(step===4){
-    body.innerHTML='Now you will roll the die and see whether <strong>'+TUT_PARTNER+'\'s</strong> prediction was correct — then you will be asked to rate it.';
+    body.innerHTML='Now you will roll the die and see whether <strong>'+robotName()+'\'s</strong> prediction was correct — then you will be asked to rate it.';
     card.appendChild(body); demo.appendChild(tutStep4_combined());
   }
 
@@ -1501,7 +1500,8 @@ function renderTutorial(){
   if(requiresTutRatings && !tutBothRated()) bNext.disabled=true;
   bNext.onclick=isLast
     ? function(){
-        startGame();
+        state.screen='partner-intro';
+        render();
       }
     : function(){
         state.tutStep++;
@@ -1596,7 +1596,7 @@ function tutStep4_combined(){
   postRoll.appendChild(ob);
 
   // Die inspection
-  var dieNote=mkEl('div','tut-demo-label'); dieNote.style.marginTop='16px'; dieNote.textContent='The die '+TUT_PARTNER+' could see:'; postRoll.appendChild(dieNote);
+  var dieNote=mkEl('div','tut-demo-label'); dieNote.style.marginTop='16px'; dieNote.textContent='The die '+robotName()+' could see:'; postRoll.appendChild(dieNote);
   var inspSec=buildInspectSection([2,2,2,2,2,6],'tut4-insp',null);
   inspSec.style.marginTop='6px'; postRoll.appendChild(inspSec);
 
@@ -1608,12 +1608,12 @@ function tutStep4_combined(){
   // Rating -- linked to prediction
   var ratingNote=mkEl('div');
   ratingNote.style.cssText='font-size:13px;color:var(--text-mid);margin:14px 0 4px;padding:10px 14px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);';
-  ratingNote.innerHTML='Now rate <strong>'+TUT_PARTNER+'\'s prediction</strong>.';
+  ratingNote.innerHTML='Now rate <strong>'+robotName()+'\'s prediction</strong>.';
   postRoll.appendChild(ratingNote);
 
   [
-    {key:'assertability', text:'Should '+TUT_PARTNER+' have said that prediction?', left:'Definitely not', right:'Definitely yes'},
-    {key:'justification', text:'Did '+TUT_PARTNER+' have good reasons for making this prediction?', left:'Definitely not', right:'Definitely yes'}
+    {key:'assertability', text:'Should '+robotName()+' have said that prediction?', left:'Definitely not', right:'Definitely yes'},
+    {key:'justification', text:'Did '+robotName()+' have good reasons for making this prediction?', left:'Definitely not', right:'Definitely yes'}
   ].forEach(function(q){
     var key=q.key;
     var item=mkEl('div'); item.style.marginTop='12px';
