@@ -1519,22 +1519,35 @@ function renderTutorial(){
 
   var nav=mkEl('div','tut-nav');
   if(step>0){var bBack=mkEl('button','btn btn-tut-sec'); bBack.textContent='← Back'; bBack.onclick=function(){state.tutStep--;state.tutDieInspected=false;render();}; nav.appendChild(bBack);}
-  var isLast=step===TOTAL_STEPS-1;
-  var bNext=mkEl('button','btn btn-tut'); bNext.textContent='Next →';
-  bNext.id='tut-next-btn';
-  if(requiresInspect && !state.tutDieInspected) bNext.disabled=true;
-  if(requiresTutRatings && !tutBothRated()) bNext.disabled=true;
-  bNext.onclick=isLast
-    ? function(){
-        state.screen='partner-intro';
-        render();
-      }
-    : function(){
-        state.tutStep++;
-        state.tutDieInspected=false;
-        render();
-      };
-  nav.appendChild(bNext);
+
+  if(step===3){
+    // Auto-advance: show "has evaluated" then move to next step
+    setTimeout(function(){
+      var el=document.getElementById('tut-eval-line');
+      if(el){ el.className='inspecting-done'; el.innerHTML='&#10003; &nbsp;'+robotName()+' has evaluated the die'; }
+    }, 3000);
+    setTimeout(function(){
+      if(state.tutStep===3){ state.tutStep=4; render(); }
+    }, 4000);
+  } else {
+    var isLast=step===TOTAL_STEPS-1;
+    var bNext=mkEl('button','btn btn-tut'); bNext.textContent='Next →';
+    bNext.id='tut-next-btn';
+    if(requiresInspect && !state.tutDieInspected) bNext.disabled=true;
+    if(requiresTutRatings && !tutBothRated()) bNext.disabled=true;
+    bNext.onclick=isLast
+      ? function(){
+          state.screen='partner-intro';
+          render();
+        }
+      : function(){
+          state.tutStep++;
+          state.tutDieInspected=false;
+          render();
+        };
+    nav.appendChild(bNext);
+  }
+
   card.appendChild(nav);
   wrap.appendChild(card); return wrap;
 }
@@ -1562,6 +1575,7 @@ function tutStepEvaluating(){
   var agentName=mkEl('div','agent-name'); agentName.textContent=robotName();
   var statusBox=mkEl('div','inspecting-status');
   var line=mkEl('div','inspecting-line');
+  line.id='tut-eval-line';
   line.innerHTML=robotName()+' is evaluating the die&ensp;';
   var dots=mkEl('span','inspecting-dots');
   dots.innerHTML='<span></span><span></span><span></span>';
