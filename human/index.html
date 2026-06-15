@@ -1441,7 +1441,7 @@ function renderMatching(){
   var card=mkEl('div','card');
   var inner=mkEl('div','end-inner');
   inner.style.cssText='text-align:center;padding:40px 20px;';
-  var msg=mkEl('div'); msg.style.cssText='font-size:18px;color:var(--text-main);margin-bottom:12px;'; msg.textContent='Randomly assigning you to a Prolific worker.';
+  var msg=mkEl('div'); msg.style.cssText='font-size:18px;color:var(--text-main);margin-bottom:12px;'; msg.textContent='Assigning you to a Prolific worker.';
   inner.appendChild(msg);
   var dots=mkEl('span','inspecting-dots');
   for(var i=0;i<3;i++){ var s=mkEl('span'); s.textContent='.'; dots.appendChild(s); }
@@ -1458,7 +1458,7 @@ function renderGameStart(){
   var inner=mkEl('div','end-inner');
   var title=mkEl('div','end-title'); title.textContent='Tutorial Complete'; inner.appendChild(title);
   var body=mkEl('div','end-body');
-  body.innerHTML='You have completed the tutorial. You are now ready to start the task.<br><br>You will observe <strong>'+ROUNDS.length+' rounds</strong>. In each round, your task is to evaluate <strong>'+robotName()+'\'s</strong> prediction after they inspect the die.';
+  body.innerHTML='You have completed the tutorial. You are now ready to start the task.<br><br>You will observe <strong>'+ROUNDS.length+' rounds</strong>. In each round, your task is to evaluate <strong>'+robotName()+'\'s</strong> prediction after they evaluate the die.';
   inner.appendChild(body);
   var btn=mkEl('button','btn btn-submit'); btn.textContent='Start the task ->'; btn.style.cssText='max-width:260px;width:100%;';
   btn.onclick=function(){
@@ -1471,14 +1471,14 @@ function renderGameStart(){
 // ================================
 // TUTORIAL STEPS
 // ================================
-var TUT_TITLES = ['Practice Tutorial','The Special Die','What '+robotName()+' Sees', robotName()+' Makes a Prediction','Your Assessment'];
+var TUT_TITLES = ['Practice Tutorial','The Special Die','What '+robotName()+' Sees',robotName()+' Evaluates',robotName()+' Makes a Prediction','Your Assessment'];
 
 function renderTutorial(){
   var wrap=mkEl('div','fade-in'); wrap.style.cssText='display:flex;flex-direction:column;gap:18px;width:100%';
   var topBar=mkEl('div','top-bar'); var gl=mkEl('div','game-label'); gl.textContent='Tutorial'; topBar.appendChild(gl); wrap.appendChild(topBar);
   var card=mkEl('div','card');
   var step=state.tutStep;
-  var TOTAL_STEPS=5;
+  var TOTAL_STEPS=6;
 
   var hdr=mkEl('div','tut-header');
   var badge=mkEl('div','tut-step-badge'); badge.textContent=String(step+1);
@@ -1498,8 +1498,10 @@ function renderTutorial(){
     body.innerHTML='<strong>'+robotName()+'</strong> is then given a die to inspect.';
     card.appendChild(body); demo.appendChild(tutStep1Demo());
   } else if(step===3){
-    demo.appendChild(tutStep_prediction());
+    demo.appendChild(tutStepEvaluating());
   } else if(step===4){
+    demo.appendChild(tutStep_prediction());
+  } else if(step===5){
     body.innerHTML='Now you will roll the die and see whether <strong>'+robotName()+'\'s</strong> prediction was correct — then you will be asked to rate it.';
     card.appendChild(body); demo.appendChild(tutStep4_combined());
   }
@@ -1512,7 +1514,7 @@ function renderTutorial(){
 
   // Steps that require die inspection before proceeding
   var requiresInspect = (step===1);
-  var requiresTutRatings = (step===4);
+  var requiresTutRatings = (step===5);
   if(step===2) state.tutDieInspected=true;
 
   var nav=mkEl('div','tut-nav');
@@ -1549,6 +1551,29 @@ function unlockTutNext(){
 }
 
 // ── Step 3 (new): Kenneth makes a prediction ──
+function tutStepEvaluating(){
+  var d=mkEl('div');
+  var agentRow=mkEl('div','agent-row'); agentRow.style.marginTop='12px';
+  var portWrap=mkEl('div','portrait-wrap');
+  var port=mkEl('div','portrait');
+  port.innerHTML = humanAvatarSVG(GAME_ROBOT.avatar);
+  portWrap.appendChild(port);
+  var speechArea=mkEl('div','speech-area');
+  var agentName=mkEl('div','agent-name'); agentName.textContent=robotName();
+  var statusBox=mkEl('div','inspecting-status');
+  var line=mkEl('div','inspecting-line');
+  line.innerHTML=robotName()+' is evaluating the die&ensp;';
+  var dots=mkEl('span','inspecting-dots');
+  dots.innerHTML='<span></span><span></span><span></span>';
+  line.appendChild(dots);
+  statusBox.appendChild(line);
+  speechArea.appendChild(agentName);
+  speechArea.appendChild(statusBox);
+  agentRow.appendChild(portWrap); agentRow.appendChild(speechArea);
+  d.appendChild(agentRow);
+  return d;
+}
+
 function tutStep_prediction(){
   var d=mkEl('div');
   var agentRow=mkEl('div','agent-row'); agentRow.style.marginTop='12px';
@@ -1941,14 +1966,14 @@ function renderGame(){
     var statusBox=mkEl('div','inspecting-status');
     if(!state.inspected){
       var line=mkEl('div','inspecting-line');
-      line.innerHTML=eName()+' is inspecting the die&ensp;';
+      line.innerHTML=eName()+' is evaluating the die&ensp;';
       var dots=mkEl('span','inspecting-dots');
       dots.innerHTML='<span></span><span></span><span></span>';
       line.appendChild(dots);
       statusBox.appendChild(line);
     } else {
       var done=mkEl('div','inspecting-done');
-      done.innerHTML='✓ &nbsp;'+eName()+' has inspected the die';
+      done.innerHTML='✓ &nbsp;'+eName()+' has evaluated the die';
       statusBox.appendChild(done);
     }
     speechArea.appendChild(agentName);
