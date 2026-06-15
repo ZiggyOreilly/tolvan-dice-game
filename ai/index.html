@@ -1268,7 +1268,7 @@ function renderManipulation(){
   card.appendChild(title);
 
   var intro=mkEl('div','intro-body');
-  intro.innerHTML='Before the task starts, please read the following information about your partner. Your partner is a chatbot with the model ID <strong>'+robotModelId()+'</strong>. We will refer to this chatbot as <strong>'+robotName()+'</strong>. Prior to this session, '+robotName()+'\'s interaction logs from everyday workplace and community environments were analysed. Based on this data, we have compiled a profile of its typical behaviours.';
+  intro.innerHTML='Your partner is a chatbot with the model ID <strong>'+robotModelId()+'</strong>. We will refer to this chatbot as <strong>'+robotName()+'</strong>. Prior to this session, '+robotName()+' completed a short questionnaire about how it typically approaches tasks and handles responsibilities in everyday work and community settings. Based on these responses, we have compiled a profile of its typical behaviours.';
   card.appendChild(intro);
 
 
