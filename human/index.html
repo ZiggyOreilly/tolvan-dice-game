@@ -771,7 +771,7 @@ var ROUNDS = shuffleArray(enforceConditionRounds([
 // STATE
 // ================================
 var state = {
-  screen:'tutorial',
+  screen:'manipulation',
   tutStep:0,
   roundIndex:0,
   phase:'inspecting',
@@ -1429,7 +1429,8 @@ function handleManipulationContinue(){
 
   var ratingErrDone=document.getElementById('err-box');
   if(ratingErrDone) ratingErrDone.style.display='none';
-  startGame();
+  state.screen='tutorial';
+  render();
   return;
 }
 
@@ -1471,7 +1472,7 @@ function renderGameStart(){
 // ================================
 // TUTORIAL STEPS
 // ================================
-var TUT_TITLES = ['Practice Tutorial','The Special Die','What '+TUT_PARTNER+' Sees', TUT_PARTNER + ' Makes a Prediction','Your Assessment'];
+var TUT_TITLES = ['Practice Tutorial','The Special Die','What '+robotName()+' Sees', robotName()+' Makes a Prediction','Your Assessment'];
 
 function renderTutorial(){
   var wrap=mkEl('div','fade-in'); wrap.style.cssText='display:flex;flex-direction:column;gap:18px;width:100%';
@@ -1489,18 +1490,18 @@ function renderTutorial(){
   var demo=mkEl('div','tut-demo');
 
   if(step===0){
-    body.innerHTML='For this task your goal is to evaluate the decision making of another Prolific worker. First, you are going to do a practice tutorial. For this tutorial you will observe a fictional human named <strong>'+TUT_PARTNER+'</strong>. '+TUT_PARTNER+' will see a die before it is rolled and then make a prediction about which number on the die is most likely to appear. After the die roll, you will be asked to rate '+TUT_PARTNER+'\'s prediction.';
+    body.innerHTML='Before the main task begins, you will do a short practice run with <strong>'+robotName()+'</strong> — the same partner you just read about. '+robotName()+' will see a die before it is rolled and then make a prediction about which number on the die is most likely to appear. After the die roll, you will be asked to rate '+robotName()+'\'s prediction.';
     card.appendChild(body); demo.appendChild(tutStep_partner());
   } else if(step===1){
     body.innerHTML='The die in this task can have <strong>identical values on multiple faces</strong> -- unlike a standard die. Drag the example die below to explore its faces:';
     card.appendChild(body); demo.appendChild(tutStep0Demo());
   } else if(step===2){
-    body.innerHTML='<strong>'+TUT_PARTNER+'</strong> is then given a die to inspect.';
+    body.innerHTML='<strong>'+robotName()+'</strong> is then given a die to inspect.';
     card.appendChild(body); demo.appendChild(tutStep1Demo());
   } else if(step===3){
     demo.appendChild(tutStep_prediction());
   } else if(step===4){
-    body.innerHTML='Now you will roll the die and see whether <strong>'+TUT_PARTNER+'\'s</strong> prediction was correct — then you will be asked to rate it.';
+    body.innerHTML='Now you will roll the die and see whether <strong>'+robotName()+'\'s</strong> prediction was correct — then you will be asked to rate it.';
     card.appendChild(body); demo.appendChild(tutStep4_combined());
   }
 
@@ -1524,9 +1525,7 @@ function renderTutorial(){
   if(requiresTutRatings && !tutBothRated()) bNext.disabled=true;
   bNext.onclick=isLast
     ? function(){
-        state.screen='partner-intro';
-        state.characterRatings={ moral:null, competence:null };
-        render();
+        startGame();
       }
     : function(){
         state.tutStep++;
@@ -1689,12 +1688,12 @@ function tutStep_partner(){
 
   var port=mkEl('div');
   port.style.cssText='width:110px;height:110px;border-radius:50%;overflow:hidden;border:3px solid var(--border);box-shadow:var(--shadow-lg);background:#c9a882;';
-  port.innerHTML = humanAvatarSVG(TUT_ROBOT.avatar);
+  port.innerHTML = humanAvatarSVG(GAME_ROBOT.avatar);
   portraitWrap.appendChild(port);
 
   var nameTag=mkEl('div');
   nameTag.style.cssText='font-family:\'Playfair Display\',serif;font-size:20px;font-weight:700;color:var(--text);';
-  nameTag.textContent=TUT_PARTNER;
+  nameTag.textContent=robotName();
   portraitWrap.appendChild(nameTag);
 
 
@@ -1703,7 +1702,7 @@ function tutStep_partner(){
   // Context note
   var note=mkEl('div','tut-highlight');
   note.style.textAlign='center';
-  note.innerHTML='You will observe a Prolific player\'s predictions after the tutorial.';
+  note.innerHTML='This is the partner whose predictions you will be evaluating throughout the task.';
   d.appendChild(note);
 
   return d;
