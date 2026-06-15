@@ -2252,7 +2252,7 @@ function doRoll(){
 
   delete dieDrags['throw'];
   // Pre-compute outcome now so the face swap is baked into the animating die
-  var finalOutcome=round.outcomeFixed!==null?round.outcomeFixed:rollDie(round.faces);
+  var finalOutcome=rollDie(round.faces);
   state._pendingOutcome=finalOutcome;
 
   // Build with animating=true AND outcome so top face = outcome from the start
