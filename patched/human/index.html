@@ -1396,7 +1396,7 @@ function renderGameStart(){
   var inner=mkEl('div','end-inner');
   var title=mkEl('div','end-title'); title.textContent='Practise Complete'; inner.appendChild(title);
   var body=mkEl('div','end-body');
-  body.innerHTML='You have completed the practise trial. You are now ready to start the task.<br><br>You will observe <strong>'+ROUNDS.length+' rounds</strong>. In each round, your task is to evaluate <strong>your partner\'s</strong> prediction after inspecting the die.';
+  body.innerHTML='You have completed the practise round. You are now ready to start the task.<br><br>You will observe <strong>'+ROUNDS.length+' rounds</strong>. In each round, your task is to evaluate <strong>your partner\'s</strong> prediction after inspecting the die.';
   inner.appendChild(body);
   var btn=mkEl('button','btn btn-submit'); btn.textContent='Start the task →'; btn.style.cssText='max-width:260px;width:100%;';
   btn.onclick=function(){
@@ -1410,7 +1410,7 @@ function renderGameStart(){
 // ================================
 // TUTORIAL STEPS
 // ================================
-var TUT_TITLES = ['Practise Trial','The Special Die','What '+TUT_PARTNER+' Sees', TUT_PARTNER + ' Makes a Prediction','Your Assessment'];
+var TUT_TITLES = ['Practise','The Special Die','What '+TUT_PARTNER+' Sees', TUT_PARTNER + ' Makes a Prediction','Your Assessment'];
 
 function renderTutorial(){
   var wrap=mkEl('div','fade-in'); wrap.style.cssText='display:flex;flex-direction:column;gap:18px;width:100%';
@@ -1428,7 +1428,7 @@ function renderTutorial(){
   var demo=mkEl('div','tut-demo');
 
   if(step===0){
-    body.innerHTML='Now you are first going to do a practice tutorial for the task you are about to complete. For this tutorial you will be paired with a human partner. The human partner\'s name is <strong>'+TUT_PARTNER+'</strong>. '+TUT_PARTNER+' sees a die before it is rolled and makes a prediction. You cannot see the die until after the roll.';
+    body.innerHTML='Now you are first going to do a practise round for the task you are about to complete. For this practise round you will be paired with a human partner. The human partner\'s name is <strong>'+TUT_PARTNER+'</strong>. '+TUT_PARTNER+' sees a die before it is rolled and makes a prediction. You cannot see the die until after the roll.';
     card.appendChild(body); demo.appendChild(tutStep_partner());
   } else if(step===1){
     body.innerHTML='The die in this task can have <strong>identical values on multiple faces</strong> -- unlike a standard die. Drag the example die below to explore its faces:';

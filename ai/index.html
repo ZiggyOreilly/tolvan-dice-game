@@ -1434,7 +1434,7 @@ function renderGameStart(){
   var inner=mkEl('div','end-inner');
   var title=mkEl('div','end-title'); title.textContent='Practise Complete'; inner.appendChild(title);
   var body=mkEl('div','end-body');
-  body.innerHTML='You have completed the practise trial. You are now ready to start the task.<br><br>You will observe <strong>'+ROUNDS.length+' rounds</strong>. In each round, your task is to evaluate <strong>'+robotName()+'\'s</strong> prediction after it evaluates the die.';
+  body.innerHTML='You have completed the practise round. You are now ready to start the task.<br><br>You will observe <strong>'+ROUNDS.length+' rounds</strong>. In each round, your task is to evaluate <strong>'+robotName()+'\'s</strong> prediction after it evaluates the die.';
   inner.appendChild(body);
   var btn=mkEl('button','btn btn-submit'); btn.textContent='Start the task →'; btn.style.cssText='max-width:260px;width:100%;';
   btn.onclick=function(){
@@ -1447,7 +1447,7 @@ function renderGameStart(){
 // ================================
 // TUTORIAL STEPS
 // ================================
-var TUT_TITLES = ['Practise Trial','The Special Die','What '+robotName()+' Sees',robotName()+' Evaluates',robotName()+' Makes a Prediction','Your Assessment'];
+var TUT_TITLES = ['Practise','The Special Die','What '+robotName()+' Sees',robotName()+' Evaluates',robotName()+' Makes a Prediction','Your Assessment'];
 
 function renderTutorial(){
   var wrap=mkEl('div','fade-in'); wrap.style.cssText='display:flex;flex-direction:column;gap:18px;width:100%';
@@ -1465,7 +1465,7 @@ function renderTutorial(){
   var demo=mkEl('div','tut-demo');
 
   if(step===0){
-    body.innerHTML='Before the main task begins, you will do a short practice run with <strong>'+robotName()+'</strong> — the same partner you just read about. '+robotName()+' will see a die before it is rolled and then make a prediction about which number on the die is most likely to appear. After the die roll, you will be asked to rate '+robotName()+'\'s prediction.';
+    body.innerHTML='Before the main task begins, you will do a short practise round with <strong>'+robotName()+'</strong> — the same partner you just read about. '+robotName()+' will see a die before it is rolled and then make a prediction about which number on the die is most likely to appear. After the die roll, you will be asked to rate '+robotName()+'\'s prediction.';
     card.appendChild(body); demo.appendChild(tutStep_partner());
   } else if(step===1){
     body.innerHTML='The die in this task can have <strong>identical values on multiple faces</strong> -- unlike a standard die. Drag the example die below to explore its faces:';
