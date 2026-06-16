@@ -1575,17 +1575,34 @@ function tutStep_prediction(){
 
   var speechArea=mkEl('div','speech-area');
   var agentName=mkEl('div','agent-name'); agentName.textContent=robotName();
-  var bubble=mkEl('div','speech-bubble');
-  var sText=mkEl('div','speech-text');
-  sText.innerHTML='My prediction: the die will land showing a <strong>1</strong>.';
-  bubble.appendChild(sText);
-  speechArea.appendChild(agentName); speechArea.appendChild(bubble);
+
+  // Start with typing indicator, then reveal prediction after a short delay
+  var statusBox=mkEl('div','inspecting-status');
+  var typingLine=mkEl('div','inspecting-line');
+  typingLine.innerHTML=robotName()+' is typing&ensp;';
+  var dots=mkEl('span','inspecting-dots');
+  dots.innerHTML='<span></span><span></span><span></span>';
+  typingLine.appendChild(dots);
+  statusBox.appendChild(typingLine);
+  speechArea.appendChild(agentName);
+  speechArea.appendChild(statusBox);
   agentRow.appendChild(portWrap); agentRow.appendChild(speechArea);
   d.appendChild(agentRow);
 
-  var note=mkEl('div'); note.style.cssText='font-size:13px;color:var(--text-mid);margin-top:14px;padding:10px 14px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);';
+  var note=mkEl('div'); note.style.cssText='font-size:13px;color:var(--text-mid);margin-top:14px;padding:10px 14px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);display:none;';
   note.innerHTML='Since this die has <strong>three faces showing 1</strong>, predicting <strong>1</strong> gives a 50% chance of being correct.';
   d.appendChild(note);
+
+  setTimeout(function(){
+    if(!d.isConnected) return;
+    var bubble=mkEl('div','speech-bubble speech-bubble-reveal');
+    var sText=mkEl('div','speech-text');
+    sText.innerHTML='My prediction: the die will land showing a <strong>1</strong>.';
+    bubble.appendChild(sText);
+    speechArea.replaceChild(bubble, statusBox);
+    note.style.display='';
+  }, 2000);
+
   return d;
 }
 
@@ -1969,6 +1986,17 @@ function renderGame(){
     }
     speechArea.appendChild(agentName);
     speechArea.appendChild(statusBox);
+  } else if(state.phase==='predicting'){
+    // Typing indicator shown briefly before prediction is revealed
+    var statusBox=mkEl('div','inspecting-status');
+    var line=mkEl('div','inspecting-line');
+    line.innerHTML=eName()+' is typing&ensp;';
+    var dots=mkEl('span','inspecting-dots');
+    dots.innerHTML='<span></span><span></span><span></span>';
+    line.appendChild(dots);
+    statusBox.appendChild(line);
+    speechArea.appendChild(agentName);
+    speechArea.appendChild(statusBox);
   } else {
     // roll / outcome phases -- show speech bubble
     var bubble=mkEl('div','speech-bubble'+(state.phase==='roll'?' speech-bubble-reveal':''));
@@ -2274,8 +2302,11 @@ function startRound(){
     if(state.phase==='inspecting'){ state.inspected=true; render(); }
   }, inspectMs - 1200);
   setTimeout(function(){
-    if(state.phase==='inspecting'){ state.phase='roll'; render(); }
+    if(state.phase==='inspecting'){ state.phase='predicting'; render(); }
   }, inspectMs);
+  setTimeout(function(){
+    if(state.phase==='predicting'){ state.phase='roll'; render(); }
+  }, inspectMs + 2000);
 }
 function doRoll(){
   var round=currentRound();
