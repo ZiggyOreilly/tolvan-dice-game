@@ -1555,8 +1555,8 @@ function tutStep4_combined(){
   d.appendChild(ratingNote);
 
   [
-    {key:'assertability', text:'Should '+TUT_PARTNER+' have said that prediction?', left:'Definitely not', right:'Definitely yes'},
-    {key:'justification', text:'Did '+TUT_PARTNER+' have good reasons for making this prediction?', left:'Definitely not', right:'Definitely yes'},
+    {key:'assertability', text:'Should '+TUT_PARTNER+' have said that prediction?', left:'Definitely<br>not', right:'Definitely<br>yes'},
+    {key:'justification', text:'Did '+TUT_PARTNER+' have good reasons for making this prediction?', left:'Definitely<br>not', right:'Definitely<br>yes'},
     {key:'attribution', text:'Was the agent\'s response primarily caused by the agent itself, regardless of the situation, or primarily caused by the situation the agent was in?', left:'Mostly by the situation', right:'Mostly by the agent'}
   ].forEach(function(q){
     var key=q.key;
@@ -1578,8 +1578,8 @@ function tutStep4_combined(){
     item.appendChild(btns);
     var anch=mkEl('div','likert-anchors');
     anch.classList.add('assessment-anchors');
-    anch.appendChild(Object.assign(mkEl('span'),{textContent:q.left}));
-    anch.appendChild(Object.assign(mkEl('span'),{textContent:q.right}));
+    var la=mkEl('span'); la.innerHTML=q.left; anch.appendChild(la);
+    var ra=mkEl('span'); ra.innerHTML=q.right; anch.appendChild(ra);
     item.appendChild(anch);
     d.appendChild(item);
   });
@@ -2023,7 +2023,7 @@ function buildLikert(){
     })(v);}
     var anchors=mkEl('div','likert-anchors');
     anchors.classList.add('assessment-anchors');
-    var l=mkEl('span');l.textContent=q.left || 'Definitely not'; var r=mkEl('span');r.textContent=q.right || 'Definitely yes';
+    var l=mkEl('span');l.innerHTML=q.left || 'Definitely<br>not'; var r=mkEl('span');r.innerHTML=q.right || 'Definitely<br>yes';
     anchors.appendChild(l); anchors.appendChild(r);
     track.appendChild(btns); track.appendChild(anchors); item.appendChild(track); group.appendChild(item);
   });
