@@ -1471,7 +1471,7 @@ function renderTutorial(){
     body.innerHTML='The die in this task can have <strong>identical values on multiple faces</strong> -- unlike a standard die. Drag the example die below to explore its faces:';
     card.appendChild(body); demo.appendChild(tutStep0Demo());
   } else if(step===2){
-    body.innerHTML='<strong>'+robotName()+'</strong> is then given a die to inspect.';
+    body.innerHTML='<strong>'+robotName()+'</strong> is then shown a die to inspect.';
     card.appendChild(body);
     demo.appendChild(tutStep1Demo());
   } else if(step===3){
@@ -1618,7 +1618,7 @@ function tutStep4_combined(){
     rollBtn.style.display='none';
     rollContainer.appendChild(makeDivider('Outcome'));
     var rollScene=buildThrowScene([1,1,1,2,2,2], false, true, 1);
-    rollScene.style.marginTop='8px';
+    rollScene.style.marginTop='18px';
     rollContainer.appendChild(rollScene);
     setTimeout(function(){
       if(!rollScene.isConnected) return;
