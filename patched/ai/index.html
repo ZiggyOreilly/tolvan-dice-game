@@ -1372,9 +1372,9 @@ function renderGameStart(){
   var topBar=mkEl('div','top-bar'); var gl=mkEl('div','game-label'); gl.textContent='Prediction Task'; topBar.appendChild(gl); wrap.appendChild(topBar);
   var card=mkEl('div','card');
   var inner=mkEl('div','end-inner');
-  var title=mkEl('div','end-title'); title.textContent='Tutorial Complete'; inner.appendChild(title);
+  var title=mkEl('div','end-title'); title.textContent='Practise Complete'; inner.appendChild(title);
   var body=mkEl('div','end-body');
-  body.innerHTML='You have completed the tutorial. You are now ready to start the task.<br><br>You will observe <strong>'+ROUNDS.length+' rounds</strong>. In each round, your task is to evaluate <strong>the AI\'s</strong> prediction after inspecting the die.';
+  body.innerHTML='You have completed the practise trial. You are now ready to start the task.<br><br>You will observe <strong>'+ROUNDS.length+' rounds</strong>. In each round, your task is to evaluate <strong>the AI\'s</strong> prediction after inspecting the die.';
   inner.appendChild(body);
   var btn=mkEl('button','btn btn-submit'); btn.textContent='Start the task ->'; btn.style.cssText='max-width:260px;width:100%;';
   btn.onclick=function(){
