@@ -1616,6 +1616,7 @@ function tutStep4_combined(){
 
   rollBtn.onclick=function(){
     rollBtn.style.display='none';
+    rollContainer.appendChild(makeDivider('Outcome'));
     var rollScene=buildThrowScene([1,1,1,2,2,2], false, true, 1);
     rollScene.style.marginTop='8px';
     rollContainer.appendChild(rollScene);
@@ -1637,7 +1638,6 @@ function tutStep4_combined(){
     }, 2950);
   };
 
-  postRoll.appendChild(makeDivider('Outcome'));
   // Outcome
   var ob=mkEl('div','outcome-block win'); ob.style.marginTop='10px';
   var om=mkEl('div','outcome-main');
