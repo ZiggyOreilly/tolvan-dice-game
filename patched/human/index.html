@@ -1446,9 +1446,6 @@ function renderTutorial(){
 
   card.appendChild(demo);
 
-  var dots=mkEl('div','tut-progress');
-  for(var i=0;i<TOTAL_STEPS;i++){var dot=mkEl('div','tut-dot'+(i===step?' active':'')); dots.appendChild(dot);}
-  card.appendChild(dots);
 
   // Steps that require die inspection before proceeding
   var requiresInspect = (step===1);
