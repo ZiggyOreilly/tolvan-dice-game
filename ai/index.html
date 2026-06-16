@@ -1589,6 +1589,23 @@ function tutStep_prediction(){
 function tutStep4_combined(){
   var d=mkEl('div');
 
+  var agentRow=mkEl('div','agent-row'); agentRow.style.marginTop='12px';
+  var portWrap=mkEl('div','portrait-wrap');
+  var port=mkEl('div','portrait');
+  port.innerHTML = GAME_ROBOT.avatar === 'amber' ? nexus7AvatarSVG() : aiAvatarSVG();
+  portWrap.appendChild(port);
+  var speechArea=mkEl('div','speech-area');
+  var agentName=mkEl('div','agent-name'); agentName.textContent=robotName();
+  var bubble=mkEl('div','speech-bubble');
+  var sText=mkEl('div','speech-text');
+  sText.innerHTML='My prediction: the die will land showing a <strong>1</strong>.';
+  bubble.appendChild(sText);
+  speechArea.appendChild(agentName); speechArea.appendChild(bubble);
+  agentRow.appendChild(portWrap); agentRow.appendChild(speechArea);
+  d.appendChild(agentRow);
+
+  d.appendChild(makeDivider('Outcome'));
+
   var rollContainer=mkEl('div');
   d.appendChild(rollContainer);
 
