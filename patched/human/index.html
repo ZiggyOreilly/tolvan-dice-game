@@ -1557,8 +1557,8 @@ function tutStep4_combined(){
   d.appendChild(ratingNote);
 
   [
-    {key:'assertability', text:'Should '+TUT_PARTNER+' have said that prediction?', left:'Definitely<br>not', right:'Definitely<br>yes'},
-    {key:'justification', text:'Did '+TUT_PARTNER+' have good reasons for making this prediction?', left:'Definitely<br>not', right:'Definitely<br>yes'},
+    {key:'assertability', text:'Should '+TUT_PARTNER+' have said that prediction?', left:'Definitely<br>No', right:'Definitely<br>yes'},
+    {key:'justification', text:'Did '+TUT_PARTNER+' have good reasons for making this prediction?', left:'Definitely<br>No', right:'Definitely<br>yes'},
     {key:'attribution', text:'Was the agent\'s response primarily caused by the agent itself, regardless of the situation, or primarily caused by the situation the agent was in?', left:'Mostly by the situation', right:'Mostly by the agent'}
   ].forEach(function(q){
     var key=q.key;
@@ -2025,7 +2025,7 @@ function buildLikert(){
     })(v);}
     var anchors=mkEl('div','likert-anchors');
     anchors.classList.add('assessment-anchors');
-    var l=mkEl('span');l.innerHTML=q.left || 'Definitely<br>not'; var r=mkEl('span');r.innerHTML=q.right || 'Definitely<br>yes';
+    var l=mkEl('span');l.innerHTML=q.left || 'Definitely<br>No'; var r=mkEl('span');r.innerHTML=q.right || 'Definitely<br>yes';
     anchors.appendChild(l); anchors.appendChild(r);
     track.appendChild(btns); track.appendChild(anchors); item.appendChild(track); group.appendChild(item);
   });

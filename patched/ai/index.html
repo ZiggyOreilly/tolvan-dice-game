@@ -1571,8 +1571,8 @@ function tutStep4_combined(){
   postRoll.appendChild(ratingNote);
 
   [
-    {key:'assertability', text:'Should '+TUT_PARTNER+' have said that prediction?', left:'Definitely<br>not', right:'Definitely<br>yes'},
-    {key:'justification', text:'Did '+TUT_PARTNER+' have good reasons for making this prediction?', left:'Definitely<br>not', right:'Definitely<br>yes'}
+    {key:'assertability', text:'Should '+TUT_PARTNER+' have said that prediction?', left:'Definitely<br>No', right:'Definitely<br>yes'},
+    {key:'justification', text:'Did '+TUT_PARTNER+' have good reasons for making this prediction?', left:'Definitely<br>No', right:'Definitely<br>yes'}
   ].forEach(function(q){
     var key=q.key;
     var item=mkEl('div'); item.style.marginTop='12px';
@@ -2012,7 +2012,7 @@ function buildLikert(){
     })(v);}
     var anchors=mkEl('div','likert-anchors');
     anchors.classList.add('assessment-anchors');
-    var l=mkEl('span');l.innerHTML=q.left || 'Definitely<br>not'; var r=mkEl('span');r.innerHTML=q.right || 'Definitely<br>yes';
+    var l=mkEl('span');l.innerHTML=q.left || 'Definitely<br>No'; var r=mkEl('span');r.innerHTML=q.right || 'Definitely<br>yes';
     anchors.appendChild(l); anchors.appendChild(r);
     track.appendChild(btns); track.appendChild(anchors); item.appendChild(track); group.appendChild(item);
   });
