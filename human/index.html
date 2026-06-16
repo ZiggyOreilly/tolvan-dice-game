@@ -1620,7 +1620,6 @@ function tutStep4_combined(){
   var speechArea=mkEl('div','speech-area');
   var agentName=mkEl('div','agent-name'); agentName.textContent=robotName();
   var bubble=mkEl('div','speech-bubble');
-  bubble.style.background='white';
   var sText=mkEl('div','speech-text');
   sText.innerHTML='My prediction: the die will land showing a <strong>1</strong>.';
   bubble.appendChild(sText);
@@ -1628,7 +1627,7 @@ function tutStep4_combined(){
   agentRow.appendChild(portWrap); agentRow.appendChild(speechArea);
   d.appendChild(agentRow);
 
-  var rollContainer=mkEl('div');
+  var rollContainer=mkEl('div'); rollContainer.style.marginTop='16px';
   d.appendChild(rollContainer);
 
   var postRoll=mkEl('div');
