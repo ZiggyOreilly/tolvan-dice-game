@@ -1620,14 +1620,13 @@ function tutStep4_combined(){
   var speechArea=mkEl('div','speech-area');
   var agentName=mkEl('div','agent-name'); agentName.textContent=robotName();
   var bubble=mkEl('div','speech-bubble');
+  bubble.style.background='white';
   var sText=mkEl('div','speech-text');
   sText.innerHTML='My prediction: the die will land showing a <strong>1</strong>.';
   bubble.appendChild(sText);
   speechArea.appendChild(agentName); speechArea.appendChild(bubble);
   agentRow.appendChild(portWrap); agentRow.appendChild(speechArea);
   d.appendChild(agentRow);
-
-  d.appendChild(makeDivider('Outcome'));
 
   var rollContainer=mkEl('div');
   d.appendChild(rollContainer);
@@ -1662,8 +1661,9 @@ function tutStep4_combined(){
     }, 2950);
   };
 
+  postRoll.appendChild(makeDivider('Outcome'));
   // Outcome
-  var ob=mkEl('div','outcome-block win'); ob.style.marginTop='0';
+  var ob=mkEl('div','outcome-block win'); ob.style.marginTop='10px';
   var om=mkEl('div','outcome-main');
   var em=mkEl('span','emoji'); em.textContent='🎉';
   var ot=mkEl('span'); ot.innerHTML='Die shows <strong>1</strong> -- prediction was <strong>1</strong>. Correct!';
