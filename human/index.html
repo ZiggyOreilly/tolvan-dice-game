@@ -1375,7 +1375,7 @@ function renderManipulation(){
   card.appendChild(errBox);
 
   var btn=mkEl('button','btn btn-submit');
-  btn.textContent='Continue to task ->';
+  btn.textContent='Continue to task →';
   btn.onclick=handleManipulationContinue;
   card.appendChild(btn);
 
@@ -1460,7 +1460,7 @@ function renderGameStart(){
   var body=mkEl('div','end-body');
   body.innerHTML='You have completed the practise trial. You are now ready to start the task.<br><br>You will observe <strong>'+ROUNDS.length+' rounds</strong>. In each round, your task is to evaluate <strong>'+robotName()+'\'s</strong> prediction after they evaluate the die.';
   inner.appendChild(body);
-  var btn=mkEl('button','btn btn-submit'); btn.textContent='Start the task ->'; btn.style.cssText='max-width:260px;width:100%;';
+  var btn=mkEl('button','btn btn-submit'); btn.textContent='Start the task →'; btn.style.cssText='max-width:260px;width:100%;';
   btn.onclick=function(){
   startGame();
 };
@@ -2185,7 +2185,7 @@ function renderOverallAttribution(){
   inner.appendChild(errBox);
 
   var btn=mkEl('button','btn btn-submit');
-  btn.textContent='Continue ->';
+  btn.textContent='Continue →';
   btn.style.cssText='max-width:260px;width:100%;';
   btn.onclick=function(){
     if(state.overallAttribution === null){
@@ -2244,7 +2244,7 @@ function renderPostCompetence(){
   inner.appendChild(errBox);
 
   var btn=mkEl('button','btn btn-submit');
-  btn.textContent='Continue ->';
+  btn.textContent='Continue →';
   btn.style.cssText='max-width:260px;width:100%;';
   btn.onclick=function(){
     if(state.postCompetenceRating === null){
