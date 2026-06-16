@@ -1456,7 +1456,7 @@ function renderTutorial(){
   if(step===2) state.tutDieInspected=true;
 
   var nav=mkEl('div','tut-nav');
-  if(step>0){var bBack=mkEl('button','btn btn-tut-sec'); bBack.textContent='← Back'; bBack.onclick=function(){state.tutStep--;state.tutDieInspected=false;render();}; nav.appendChild(bBack);}
+  if(step>0 && step!==3){var bBack=mkEl('button','btn btn-tut-sec'); bBack.textContent='← Back'; bBack.onclick=function(){state.tutStep--;state.tutDieInspected=false;render();}; nav.appendChild(bBack);}
   var isLast=step===TOTAL_STEPS-1;
   var bNext=mkEl('button','btn btn-tut'); bNext.textContent='Next →';
   bNext.id='tut-next-btn';
