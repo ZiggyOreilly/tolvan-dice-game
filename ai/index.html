@@ -1491,7 +1491,7 @@ function renderTutorial(){
   if(step===2) state.tutDieInspected=true;
 
   var nav=mkEl('div','tut-nav');
-  if(step>0 && step!==3 && step!==4){var bBack=mkEl('button','btn btn-tut-sec'); bBack.textContent='← Back'; bBack.onclick=function(){state.tutStep--;state.tutDieInspected=false;render();}; nav.appendChild(bBack);}
+  if(step>0 && step!==3 && step!==4 && step!==5){var bBack=mkEl('button','btn btn-tut-sec'); bBack.textContent='← Back'; bBack.onclick=function(){state.tutStep--;state.tutDieInspected=false;render();}; nav.appendChild(bBack);}
 
   if(step===3){
     // Auto-advance: show "has evaluated" then move to next step
