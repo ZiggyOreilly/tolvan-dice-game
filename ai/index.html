@@ -1434,7 +1434,7 @@ function renderGameStart(){
   var inner=mkEl('div','end-inner');
   var title=mkEl('div','end-title'); title.textContent='Tutorial Complete'; inner.appendChild(title);
   var body=mkEl('div','end-body');
-  body.innerHTML='You have completed the tutorial. You are now ready to start the task.<br><br>You will observe <strong>'+ROUNDS.length+' rounds</strong>. In each round, your task is to evaluate <strong>'+robotName()+'\'s</strong> prediction after they evaluate the die.';
+  body.innerHTML='You have completed the tutorial. You are now ready to start the task.<br><br>You will observe <strong>'+ROUNDS.length+' rounds</strong>. In each round, your task is to evaluate <strong>'+robotName()+'\'s</strong> prediction after it evaluates the die.';
   inner.appendChild(body);
   var btn=mkEl('button','btn btn-submit'); btn.textContent='Start the task ->'; btn.style.cssText='max-width:260px;width:100%;';
   btn.onclick=function(){
@@ -1451,7 +1451,7 @@ var TUT_TITLES = ['Practice Tutorial','The Special Die','What '+robotName()+' Se
 
 function renderTutorial(){
   var wrap=mkEl('div','fade-in'); wrap.style.cssText='display:flex;flex-direction:column;gap:18px;width:100%';
-  var topBar=mkEl('div','top-bar'); var gl=mkEl('div','game-label'); gl.textContent='Tutorial'; topBar.appendChild(gl); wrap.appendChild(topBar);
+  var topBar=mkEl('div','top-bar'); var gl=mkEl('div','game-label'); gl.textContent='Practise'; topBar.appendChild(gl); wrap.appendChild(topBar);
   var card=mkEl('div','card');
   var step=state.tutStep;
   var TOTAL_STEPS=6;
