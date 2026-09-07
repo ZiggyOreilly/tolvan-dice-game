@@ -374,8 +374,11 @@ body{font-family:'Lato',sans-serif;font-weight:400;background:var(--bg);color:va
 }
 .partner-info{flex:1;display:flex;flex-direction:column;gap:8px;}
 .partner-box--video{flex-direction:column;align-items:center;gap:14px;}
-.partner-video{width:100%;max-width:340px;height:auto;border-radius:10px;border:1px solid var(--border);background:#000;display:block;}
+.partner-video{width:100%;max-width:360px;height:auto;border-radius:10px;border:1px solid var(--border);background:#000;display:block;}
 .partner-box--video .partner-info{flex:none;align-items:center;text-align:center;}
+.watch-hint{font-size:12px;color:var(--text-dim);font-style:italic;text-align:center;margin-top:4px;}
+.ready-note{display:flex;gap:10px;align-items:flex-start;background:var(--accent-pale);border:1px solid rgba(82,183,136,0.4);border-radius:10px;padding:12px 14px;font-size:13px;line-height:1.6;color:var(--text-mid);}
+.ready-note strong{color:var(--accent);font-weight:700;}
 .partner-name{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--text);}
 .partner-role{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim);}
 
@@ -1281,7 +1284,8 @@ function buildInspectSection(faces, dragId, label, opts){
 function render(){
   var app=document.getElementById('app');
   app.innerHTML='';
-  if(state.screen==='manipulation')     app.appendChild(renderManipulation());
+  if(state.screen==='partner-video')    app.appendChild(renderPartnerVideo());
+  else if(state.screen==='manipulation')     app.appendChild(renderManipulation());
   else if(state.screen==='tutorial')    app.appendChild(renderTutorial());
   else if(state.screen==='partner-intro')  app.appendChild(renderGameStart());
   else if(state.screen==='matching')    app.appendChild(renderMatching());
@@ -1291,7 +1295,7 @@ function render(){
   else                                  app.appendChild(renderEnd());
 }
 
-function renderManipulation(){
+function renderPartnerVideo(){
   var wrap=mkEl('div','fade-in');
   wrap.style.cssText='display:flex;flex-direction:column;gap:18px;width:100%';
 
@@ -1308,45 +1312,107 @@ function renderManipulation(){
   card.appendChild(title);
 
   var intro=mkEl('div','intro-body');
+  intro.innerHTML='You have been paired with <strong>'+robotName()+'</strong>, another Prolific worker. Below is the short video introduction they recorded. <strong>Please watch the full video before continuing.</strong>';
+  card.appendChild(intro);
+
+  var partnerBox=mkEl('div','partner-box partner-box--video');
+  var vid=mkEl('video','partner-video');
+  vid.src=GAME_ROBOT.videoSrc;
+  vid.controls=true;
+  vid.playsInline=true;
+  vid.preload='auto';
+  vid.setAttribute('aria-label','Video introduction from '+robotName());
+  partnerBox.appendChild(vid);
+
+  var info=mkEl('div','partner-info');
+  var name=mkEl('div','partner-name');
+  name.textContent=robotName();
+  info.appendChild(name);
+  var descriptor=mkEl('div');
+  descriptor.style.cssText='font-size:12px;color:var(--text-dim);line-height:1.5;margin-top:2px;';
+  descriptor.textContent='Prolific worker';
+  info.appendChild(descriptor);
+  partnerBox.appendChild(info);
+  card.appendChild(partnerBox);
+
+  var hint=mkEl('div','watch-hint');
+  hint.textContent='Please watch the video before continuing.';
+  card.appendChild(hint);
+
+  var ready=mkEl('div','ready-note');
+  ready.innerHTML='<strong>&#10003;</strong><span>'+robotName()+' has watched the video introduction you uploaded. Once you have watched theirs, you are both ready to begin.</span>';
+  card.appendChild(ready);
+
+  var btn=mkEl('button','btn btn-submit');
+  btn.textContent='Continue →';
+  btn.disabled=true;
+  btn.onclick=function(){ state.partnerVideoWatched=true; state.screen='manipulation'; render(); };
+  card.appendChild(btn);
+
+  function enableContinue(){
+    if(!btn.disabled) return;
+    btn.disabled=false;
+    hint.style.display='none';
+  }
+  vid.addEventListener('ended', enableContinue);
+  vid.addEventListener('timeupdate', function(){
+    if(vid.duration && vid.currentTime >= vid.duration - 0.5) enableContinue();
+  });
+  // Never trap a participant on a clip that fails to load or play.
+  vid.addEventListener('error', enableContinue);
+  setTimeout(enableContinue, 45000);
+
+  wrap.appendChild(card);
+  return wrap;
+}
+
+function renderManipulation(){
+  var wrap=mkEl('div','fade-in');
+  wrap.style.cssText='display:flex;flex-direction:column;gap:18px;width:100%';
+
+  var topBar=mkEl('div','top-bar');
+  var gl=mkEl('div','game-label');
+  gl.textContent='Prediction Task';
+  topBar.appendChild(gl);
+  wrap.appendChild(topBar);
+
+  var card=mkEl('div','card');
+
+  var title=mkEl('div','intro-title');
+  // When a video intro was shown on the previous screen, the participant has
+  // already "met" the partner -- this screen is just the behaviour profile.
+  title.innerHTML=(GAME_ROBOT.videoSrc ? 'About your partner, ' : 'Meet your partner, ')+'<span>'+robotName()+'</span>';
+  card.appendChild(title);
+
+  var intro=mkEl('div','intro-body');
   intro.innerHTML='Before the task starts, please read the following information about your partner. Your partner is a Prolific worker with the ID <strong>'+robotProlificId()+'</strong>. We will refer to this worker as <strong>'+robotName()+'</strong>. Prior to this session, '+robotName()+' also completed a short questionnaire about how they typically approach tasks and handle responsibilities in everyday work and community settings. Based on their responses, we have compiled a profile of their typical behaviours.';
   card.appendChild(intro);
 
+  // Cartoon avatar only for identities without a video clip. When there is a
+  // video it lives on the preceding 'partner-video' screen, not here.
+  if(!GAME_ROBOT.videoSrc){
+    var partnerBox=mkEl('div','partner-box');
 
-  var partnerBox=mkEl('div','partner-box');
-
-  if(GAME_ROBOT.videoSrc){
-    // Video intro replaces the cartoon avatar entirely: a drawn face next to
-    // real footage invites the "is this person real?" question we are removing.
-    partnerBox.classList.add('partner-box--video');
-    var vid=mkEl('video','partner-video');
-    vid.src=GAME_ROBOT.videoSrc;
-    vid.controls=true;
-    vid.playsInline=true;
-    vid.preload='metadata';
-    vid.setAttribute('aria-label','Video introduction from '+robotName());
-    partnerBox.appendChild(vid);
-  } else {
     var portrait=mkEl('div','portrait');
     portrait.style.width='90px';
     portrait.style.height='90px';
     portrait.innerHTML = humanAvatarSVG(GAME_ROBOT.avatar);
     partnerBox.appendChild(portrait);
+
+    var info=mkEl('div','partner-info');
+
+    var name=mkEl('div','partner-name');
+    name.textContent=robotName();
+    info.appendChild(name);
+
+    var descriptor=mkEl('div');
+    descriptor.style.cssText='font-size:12px;color:var(--text-dim);line-height:1.5;margin-top:2px;';
+    descriptor.textContent='Prolific worker';
+    info.appendChild(descriptor);
+
+    partnerBox.appendChild(info);
+    card.appendChild(partnerBox);
   }
-
-  var info=mkEl('div','partner-info');
-
-  var name=mkEl('div','partner-name');
-  name.textContent=robotName();
-  info.appendChild(name);
-
-  var descriptor=mkEl('div');
-  descriptor.style.cssText='font-size:12px;color:var(--text-dim);line-height:1.5;margin-top:2px;';
-  descriptor.textContent='Prolific worker';
-  info.appendChild(descriptor);
-
-
-  partnerBox.appendChild(info);
-  card.appendChild(partnerBox);
 
   card.appendChild(makeDivider('Character description'));
 
@@ -1477,7 +1543,7 @@ function renderMatching(){
   for(var i=0;i<3;i++){ var s=mkEl('span'); s.textContent='.'; dots.appendChild(s); }
   inner.appendChild(dots);
   card.appendChild(inner); wrap.appendChild(card);
-  setTimeout(function(){ state.screen='manipulation'; render(); }, 8000);
+  setTimeout(function(){ state.screen = GAME_ROBOT.videoSrc ? 'partner-video' : 'manipulation'; render(); }, 8000);
   return wrap;
 }
 
