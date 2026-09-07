@@ -373,6 +373,9 @@ body{font-family:'Lato',sans-serif;font-weight:400;background:var(--bg);color:va
   border-radius:12px;padding:20px;
 }
 .partner-info{flex:1;display:flex;flex-direction:column;gap:8px;}
+.partner-box--video{flex-direction:column;align-items:center;gap:14px;}
+.partner-video{width:100%;max-width:340px;height:auto;border-radius:10px;border:1px solid var(--border);background:#000;display:block;}
+.partner-box--video .partner-info{flex:none;align-items:center;text-align:center;}
 .partner-name{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--text);}
 .partner-role{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim);}
 
@@ -477,7 +480,7 @@ var TUTORIAL_IDENTITIES = [
 ];
 
 var PARTNER_IDENTITIES = [
-  { prolificId:'XXXXXXXXXXXXXXXXXXXXXX03', label:'Worker #03', avatar:'blue' },
+  { prolificId:'XXXXXXXXXXXXXXXXXXXXXX03', label:'Worker #03', avatar:'blue', videoSrc:'assets/partner_worker03.mp4' },
   { prolificId:'XXXXXXXXXXXXXXXXXXXXXX05', label:'Worker #05', avatar:'amber' },
   { prolificId:'XXXXXXXXXXXXXXXXXXXXXX07', label:'Worker #07', avatar:'green' },
   { prolificId:'XXXXXXXXXXXXXXXXXXXXXX09', label:'Worker #09', avatar:'blue' },
@@ -504,6 +507,20 @@ function pickDifferentIdentity(identities, currentIdentity){
 var TUT_ROBOT = pickRandomIdentity(TUTORIAL_IDENTITIES);
 // Select a random Prolific worker for the game
 var GAME_ROBOT = pickRandomIdentity(PARTNER_IDENTITIES);
+
+// --- VIDEO-INTRO PROTOTYPE -------------------------------------------------
+// Only Worker #03 has a real intro clip so far (placeholder recording).
+// While PROTOTYPE_PIN_VIDEO is true, or ?partner=NN is in the URL, force that
+// identity so the video branch is exercised. Set to false to restore the
+// random draw once every partner identity has its own clip.
+var PROTOTYPE_PIN_VIDEO = true;
+(function(){
+  var want = (getURLParam('partner') || (PROTOTYPE_PIN_VIDEO ? '03' : '')).replace(/\D/g,'');
+  if(!want) return;
+  var target = 'Worker #' + (want.length === 1 ? '0' + want : want);
+  var match = PARTNER_IDENTITIES.filter(function(id){ return id.label === target; })[0];
+  if(match) GAME_ROBOT = match;
+})();
 
 var CONFIG = {
   likertPoints: 7
@@ -1297,11 +1314,24 @@ function renderManipulation(){
 
   var partnerBox=mkEl('div','partner-box');
 
-  var portrait=mkEl('div','portrait');
-  portrait.style.width='90px';
-  portrait.style.height='90px';
-  portrait.innerHTML = humanAvatarSVG(GAME_ROBOT.avatar);
-  partnerBox.appendChild(portrait);
+  if(GAME_ROBOT.videoSrc){
+    // Video intro replaces the cartoon avatar entirely: a drawn face next to
+    // real footage invites the "is this person real?" question we are removing.
+    partnerBox.classList.add('partner-box--video');
+    var vid=mkEl('video','partner-video');
+    vid.src=GAME_ROBOT.videoSrc;
+    vid.controls=true;
+    vid.playsInline=true;
+    vid.preload='metadata';
+    vid.setAttribute('aria-label','Video introduction from '+robotName());
+    partnerBox.appendChild(vid);
+  } else {
+    var portrait=mkEl('div','portrait');
+    portrait.style.width='90px';
+    portrait.style.height='90px';
+    portrait.innerHTML = humanAvatarSVG(GAME_ROBOT.avatar);
+    partnerBox.appendChild(portrait);
+  }
 
   var info=mkEl('div','partner-info');
 
