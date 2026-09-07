@@ -1302,6 +1302,10 @@ function setPartnerPortrait(el){
   if(GAME_ROBOT.photo){
     var img = new Image();
     img.alt = robotName();
+    // Style the element directly so framing does not depend on a .portrait
+    // ancestor class (one call site uses a bare div). 'center 32%' pulls the
+    // face into the circle instead of the grey headroom above it.
+    img.style.cssText = 'width:100%;height:100%;object-fit:cover;object-position:center 32%;display:block;';
     img.onload = function(){ el.innerHTML = ''; el.appendChild(img); };
     img.src = GAME_ROBOT.photo;
   }
