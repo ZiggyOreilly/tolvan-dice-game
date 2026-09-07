@@ -2,7 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [main, pilot-2]
+    branches: [main, pilot-2, pilot-3]
   workflow_dispatch:
 
 permissions:
@@ -30,11 +30,18 @@ jobs:
           ref: pilot-2
           path: pilot-2
 
+      - name: Checkout pilot-3
+        uses: actions/checkout@v4
+        with:
+          ref: pilot-3
+          path: pilot-3
+
       - name: Assemble site
         run: |
-          mkdir -p site/p2
+          mkdir -p site/p2 site/p3
           cp -r main/human main/ai site/
           cp -r pilot-2/human pilot-2/ai site/p2/
+          cp -r pilot-3/human pilot-3/ai site/p3/
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
