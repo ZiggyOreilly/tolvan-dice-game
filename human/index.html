@@ -375,7 +375,6 @@ body{font-family:'Lato',sans-serif;font-weight:400;background:var(--bg);color:va
 .partner-info{flex:1;display:flex;flex-direction:column;gap:8px;}
 .partner-video-wrap{display:flex;justify-content:center;}
 .partner-video{width:100%;max-width:none;height:auto;border-radius:12px;background:#000;display:block;}
-.watch-hint{font-size:12px;color:var(--text-dim);font-style:italic;text-align:center;margin-top:4px;}
 .ready-note{display:flex;gap:10px;align-items:flex-start;background:var(--accent-pale);border:1px solid rgba(82,183,136,0.4);border-radius:10px;padding:12px 14px;font-size:13px;line-height:1.6;color:var(--text-mid);}
 .ready-note strong{color:var(--accent);font-weight:700;}
 .partner-name{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--text);}
@@ -1377,10 +1376,6 @@ function renderPartnerVideo(){
   partnerBox.appendChild(vid);
   card.appendChild(partnerBox);
 
-  var hint=mkEl('div','watch-hint');
-  hint.textContent='Please watch the video before continuing.';
-  card.appendChild(hint);
-
   var ready=mkEl('div','ready-note');
   ready.innerHTML='<strong>&#10003;</strong><span>You and '+robotName()+' are watching each other’s introductions now.</span>';
   card.appendChild(ready);
@@ -1394,7 +1389,6 @@ function renderPartnerVideo(){
   function enableContinue(){
     if(!btn.disabled) return;
     btn.disabled=false;
-    hint.style.display='none';
   }
   vid.addEventListener('ended', enableContinue);
   vid.addEventListener('timeupdate', function(){
