@@ -482,48 +482,85 @@ var TUTORIAL_IDENTITIES = [
   { name:'Riley', avatar:'amber' }
 ];
 
-var PARTNER_IDENTITIES = [
-  { prolificId:'XXXXXXXXXXXXXXXXXXXXXX03', label:'Worker #03', avatar:'blue', videoSrc:'assets/partner_worker03.mp4', photo:'assets/partner_worker03.jpg' },
-  { prolificId:'XXXXXXXXXXXXXXXXXXXXXX05', label:'Worker #05', avatar:'amber' },
-  { prolificId:'XXXXXXXXXXXXXXXXXXXXXX07', label:'Worker #07', avatar:'green' },
-  { prolificId:'XXXXXXXXXXXXXXXXXXXXXX09', label:'Worker #09', avatar:'blue' },
-  { prolificId:'XXXXXXXXXXXXXXXXXXXXXX12', label:'Worker #12', avatar:'amber' }
-];
-
 function pickRandomIdentity(identities){
   return identities[Math.floor(Math.random() * identities.length)];
 }
 
-function pickDifferentIdentity(identities, currentIdentity){
-  var available = identities.filter(function(identity){
-    return identity.name !== currentIdentity.name && identity.avatar !== currentIdentity.avatar;
-  });
-  if(!available.length){
-    available = identities.filter(function(identity){
-      return identity.name !== currentIdentity.name;
-    });
+// --- PARTNER IDENTITIES (video intro) ------------------------------------
+// Four pre-recorded confederates, each of whom recorded all five worker IDs.
+var PARTNER_PEOPLE = {
+  Female1: { avatar:'amber', photo:'assets/partners/Female1.jpg' },
+  Female2: { avatar:'green', photo:'assets/partners/Female2.jpg' },
+  Male1:   { avatar:'blue',  photo:'assets/partners/Male1.jpg'  },
+  Male2:   { avatar:'amber', photo:'assets/partners/Male2.jpg'  }
+};
+
+var PARTNER_WORKER_IDS = {
+  '03':'XXXXXXXXXXXXXXXXXXXXXX03',
+  '05':'XXXXXXXXXXXXXXXXXXXXXX05',
+  '07':'XXXXXXXXXXXXXXXXXXXXXX07',
+  '09':'XXXXXXXXXXXXXXXXXXXXXX09',
+  '12':'XXXXXXXXXXXXXXXXXXXXXX12'
+};
+
+// Fixed, balanced rotation of all 4 confederates x 5 worker IDs (20 cells).
+// Qualtrics assigns the row with an "evenly present elements" randomiser and
+// passes it as ?seq=0..19; the game walks this list so that across a full
+// cycle every person shows each ID once and every ID is shown by each person
+// once. Adjacent rows never repeat person or ID, so a partially filled cycle
+// stays balanced. Reorder here only if the counterbalancing plan changes.
+var PARTNER_SEQUENCE = [
+  {person:'Female1', id:'03'}, {person:'Female2', id:'09'}, {person:'Male1', id:'05'}, {person:'Male2', id:'12'},
+  {person:'Female1', id:'07'}, {person:'Female2', id:'03'}, {person:'Male1', id:'09'}, {person:'Male2', id:'05'},
+  {person:'Female1', id:'12'}, {person:'Female2', id:'07'}, {person:'Male1', id:'03'}, {person:'Male2', id:'09'},
+  {person:'Female1', id:'05'}, {person:'Female2', id:'12'}, {person:'Male1', id:'07'}, {person:'Male2', id:'03'},
+  {person:'Female1', id:'09'}, {person:'Female2', id:'05'}, {person:'Male1', id:'12'}, {person:'Male2', id:'07'}
+];
+
+function hashString(s){
+  var h = 0; s = String(s);
+  for(var i=0;i<s.length;i++){ h = (h*31 + s.charCodeAt(i)) | 0; }
+  return Math.abs(h);
+}
+
+// Resolve the partner for this session:
+//   1. ?partner=Female1_07  -> explicit override (testing / fixed demo links)
+//   2. ?seq=0..19           -> Qualtrics-assigned balanced row
+//   3. no param             -> deterministic from the Prolific ID, else row 0
+function resolvePartner(){
+  var out = { seq:null, source:'default' };
+  var explicit = (getURLParam('partner') || '').trim();
+  var m = explicit.match(/^(female1|female2|male1|male2)[ _-]?(03|05|07|09|12)$/i);
+  var combo;
+  if(m){
+    combo = { person: m[1].charAt(0).toUpperCase() + m[1].slice(1).toLowerCase(), id: m[2] };
+    out.source = 'partner-param';
+  } else {
+    var s = parseInt(getURLParam('seq'), 10);
+    if(!isNaN(s)){
+      out.seq = ((s % PARTNER_SEQUENCE.length) + PARTNER_SEQUENCE.length) % PARTNER_SEQUENCE.length;
+      out.source = 'seq';
+    } else {
+      out.seq = hashString(getParticipantId()) % PARTNER_SEQUENCE.length;
+      out.source = 'pid-hash';
+    }
+    combo = PARTNER_SEQUENCE[out.seq];
   }
-  return pickRandomIdentity(available.length ? available : identities);
+  var person = PARTNER_PEOPLE[combo.person];
+  out.person     = combo.person;
+  out.workerId   = combo.id;
+  out.label      = 'Worker #' + combo.id;
+  out.prolificId = PARTNER_WORKER_IDS[combo.id];
+  out.avatar     = person.avatar;
+  out.photo      = person.photo;
+  out.videoSrc   = 'assets/partners/' + combo.person + '_' + combo.id + '.mp4';
+  return out;
 }
 
 // Select a human partner for the tutorial (example partner)
 var TUT_ROBOT = pickRandomIdentity(TUTORIAL_IDENTITIES);
-// Select a random Prolific worker for the game
-var GAME_ROBOT = pickRandomIdentity(PARTNER_IDENTITIES);
-
-// --- VIDEO-INTRO PROTOTYPE -------------------------------------------------
-// Only Worker #03 has a real intro clip so far (placeholder recording).
-// While PROTOTYPE_PIN_VIDEO is true, or ?partner=NN is in the URL, force that
-// identity so the video branch is exercised. Set to false to restore the
-// random draw once every partner identity has its own clip.
-var PROTOTYPE_PIN_VIDEO = true;
-(function(){
-  var want = (getURLParam('partner') || (PROTOTYPE_PIN_VIDEO ? '03' : '')).replace(/\D/g,'');
-  if(!want) return;
-  var target = 'Worker #' + (want.length === 1 ? '0' + want : want);
-  var match = PARTNER_IDENTITIES.filter(function(id){ return id.label === target; })[0];
-  if(match) GAME_ROBOT = match;
-})();
+// Resolve this session's game partner (confederate + worker ID)
+var GAME_ROBOT = resolvePartner();
 
 var CONFIG = {
   likertPoints: 7
@@ -2504,6 +2541,11 @@ function finishGame(){
     code: code,
     condition: EXP_CONDITION,
     agent: 'human',
+    partner: GAME_ROBOT.person + '_' + GAME_ROBOT.workerId,
+    partnerPerson: GAME_ROBOT.person,
+    partnerWorkerId: GAME_ROBOT.workerId,
+    partnerSeq: GAME_ROBOT.seq,
+    partnerSource: GAME_ROBOT.source,
     cc: state.characterRatings && state.characterRatings.competence != null ? state.characterRatings.competence : null,
     postCompetenceRating: state.postCompetenceRating,
     oa: state.overallAttribution,
