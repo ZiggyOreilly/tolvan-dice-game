@@ -489,7 +489,14 @@ function pickRandomIdentity(identities){
 var PARTNER_PEOPLE = {
   Female1: { avatar:'amber', photo:'assets/partners/Female1.jpg' },
   Female2: { avatar:'green', photo:'assets/partners/Female2.jpg' },
-  Male1:   { avatar:'blue',  photo:'assets/partners/Male1.jpg'  },
+  // Male1's clips are three different looks, so his still is per worker ID.
+  Male1:   { avatar:'blue',  photos:{
+    '03':'assets/partners/Male1_03.jpg',
+    '05':'assets/partners/Male1_05_07.jpg',
+    '07':'assets/partners/Male1_05_07.jpg',
+    '09':'assets/partners/Male1_09_12.jpg',
+    '12':'assets/partners/Male1_09_12.jpg'
+  } },
   Male2:   { avatar:'amber', photo:'assets/partners/Male2.jpg'  }
 };
 
@@ -550,7 +557,7 @@ function resolvePartner(){
   out.label      = 'Worker #' + combo.id;
   out.prolificId = PARTNER_WORKER_IDS[combo.id];
   out.avatar     = person.avatar;
-  out.photo      = person.photo;
+  out.photo      = (person.photos && person.photos[combo.id]) || person.photo;
   out.videoSrc   = 'assets/partners/' + combo.person + '_' + combo.id + '.mp4';
   return out;
 }
