@@ -1376,16 +1376,6 @@ function renderPartnerVideo(){
   vid.preload='auto';
   vid.setAttribute('aria-label','Video introduction from '+robotName());
   partnerBox.appendChild(vid);
-
-  var info=mkEl('div','partner-info');
-  var name=mkEl('div','partner-name');
-  name.textContent=robotName();
-  info.appendChild(name);
-  var descriptor=mkEl('div');
-  descriptor.style.cssText='font-size:12px;color:var(--text-dim);line-height:1.5;margin-top:2px;';
-  descriptor.textContent='Prolific worker';
-  info.appendChild(descriptor);
-  partnerBox.appendChild(info);
   card.appendChild(partnerBox);
 
   var hint=mkEl('div','watch-hint');
