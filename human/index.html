@@ -559,6 +559,8 @@ function resolvePartner(){
 var TUT_ROBOT = pickRandomIdentity(TUTORIAL_IDENTITIES);
 // Resolve this session's game partner (confederate + worker ID)
 var GAME_ROBOT = resolvePartner();
+// Warm the cache so the portrait photo is ready before any screen shows it.
+if(GAME_ROBOT.photo){ (new Image()).src = GAME_ROBOT.photo; }
 
 var CONFIG = {
   likertPoints: 7
@@ -1333,17 +1335,22 @@ function render(){
 // Partner portrait: show the real photo when the identity has one. The cartoon
 // avatar is drawn first and stays as the fallback if the photo fails to load.
 function setPartnerPortrait(el){
-  el.innerHTML = humanAvatarSVG(GAME_ROBOT.avatar);
-  if(GAME_ROBOT.photo){
-    var img = new Image();
-    img.alt = robotName();
-    // Style the element directly so framing does not depend on a .portrait
-    // ancestor class (one call site uses a bare div). 'center 32%' pulls the
-    // face into the circle instead of the grey headroom above it.
-    img.style.cssText = 'width:100%;height:100%;object-fit:cover;object-position:center 32%;display:block;';
-    img.onload = function(){ el.innerHTML = ''; el.appendChild(img); };
-    img.src = GAME_ROBOT.photo;
+  if(!GAME_ROBOT.photo){
+    el.innerHTML = humanAvatarSVG(GAME_ROBOT.avatar);
+    return;
   }
+  // Put the photo straight in -- no cartoon-avatar flash while it loads.
+  // Style the element directly so framing does not depend on a .portrait
+  // ancestor class (one call site uses a bare div). 'center 32%' pulls the
+  // face into the circle instead of the headroom above it. Fall back to the
+  // drawn avatar only if the image genuinely fails to load.
+  var img = new Image();
+  img.alt = robotName();
+  img.style.cssText = 'width:100%;height:100%;object-fit:cover;object-position:center 32%;display:block;';
+  img.onerror = function(){ el.innerHTML = humanAvatarSVG(GAME_ROBOT.avatar); };
+  img.src = GAME_ROBOT.photo;
+  el.innerHTML = '';
+  el.appendChild(img);
 }
 
 function renderPartnerVideo(){
