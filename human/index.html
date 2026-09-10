@@ -373,9 +373,8 @@ body{font-family:'Lato',sans-serif;font-weight:400;background:var(--bg);color:va
   border-radius:12px;padding:20px;
 }
 .partner-info{flex:1;display:flex;flex-direction:column;gap:8px;}
-.partner-box--video{flex-direction:column;align-items:center;gap:14px;}
-.partner-video{width:100%;max-width:360px;height:auto;border-radius:10px;border:1px solid var(--border);background:#000;display:block;}
-.partner-box--video .partner-info{flex:none;align-items:center;text-align:center;}
+.partner-video-wrap{display:flex;justify-content:center;}
+.partner-video{width:100%;max-width:none;height:auto;border-radius:12px;background:#000;display:block;}
 .watch-hint{font-size:12px;color:var(--text-dim);font-style:italic;text-align:center;margin-top:4px;}
 .ready-note{display:flex;gap:10px;align-items:flex-start;background:var(--accent-pale);border:1px solid rgba(82,183,136,0.4);border-radius:10px;padding:12px 14px;font-size:13px;line-height:1.6;color:var(--text-mid);}
 .ready-note strong{color:var(--accent);font-weight:700;}
@@ -1368,7 +1367,7 @@ function renderPartnerVideo(){
   intro.innerHTML='You have been paired with <strong>'+robotName()+'</strong>, another Prolific worker. Below is the short video introduction they recorded. <strong>Please watch the full video before continuing.</strong>';
   card.appendChild(intro);
 
-  var partnerBox=mkEl('div','partner-box partner-box--video');
+  var partnerBox=mkEl('div','partner-video-wrap');
   var vid=mkEl('video','partner-video');
   vid.src=GAME_ROBOT.videoSrc;
   vid.controls=true;
