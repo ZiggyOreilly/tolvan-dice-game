@@ -372,6 +372,10 @@ body{font-family:'Lato',sans-serif;font-weight:400;background:var(--bg);color:va
   border-radius:12px;padding:20px;
 }
 .partner-info{flex:1;display:flex;flex-direction:column;gap:8px;}
+.partner-video-wrap{display:flex;justify-content:center;}
+.partner-video{width:100%;max-width:none;height:auto;border-radius:12px;background:#000;display:block;}
+.ready-note{display:flex;gap:10px;align-items:flex-start;background:var(--accent-pale);border:1px solid rgba(82,183,136,0.4);border-radius:10px;padding:12px 14px;font-size:13px;line-height:1.6;color:var(--text-mid);}
+.ready-note strong{color:var(--accent);font-weight:700;}
 .partner-name{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--text);}
 .partner-role{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim);}
 
@@ -475,34 +479,85 @@ var ROBOT_IDENTITIES = [
   { name:'Elvik', avatar:'blue' }
 ];
 
-var CHATBOT_IDENTITIES = [
-  { modelId:'XXXXXXXXXXXXXXXXXXXXXX03', label:'Chatbot #03', avatar:'blue' },
-  { modelId:'XXXXXXXXXXXXXXXXXXXXXX05', label:'Chatbot #05', avatar:'amber' },
-  { modelId:'XXXXXXXXXXXXXXXXXXXXXX07', label:'Chatbot #07', avatar:'blue' },
-  { modelId:'XXXXXXXXXXXXXXXXXXXXXX09', label:'Chatbot #09', avatar:'amber' },
-  { modelId:'XXXXXXXXXXXXXXXXXXXXXX12', label:'Chatbot #12', avatar:'blue' }
-];
-
 function pickRandomIdentity(identities){
   return identities[Math.floor(Math.random() * identities.length)];
 }
 
-function pickDifferentIdentity(identities, currentIdentity){
-  var available = identities.filter(function(identity){
-    return identity.name !== currentIdentity.name && identity.avatar !== currentIdentity.avatar;
-  });
-  if(!available.length){
-    available = identities.filter(function(identity){
-      return identity.name !== currentIdentity.name;
-    });
+// --- PARTNER IDENTITIES (video intro) --------------------------------------
+// Four AI avatars (VRoid/VSeeFace renders driven by the same script as the
+// human confederates), each with a clip for all five worker/model IDs.
+var PARTNER_PEOPLE = {
+  Female1: { avatar:'amber', photo:'assets/partners/Female1.jpg' },
+  Female2: { avatar:'blue',  photo:'assets/partners/Female2.jpg' },
+  Male1:   { avatar:'blue',  photo:'assets/partners/Male1.jpg'  },
+  Male2:   { avatar:'amber', photo:'assets/partners/Male2.jpg'  }
+};
+
+var PARTNER_MODEL_IDS = {
+  '03':'XXXXXXXXXXXXXXXXXXXXXX03',
+  '05':'XXXXXXXXXXXXXXXXXXXXXX05',
+  '07':'XXXXXXXXXXXXXXXXXXXXXX07',
+  '09':'XXXXXXXXXXXXXXXXXXXXXX09',
+  '12':'XXXXXXXXXXXXXXXXXXXXXX12'
+};
+
+// Same fixed, balanced 4x5 rotation as the human arm (see human/index.html)
+// so the two conditions are counterbalanced the same way. Qualtrics assigns
+// the row via ?seq=0..19.
+var PARTNER_SEQUENCE = [
+  {person:'Female1', id:'03'}, {person:'Female2', id:'09'}, {person:'Male1', id:'05'}, {person:'Male2', id:'12'},
+  {person:'Female1', id:'07'}, {person:'Female2', id:'03'}, {person:'Male1', id:'09'}, {person:'Male2', id:'05'},
+  {person:'Female1', id:'12'}, {person:'Female2', id:'07'}, {person:'Male1', id:'03'}, {person:'Male2', id:'09'},
+  {person:'Female1', id:'05'}, {person:'Female2', id:'12'}, {person:'Male1', id:'07'}, {person:'Male2', id:'03'},
+  {person:'Female1', id:'09'}, {person:'Female2', id:'05'}, {person:'Male1', id:'12'}, {person:'Male2', id:'07'}
+];
+
+function hashString(s){
+  var h = 0; s = String(s);
+  for(var i=0;i<s.length;i++){ h = (h*31 + s.charCodeAt(i)) | 0; }
+  return Math.abs(h);
+}
+
+// Resolve the partner for this session:
+//   1. ?partner=Female1_07  -> explicit override (testing / fixed demo links)
+//   2. ?seq=0..19           -> Qualtrics-assigned balanced row
+//   3. no param             -> deterministic from the participant ID, else row 0
+function resolvePartner(){
+  var out = { seq:null, source:'default' };
+  var explicit = (getURLParam('partner') || '').trim();
+  var m = explicit.match(/^(female1|female2|male1|male2)[ _-]?(03|05|07|09|12)$/i);
+  var combo;
+  if(m){
+    combo = { person: m[1].charAt(0).toUpperCase() + m[1].slice(1).toLowerCase(), id: m[2] };
+    out.source = 'partner-param';
+  } else {
+    var s = parseInt(getURLParam('seq'), 10);
+    if(!isNaN(s)){
+      out.seq = ((s % PARTNER_SEQUENCE.length) + PARTNER_SEQUENCE.length) % PARTNER_SEQUENCE.length;
+      out.source = 'seq';
+    } else {
+      out.seq = hashString(getParticipantId()) % PARTNER_SEQUENCE.length;
+      out.source = 'pid-hash';
+    }
+    combo = PARTNER_SEQUENCE[out.seq];
   }
-  return pickRandomIdentity(available.length ? available : identities);
+  var person = PARTNER_PEOPLE[combo.person];
+  out.person     = combo.person;
+  out.workerId   = combo.id;
+  out.label      = 'Chatbot #' + combo.id;
+  out.modelId    = PARTNER_MODEL_IDS[combo.id];
+  out.avatar     = person.avatar;
+  out.photo      = person.photo;
+  out.videoSrc   = 'assets/partners/' + combo.person + '_' + combo.id + '.mp4';
+  return out;
 }
 
 // Select an AI partner for the tutorial (example partner)
 var TUT_ROBOT = pickRandomIdentity(ROBOT_IDENTITIES);
-// Select a random chatbot partner for the game
-var GAME_ROBOT = pickRandomIdentity(CHATBOT_IDENTITIES);
+// Resolve this session's game partner (avatar + worker/model ID)
+var GAME_ROBOT = resolvePartner();
+// Warm the cache so the portrait photo is ready before any screen shows it.
+if(GAME_ROBOT.photo){ (new Image()).src = GAME_ROBOT.photo; }
 
 var CONFIG = {
   likertPoints: 7
@@ -1242,6 +1297,7 @@ function render(){
   var app=document.getElementById('app');
   app.innerHTML='';
   if(state.screen==='manipulation')     app.appendChild(renderManipulation());
+  else if(state.screen==='partner-video') app.appendChild(renderPartnerVideo());
   else if(state.screen==='tutorial')    app.appendChild(renderTutorial());
   else if(state.screen==='partner-intro')  app.appendChild(renderGameStart());
   else if(state.screen==='matching')    app.appendChild(renderMatching());
@@ -1251,7 +1307,26 @@ function render(){
   else                                  app.appendChild(renderEnd());
 }
 
-function renderManipulation(){
+function setPartnerPortrait(el){
+  if(!GAME_ROBOT.photo){
+    el.innerHTML = GAME_ROBOT.avatar === 'amber' ? nexus7AvatarSVG() : aiAvatarSVG();
+    return;
+  }
+  // Put the photo straight in -- no cartoon-avatar flash while it loads.
+  // Style the element directly so framing does not depend on a .portrait
+  // ancestor class (one call site uses a bare div). 'center 32%' pulls the
+  // face into the circle instead of the headroom above it. Fall back to the
+  // drawn avatar only if the image genuinely fails to load.
+  var img = new Image();
+  img.alt = robotName();
+  img.style.cssText = 'width:100%;height:100%;object-fit:cover;object-position:center 32%;display:block;';
+  img.onerror = function(){ el.innerHTML = GAME_ROBOT.avatar === 'amber' ? nexus7AvatarSVG() : aiAvatarSVG(); };
+  img.src = GAME_ROBOT.photo;
+  el.innerHTML = '';
+  el.appendChild(img);
+}
+
+function renderPartnerVideo(){
   var wrap=mkEl('div','fade-in');
   wrap.style.cssText='display:flex;flex-direction:column;gap:18px;width:100%';
 
@@ -1268,31 +1343,88 @@ function renderManipulation(){
   card.appendChild(title);
 
   var intro=mkEl('div','intro-body');
+  intro.innerHTML='You have been paired with <strong>'+robotName()+'</strong>, a chatbot with model ID <strong>'+robotModelId()+'</strong>. Below is a short video introduction it generated. <strong>Please watch the full video before continuing.</strong>';
+  card.appendChild(intro);
+
+  var partnerBox=mkEl('div','partner-video-wrap');
+  var vid=mkEl('video','partner-video');
+  vid.src=GAME_ROBOT.videoSrc;
+  vid.controls=true;
+  vid.playsInline=true;
+  vid.preload='auto';
+  vid.setAttribute('aria-label','Video introduction from '+robotName());
+  partnerBox.appendChild(vid);
+  card.appendChild(partnerBox);
+
+  var btn=mkEl('button','btn btn-submit');
+  btn.textContent='Continue →';
+  btn.disabled=true;
+  btn.onclick=function(){ state.partnerVideoWatched=true; state.screen='manipulation'; render(); };
+  card.appendChild(btn);
+
+  function enableContinue(){
+    if(!btn.disabled) return;
+    btn.disabled=false;
+  }
+  vid.addEventListener('ended', enableContinue);
+  vid.addEventListener('timeupdate', function(){
+    if(vid.duration && vid.currentTime >= vid.duration - 0.5) enableContinue();
+  });
+  // Never trap a participant on a clip that fails to load or play.
+  vid.addEventListener('error', enableContinue);
+  setTimeout(enableContinue, 45000);
+
+  wrap.appendChild(card);
+  return wrap;
+}
+
+function renderManipulation(){
+  var wrap=mkEl('div','fade-in');
+  wrap.style.cssText='display:flex;flex-direction:column;gap:18px;width:100%';
+
+  var topBar=mkEl('div','top-bar');
+  var gl=mkEl('div','game-label');
+  gl.textContent='Prediction Task';
+  topBar.appendChild(gl);
+  wrap.appendChild(topBar);
+
+  var card=mkEl('div','card');
+
+  var title=mkEl('div','intro-title');
+  // When a video intro was shown on the previous screen, the participant has
+  // already "met" the partner -- this screen is just the behaviour profile.
+  title.innerHTML=(GAME_ROBOT.videoSrc ? 'About your partner, ' : 'Meet your partner, ')+'<span>'+robotName()+'</span>';
+  card.appendChild(title);
+
+  var intro=mkEl('div','intro-body');
   intro.innerHTML='Before the task starts, please read the following information about your partner. Your partner is a chatbot with the model ID <strong>'+robotModelId()+'</strong>. We will refer to this chatbot as <strong>'+robotName()+'</strong>. Prior to this session, '+robotName()+'\'s interaction logs from everyday workplace and community environments were analysed. Based on this data, we have compiled a profile of its typical behaviours.';
   card.appendChild(intro);
 
+  // Cartoon avatar only for identities without a video clip. When there is a
+  // video it lives on the preceding 'partner-video' screen, not here.
+  if(!GAME_ROBOT.videoSrc){
+    var partnerBox=mkEl('div','partner-box');
 
-  var partnerBox=mkEl('div','partner-box');
+    var portrait=mkEl('div','portrait');
+    portrait.style.width='90px';
+    portrait.style.height='90px';
+    setPartnerPortrait(portrait);
+    partnerBox.appendChild(portrait);
 
-  var portrait=mkEl('div','portrait');
-  portrait.style.width='90px';
-  portrait.style.height='90px';
-  portrait.innerHTML = GAME_ROBOT.avatar === 'amber' ? nexus7AvatarSVG() : aiAvatarSVG();
-  partnerBox.appendChild(portrait);
+    var info=mkEl('div','partner-info');
 
-  var info=mkEl('div','partner-info');
+    var name=mkEl('div','partner-name');
+    name.textContent=robotName();
+    info.appendChild(name);
 
-  var name=mkEl('div','partner-name');
-  name.textContent=robotName();
-  info.appendChild(name);
+    var descriptor=mkEl('div');
+    descriptor.style.cssText='font-size:12px;color:var(--text-dim);line-height:1.5;margin-top:2px;';
+    descriptor.textContent='AI chatbot';
+    info.appendChild(descriptor);
 
-  var descriptor=mkEl('div');
-  descriptor.style.cssText='font-size:12px;color:var(--text-dim);line-height:1.5;margin-top:2px;';
-  descriptor.textContent='AI chatbot';
-  info.appendChild(descriptor);
-
-  partnerBox.appendChild(info);
-  card.appendChild(partnerBox);
+    partnerBox.appendChild(info);
+    card.appendChild(partnerBox);
+  }
 
   card.appendChild(makeDivider('Character description'));
 
@@ -1423,7 +1555,7 @@ function renderMatching(){
   for(var i=0;i<3;i++){ var s=mkEl('span'); s.textContent='.'; dots.appendChild(s); }
   inner.appendChild(dots);
   card.appendChild(inner); wrap.appendChild(card);
-  setTimeout(function(){ state.screen='manipulation'; render(); }, 8000);
+  setTimeout(function(){ state.screen = GAME_ROBOT.videoSrc ? 'partner-video' : 'manipulation'; render(); }, 8000);
   return wrap;
 }
 
@@ -1541,7 +1673,7 @@ function tutStepEvaluating(){
   var agentRow=mkEl('div','agent-row'); agentRow.style.marginTop='12px';
   var portWrap=mkEl('div','portrait-wrap');
   var port=mkEl('div','portrait');
-  port.innerHTML = GAME_ROBOT.avatar === 'amber' ? nexus7AvatarSVG() : aiAvatarSVG();
+  setPartnerPortrait(port);
   portWrap.appendChild(port);
   var speechArea=mkEl('div','speech-area');
   var agentName=mkEl('div','agent-name'); agentName.textContent=robotName();
@@ -1566,7 +1698,7 @@ function tutStep_prediction(){
   var agentRow=mkEl('div','agent-row'); agentRow.style.marginTop='12px';
   var portWrap=mkEl('div','portrait-wrap');
   var port=mkEl('div','portrait');
-  port.innerHTML = GAME_ROBOT.avatar === 'amber' ? nexus7AvatarSVG() : aiAvatarSVG();
+  setPartnerPortrait(port);
   portWrap.appendChild(port);
 
   var speechArea=mkEl('div','speech-area');
@@ -1592,7 +1724,7 @@ function tutStep4_combined(){
   var agentRow=mkEl('div','agent-row'); agentRow.style.marginTop='12px';
   var portWrap=mkEl('div','portrait-wrap');
   var port=mkEl('div','portrait');
-  port.innerHTML = GAME_ROBOT.avatar === 'amber' ? nexus7AvatarSVG() : aiAvatarSVG();
+  setPartnerPortrait(port);
   portWrap.appendChild(port);
   var speechArea=mkEl('div','speech-area');
   var agentName=mkEl('div','agent-name'); agentName.textContent=robotName();
@@ -1716,7 +1848,7 @@ function tutStep_partner(){
 
   var port=mkEl('div');
   port.style.cssText='width:110px;height:110px;border-radius:50%;overflow:hidden;border:3px solid var(--border);box-shadow:var(--shadow-lg);background:#c9a882;';
-  port.innerHTML = GAME_ROBOT.avatar === 'amber' ? nexus7AvatarSVG() : aiAvatarSVG();
+  setPartnerPortrait(port);
   portraitWrap.appendChild(port);
 
   var nameTag=mkEl('div');
@@ -1959,7 +2091,7 @@ function renderGame(){
   // Agent portrait (always shown)
   var agentRow=mkEl('div','agent-row');
   var portWrap=mkEl('div','portrait-wrap');
-  var port=mkEl('div','portrait'); port.innerHTML = GAME_ROBOT.avatar === 'amber' ? nexus7AvatarSVG() : aiAvatarSVG();
+  var port=mkEl('div','portrait'); setPartnerPortrait(port);
   portWrap.appendChild(port);
   var speechArea=mkEl('div','speech-area');
   var agentName=mkEl('div','agent-name'); agentName.textContent=eName();
@@ -2368,6 +2500,11 @@ function finishGame(){
     code: code,
     condition: EXP_CONDITION,
     agent: 'ai',
+    partner: GAME_ROBOT.person + '_' + GAME_ROBOT.workerId,
+    partnerPerson: GAME_ROBOT.person,
+    partnerWorkerId: GAME_ROBOT.workerId,
+    partnerSeq: GAME_ROBOT.seq,
+    partnerSource: GAME_ROBOT.source,
     cc: state.characterRatings && state.characterRatings.competence != null ? state.characterRatings.competence : null,
     postCompetenceRating: state.postCompetenceRating,
     oa: state.overallAttribution,
