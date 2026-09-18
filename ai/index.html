@@ -1328,7 +1328,10 @@ function setPartnerPortrait(el){
   // drawn avatar only if the image genuinely fails to load.
   var img = new Image();
   img.alt = robotName();
-  img.style.cssText = 'width:100%;height:100%;object-fit:cover;object-position:center 32%;display:block;';
+  // The still photos are pre-cropped to a tight square around each person's
+  // own head (see partner still generation notes), so a plain cover fit is
+  // enough -- no extra transform needed.
+  img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
   img.onerror = function(){ el.innerHTML = GAME_ROBOT.avatar === 'amber' ? nexus7AvatarSVG() : aiAvatarSVG(); };
   img.src = GAME_ROBOT.photo;
   el.innerHTML = '';
